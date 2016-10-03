@@ -1,0 +1,57 @@
+<!--
+  Generated template for the LoginPage page.
+
+  See http://ionicframework.com/docs/v2/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+  <ion-navbar>
+    <ion-title>Log in/Sign up</ion-title>
+    <ion-buttons end>
+      <button ion-button (click)="cancelClicked($event)" color="primary">Cancel</button>
+      <button ion-button (click)="okClicked($event)" color="primary">Ok</button>
+      <button ion-button (click)="guestClicked($event)" color="primary">Guest</button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-card fancy-text>
+  <ion-card-header>Welcome to stick control metronome!</ion-card-header>
+  <ion-card-content>
+    <ion-list [hidden]="invisibilityMap['Menu']">
+      <ion-item>
+        <button ion-button (click)="onLogIn()" >Log In</button>
+        <button ion-button (click)="onCreateAccount()">Create Account</button>
+        <button ion-button (click)="onGuest()">Guest</button>
+      </ion-item>
+    </ion-list>
+  </ion-card-content>
+  </ion-card>
+  <ion-list [hidden]="invisibilityMap['LogIn']">
+    <ion-item-divider light>Log In</ion-item-divider>
+    <ion-item>
+      <ion-input (change)="onChange('old')" [(ngModel)]="email" type="email" value="" placeholder="Email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input (change)="onChange('old')" [(ngModel)]="password"  type="password" value="" placeholder="Password"></ion-input>
+    </ion-item>
+    <ion-item>
+      <button ion-button (click)="logIn()">Ok</button>
+      <button ion-button (click)="makeVisible('')">Cancel</button>
+    </ion-item>
+  <ion-item-divider [hidden]="invisibilityMap['CreateAccount']" light>Create Account</ion-item-divider>
+    <ion-item>
+      <ion-input  (change)="onChange('new')" [(ngModel)]="newUsername"  type="text" value="" placeholder="User name"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input (change)="onChange('new')" [(ngModel)]="newEmail" type="email" value="" placeholder="Email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input (change)="onChange('new')" [(ngModel)]="newPassword1"  type="password" value="" placeholder="Password"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input (change)="onChange('new')" [(ngModel)]="newPassword2"  type="password" value="" placeholder="Re-enter password"></ion-input>
+    </ion-item>
+  </ion-list>
+</ion-content>

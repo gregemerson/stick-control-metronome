@@ -1,0 +1,102 @@
+{
+  "name": "Exercise",
+  "plural": "Exercises",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "created": {
+      "type": "Date",
+      "required": false,
+      "default": ""
+    },
+    "name": {
+      "type": "string",
+      "required": false,
+      "default": "Unnamed",
+      "length": 40
+    },
+    "notation": {
+      "type": "string",
+      "required": false,
+      "default": "|",
+      "length": 600
+    },
+    "isPublic": {
+      "type": "boolean",
+      "required": false,
+      "default": false
+    },
+    "category": {
+      "type": "string",
+      "required": true,
+      "default": "Uncategorized",
+      "length": 20
+    },
+    "comments": {
+      "type": "string",
+      "required": false,
+      "length": 300
+    }
+  },
+  "validations": [],
+  "relations": {
+    "exerciseSets": {
+      "type": "hasAndBelongsToMany",
+      "model": "ExerciseSet",
+      "foreignKey": ""
+    },
+    "owner": {
+      "type": "belongsTo",
+      "model": "Client",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "model": "Exercise",
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    },
+    {
+      "model": "Exercise",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "DENY"
+    },
+    {
+      "model": "Exercise",
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW"
+    },
+    {
+      "model": "Exercise",
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "DENY"
+    },
+    {
+      "model": "Exercise",
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "DENY"
+    },
+    {
+      "model": "Exercise",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY"
+    }
+  ],
+  "methods": {}
+}

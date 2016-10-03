@@ -1,0 +1,103 @@
+{
+  "name": "ExerciseSet",
+  "plural": "ExerciseSets",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "created": {
+      "type": "Date",
+      "required": false,
+      "default": ""
+    },
+    "name": {
+      "type": "string",
+      "required": false,
+      "default": "Unnamed",
+      "length": 40
+    },
+    "category": {
+      "type": "string",
+      "required": false,
+      "default": "Uncategorized",
+      "length": 20
+    },
+    "disabledExercises": {
+      "type": "array",
+      "required": false,
+      "default": "[]"
+    },
+    "exerciseOrdering": {
+      "type": "array",
+      "required": false,
+      "default": "[]"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "exercises": {
+      "type": "hasAndBelongsToMany",
+      "model": "Exercise",
+      "foreignKey": ""
+    },
+    "owner": {
+      "type": "belongsTo",
+      "model": "Client",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "model": "ExerciseSet",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "administrator",
+      "permission": "ALLOW"
+    },
+    {
+      "model": "ExerciseSet",
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "ALLOW"
+    },
+    {
+      "model": "ExerciseSet",
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "DENY"
+    },
+    {
+      "model": "ExerciseSet",
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "DENY"
+    },
+    {
+      "model": "ExerciseSet",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW"
+    },
+    {
+      "model": "ExerciseSet",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "DENY"
+    },
+    {
+      "model": "ExerciseSet",
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY"
+    }
+  ],
+  "methods": {}
+}

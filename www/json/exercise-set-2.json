@@ -1,0 +1,18 @@
+{
+    "meta": {
+        "id": 2,
+        "version": "1.0",
+        "name": "Hand Symmetry 1",
+        "time-signature": [4, 4],
+        "measure-count" : 1,
+        "comment": "In these exercises, the right and left hands reverse roles in the rhythms.",
+        "ideas": {
+            "r1": "Play each exercise playing only nd only or right and left hands in unison.",
+            "r2": "Play with alternating sticking and treat Rs as rests. Perform with both right-hand and left-hand lead."
+        }
+    },
+    "exercises": [
+        {"name": "1", "display" : "rlrl r-lr lrl- rlr-|lrlr l-rl rlr- lrl-|rlrl <1/7>"},
+        {"name": "2", "display" : "LRLR LRLR LRLR LRLR"}
+    ]
+}

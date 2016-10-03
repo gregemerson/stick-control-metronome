@@ -1,0 +1,80 @@
+{
+  "name": "Client",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true,
+    "emailVerificationRequired": true
+  },
+  "comments": "Guests are never explicitly logged in or out.  Credentials stored on client.",
+  "properties": {
+    "created": {
+      "type": "Date",
+      "required": false,
+      "default": "1900-01-01 00:00:00"
+    },
+    "username": {
+      "type": "string",
+      "length": 40,
+      "required": true
+    },
+    "membershipExpiry": {
+      "type": "Date",
+      "required": false,
+      "default": null
+    }
+  },
+  "validations": [],
+  "relations": {
+    "students": {
+      "type": "hasMany",
+      "model": "Client",
+      "foreignKey": ""
+    },
+    "peers": {
+      "type": "hasMany",
+      "model": "Client",
+      "foreignKey": ""
+    },
+    "exerciseSets": {
+      "type": "hasMany",
+      "model": "ExerciseSet",
+      "foreignKey": ""
+    },
+    "exercises": {
+      "type": "hasMany",
+      "model": "Exercise",
+      "foreignKey": ""
+    },
+    "userSettings": {
+      "type": "embedsOne",
+      "model": "UserSettings",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "administrator",
+      "permission": "ALLOW"
+    },
+    {
+      "model": "Client",
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "DENY",
+      "property": "logout"
+    },
+    {
+      "model": "Client",
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "guest",
+      "permission": "DENY",
+      "property": "login"
+    }
+  ],
+  "methods": {}
+}

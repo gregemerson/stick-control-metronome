@@ -1,0 +1,29 @@
+{
+    "sc-group" : {
+        "sc-audio": {
+            "items" :[
+                    {"name" : "silence", "location" : "audio/silence.wav"},
+                    {"name" : "1-count", "location" : "audio/1.wav"},
+                    {"name" : "2-count", "location" : "audio/2.wav"},
+                    {"name" : "3-count", "location" : "audio/3.wav"},
+                    {"name" : "4-count", "location" : "audio/4.wav"},
+                    {"name" : "5-count", "location" : "audio/5.wav"},
+                    {"name" : "6-count", "location" : "audio/6.wav"},
+                    {"name" : "7-count", "location" : "audio/7.wav"},
+                    {"name" : "8-count", "location" : "audio/8.wav"},
+                    {"name" : "cowbell 1", "location" : "audio/cowbell-1.wav"},
+                    {"name" : "hi-hat 1", "location" : "audio/hi-hat-1.wav"},
+                    {"name" : "hip-hop snare", "location" : "audio/hip-hop-snare-1.wav"}
+                ]
+            },
+        "sc-exercise-sets" : {
+            "items" : [
+                {"name" : "Basic 1", "location" : "json/exercise-set-1.json"},
+                {"name" : "Hand Symmetry 1", "location" : "json/exercise-set-2.json"},
+                {"name" : "Accents 1", "location" : "json/exercise-set-3.json"},
+                {"name" : "Fours and Sixes 1", "location" : "json/exercise-set-4.json"},
+                {"name" : "1-34 Ride", "location" : "json/exercise-set-5.json"}
+            ]
+        }
+    }
+}

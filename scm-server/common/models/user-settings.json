@@ -1,0 +1,40 @@
+{
+  "name": "UserSettings",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "currentExerciseSet": {
+      "type": "string",
+      "required": true,
+      "default": "\"\""
+    },
+    "numberOfRepititions": {
+      "type": "number",
+      "required": true,
+      "default": 20
+    },
+    "minTempo": {
+      "type": "number",
+      "required": true,
+      "default": 80
+    },
+    "maxTempo": {
+      "type": "number",
+      "required": true,
+      "default": 80
+    },
+    "tempoStep": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+  ],
+  "methods": {}
+}

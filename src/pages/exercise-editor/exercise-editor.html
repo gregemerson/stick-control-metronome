@@ -1,0 +1,19 @@
+
+<ion-header>
+  <ion-navbar>
+    <ion-title>Exercise Set Editor</ion-title>
+      <ion-buttons end>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-input type="text" placeholder="Exercise Name">{{ exercise.name }}</ion-input>
+  <ion-card>
+    <ion-card-content #displayContainer>
+      <exercise-display #exerciseDisplay></exercise-display>
+      <button ion-button (click)="saveClicked($event)" primary>Edit</button>
+      <button ion-button (click)="cancelClicked($event)" primary>Delete</button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,49 @@
+
+<ion-header>
+  <ion-navbar>
+    <ion-title>Settings</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding class="settings">
+  <ion-list>
+    <ion-item>
+      <ion-label stacked>First Exercise</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.firstExercise"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Last Exercise</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.lastExercise"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Number of Repetitions</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.numberOfRepititions"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Minimum Tempo</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.minTempo"></ion-input>
+    </ion-item>
+        <ion-item>
+      <ion-label stacked>MaximumTempo</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.maxTempo"></ion-input>
+    </ion-item>
+        <ion-item>
+      <ion-label stacked>Tempo Step</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.stepTempo"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label stacked>Seconds Before Start</ion-label>
+      <ion-input type="number" [(ngModel)]="userSettings.startDelaySeconds"></ion-input>
+    </ion-item>     
+    <ion-item>
+      <ion-label>Exercise Set</ion-label>
+      <ion-select [(ngModel)]="exerciseSets.currentExerciseSet.name" (ionChange)="onChange($event)">
+        <ion-option *ngFor="let set of exerciseSets.items" [value]="set.name">{{ set.name }}</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <button ion-button (click)="previewClicked($event)" color="secondary">Preview Exercise Set</button>
+    </ion-item>
+  </ion-list>
+  
+</ion-content>
