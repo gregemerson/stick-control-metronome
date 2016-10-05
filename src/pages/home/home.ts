@@ -69,8 +69,8 @@ export class HomePage {
   @Output() countdown: EventEmitter<number> = new EventEmitter<number>();
   @Output() animateExercises: EventEmitter<void> = new EventEmitter<void>();
   // Control exercise display cards
-  private topDisplayState: DisplayState;
-  private bottomDisplayState: DisplayState;
+  topDisplayState: DisplayState;
+  bottomDisplayState: DisplayState;
   @ViewChild(Content) content: Content;
   @ViewChild('topDisplay') topExerciseDisplay: ExerciseDisplay;
   @ViewChild('bottomDisplay') bottomExerciseDisplay: ExerciseDisplay;
@@ -90,7 +90,7 @@ export class HomePage {
 
   constructor(private navCtrl: NavController,
               private metronome: Metronome,
-              private exerciseSets: ExerciseSets,
+              public exerciseSets: ExerciseSets,
               private audioBuffers: AudioBuffers,
               private changeDetect: ChangeDetectorRef,
               private popoverController : PopoverController,
@@ -254,7 +254,7 @@ export class HomePage {
   }
 }
 
-class DisplayState {
+export class DisplayState {
   private static currentText = 'Current Exercise';
   private static nextText = 'Next Exercise';
   private static activeStyle = 'active';

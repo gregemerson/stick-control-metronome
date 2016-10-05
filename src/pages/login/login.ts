@@ -24,7 +24,7 @@ export class LoginPage {
   private authenticator: Authenticator;
   
   // Usedf to switch between different control groups
-  private invisibilityMap = {
+  invisibilityMap = {
       'Menu': false,
       'LogIn': true,
       'CreateAccount': true
@@ -34,6 +34,10 @@ export class LoginPage {
               private navParams: NavParams,
               private viewCtrl: ViewController) {
     this.authenticator = <Authenticator>navParams.get('authenticator');
+  }
+
+  onChange(form: string) {
+
   }
 
   makeVisible(controlGroup: string) {
@@ -47,7 +51,7 @@ export class LoginPage {
     this.newPassword2 = '';
   }
 
-  okClicked(event) {
+  logIn() {
   this.authenticator.login(this.email, this.password)
   .subscribe(
       () => {
@@ -64,7 +68,7 @@ export class LoginPage {
     );
   }
 
-  createUserClicked(event) {
+  createAccount() {
     this.authenticator.createUser(this.newEmail, 
         this.newPassword1, this.newUsername)
     .subscribe(
@@ -82,7 +86,7 @@ export class LoginPage {
     );
   }
 
-  guestClicked(event) {
+  loginGuest() {
     this.authenticator.loginGuest().subscribe(
       next => {
         this.viewCtrl.dismiss();

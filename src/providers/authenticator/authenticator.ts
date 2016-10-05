@@ -163,7 +163,7 @@ export class Authenticator extends BaseObservable<IAuthUser> {
     return this.http.get('/api/Clients/logout', Authenticator.newRequestOptions())
     .map((res : any) => {
       this.token = null;
-      this.user = null;
+      this._user = null;
       localStorage.removeItem(Authenticator.tokenKey);
       localStorage.removeItem(Authenticator.uidKey);
     });
@@ -226,7 +226,7 @@ class AuthUser implements IAuthUser {
 }
 
 export interface IAuthUserSettings {
-  currentExerciseSetId: string;
+  currentExerciseSetId: number;
   numberOfRepititions: number;
   minTempo: number;
   maxTempo: number;
@@ -234,7 +234,7 @@ export interface IAuthUserSettings {
 }
 
 class AuthUserSettings implements IAuthUserSettings {
-  currentExerciseSetId: string;
+  currentExerciseSetId: number;
   numberOfRepititions: number;
   minTempo: number;
   maxTempo: number;

@@ -169,7 +169,7 @@ export class Metronome {
       startTime += interval;
     }
   }
-
+/*
   pause() {
     // will have to change the start time of the call back 
     // in the last measure beat
@@ -177,8 +177,8 @@ export class Metronome {
     this.pauseTime = this.audioContext.currentTime;
     let clicks = this.scheduledClicks;
     let events = this.scheduledEvents;
-    this.scheduledClicks = new Array<StartedNode>();
-    this.scheduledEvents = new Array<StartedNode>();
+    //this.scheduledClicks = new Array<StartedNode>();
+    //this.scheduledEvents = new Array<StartedNode>();
     for (let started of clicks) {
       started.node.stop();
       // put unplayed clicks in new schedule
@@ -208,7 +208,7 @@ export class Metronome {
   resume() {
 
   }
-
+*/
   stop() {
     this.state = MetronomeState.Stopped;
     for (let started of this.scheduledClicks) {

@@ -16,8 +16,7 @@ import {HttpService, IHttpServiceError, HttpServiceErrors} from '../providers/ht
   providers: [UserSettings, ResourceLibrary, ExerciseSets, Authenticator, ModalController, PopoverController, HttpService]
 })
 export class StickControlMetronome {
-
-  private rootPage: any;
+  rootPage: any;
   private userLoadedSubscription: BaseObservableSubscription;
   constructor(private platform: Platform, 
     public userSettings: UserSettings, 
@@ -63,7 +62,8 @@ export class StickControlMetronome {
         },
         error: (err: any) => {
           console.log(err);
-          let modal = this.modalController.create(LoginPage);
+          let modal = this.modalController.create(
+            LoginPage, {authenticator: authenticator});
           modal.present();
         },
         complete: () => {

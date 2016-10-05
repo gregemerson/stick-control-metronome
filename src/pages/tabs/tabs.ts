@@ -9,10 +9,10 @@ import {GuidePage} from '../guide/guide';
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
-  private tab1Root: any;
-  private tab2Root: any;
-  private tab3Root: any;
-  private tab4Root: any;
+  tab1Root: any;
+  tab2Root: any;
+  tab3Root: any;
+  tab4Root: any;
 
   constructor() {
     this.tab1Root = HomePage;
