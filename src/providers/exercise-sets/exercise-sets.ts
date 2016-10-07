@@ -175,6 +175,9 @@ class ExerciseSet implements IExerciseSet{
   private getNextEnabledIndex(index: number): number {
     let nextIdx = index + 1;
     while (nextIdx < this.exerciseOrdering.length) {
+      if (this.ignoreDisabled) {
+        return nextIdx;
+      }
       if (!this.disabledExercises.hasOwnProperty(nextIdx)) {
         return nextIdx;
       }
