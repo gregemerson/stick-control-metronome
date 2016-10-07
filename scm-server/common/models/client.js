@@ -4,6 +4,13 @@ module.exports = function(Client) {
     Client.beforeRemote('create', function(ctx, instance, next) {
         ctx.req.body.created = new Date();
         ctx.req.body.lastUpdated = new Date();
+        ctx.req.body._userSettings = {
+            "currentExerciseSet": -1,
+            "numberOfRepititions": 20,
+            "minTempo": 80,
+            "maxTempo": 80,
+            "tempoStep": 10
+        };
         delete ctx.req.body.membershipExpiry;
         next();
     }); 

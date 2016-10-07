@@ -34,25 +34,35 @@ export class StickControlMetronome {
         let messages: Array<string> = [];
         let errorsHandled = false;
         for (let error of errors) {
-          if (error.code == 'INVALID_TOKEN' || error.code == 'AUTHORIZATION_REQUIRED') {
+          if (error.code == 'INVALID_TOKEN') {
+            messages.length = 0;
+            messages.push(error.message);
+            this.displayLogInPage();
+            errorsHandled = true;
+            break;
+          }
+          else if (error.code == 'AUTHORIZATION_REQUIRED') {
+            messages.length = 0;
             messages.push(error.message);
             errorsHandled = true;
+            break;
+          }
+          else {
+            messages.push(error.message);
           }
         }
-        if (!errorsHandled) {
-          return;
-        }
-        let loginModal = this.modalController.
-          create(LoginPage);
-        let messagesPopover = this.popoverController.
-          create(MessagesPage, {messages: messages});
-        loginModal.present();
-        messagesPopover.present();
+        this.popoverController.create(
+          MessagesPage, {messages: messages}).present();
       }}));
 
-      // Listen for the user being loaded
+      // Listen for the IAuthUser being loaded
       this.userLoadedSubscription = authenticator.subscribe({
         next: (user: IAuthUser) => {
+          if (user == null) {
+            this.unloadUserData();
+            this.displayLogInPage();
+            return;
+          }
           this.loadUserData(user);
       }});
 
@@ -71,6 +81,15 @@ export class StickControlMetronome {
 
       StatusBar.styleDefault();
     });
+  }
+
+  private displayLogInPage() {
+    this.modalController.
+      create(LoginPage,{authenticator: this.authenticator}).present();
+  }
+
+  private unloadUserData(): void {
+    this.exerciseSets.unload();
   }
 
   private loadUserData(user: IAuthUser): void {

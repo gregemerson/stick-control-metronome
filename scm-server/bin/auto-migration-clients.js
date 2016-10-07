@@ -3,7 +3,7 @@ var app = require(path.resolve(__dirname, '../server/server'));
 //var ds = app.datasources.mysqlDs;
 
 // Step one - create tables
-// ds.automigrate();
+//ds.automigrate();
 //
 /*
 var clients = [
@@ -36,6 +36,7 @@ clients.forEach(function(value) {
     })
 });
         */
+
 [{username: 'gemerson', role: 'administrator'},{username: 'guest', role: 'guest'}].forEach(function(value) {
     app.models.Client.findOne({where: {username: value.username}}, function(err, user) {
         if (err) throw err;
@@ -55,4 +56,5 @@ clients.forEach(function(value) {
         });
     });
 });
+
 

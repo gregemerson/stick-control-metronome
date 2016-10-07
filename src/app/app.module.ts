@@ -37,7 +37,7 @@ import {UserSettings} from '../providers/user-settings/user-settings';
     SettingsPage
   ],
   imports: [
-    IonicModule.forRoot(StickControlMetronome)
+    IonicModule.forRoot(StickControlMetronome, {prodMode: false})
   ],
   bootstrap: [IonicApp],
   entryComponents: [

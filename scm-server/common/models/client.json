@@ -21,7 +21,7 @@
     "membershipExpiry": {
       "type": "Date",
       "required": false,
-      "default": null
+      "default": "1900-01-01 00:00:00"
     }
   },
   "validations": [],

@@ -29,7 +29,7 @@
     "tempoStep": {
       "type": "number",
       "required": true,
-      "default": 0
+      "default": 10
     }
   },
   "validations": [],

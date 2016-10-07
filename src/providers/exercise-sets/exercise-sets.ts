@@ -12,13 +12,20 @@ import 'rxjs/add/observable/throw';
 export class ExerciseSets {
   currentExerciseSet: IExerciseSet;
   private user: IAuthUser;
-  items: Array<IExerciseSet> = [];
+  items: Array<IExerciseSet>;
   
   constructor(private httpService: HttpService) {
   }
 
+  unload() {
+    this.currentExerciseSet = null;
+    this.user = null;
+    this.items = null;
+  }
+
   load(user: IAuthUser): Observable<void> {
     this.user = user;
+    this.items = [];
     this.currentExerciseSet = null;
     let currentId = user.settings.currentExerciseSetId;
     for (let key in user.rawExerciseSets) {
@@ -86,53 +93,39 @@ export interface IExerciseSet {
 }
 
 class ExerciseSet implements IExerciseSet{
-  currentExercise: IExercise = null;
-  nextExercise: IExercise = null;
+  comments: string;
+  currentExercise: IExercise;
+  nextExercise: IExercise;
   name: string;
   category: string;
   id: number;
   private ownerId: number;
   private nextIndex: number = -1;
-  private exerciseCount = 0;
   private exercises: {[key: number]: Exercise} = {};
-  private disabledExercises: Array<number>;
+  private disabledExercises:  {[key: number]: boolean} = {};
   private exerciseOrdering: Array<number>;
   private filter = '?filter[include][exercises]';
   private _exercisesLoaded = false;
+  private ignoreDisabled: boolean;
 
   constructor(rawExerciseSet: Object) {
     this.name = rawExerciseSet['name'];
     this.id = rawExerciseSet['id'];
     this.ownerId = rawExerciseSet['ownerId'];
     this.category = rawExerciseSet['category'];
-    this.disabledExercises = rawExerciseSet['disabledExercises'];
-    for (let id of (<string>rawExerciseSet['disabledExercises']).split('/')) {
-      this.disabledExercises.push(Number.parseInt(id));
+    this.comments = rawExerciseSet['comments']
+    this.exerciseOrdering = rawExerciseSet['exerciseOrdering'];
+    for (let exerciseId of rawExerciseSet['disabledExercises']) {
+      this.disabledExercises[<number>exerciseId] = true;
     }
-    this.exerciseOrdering = new Array<number>();
-    for (let id of (<string>rawExerciseSet['exerciseOrdering']).split('/')) {
-      this.exerciseOrdering.push(Number.parseInt(id));
-    }
-    this.initIterator();
   }
 
   disableExercise(exerciseId: number) {
-    let exercise = this.exercises[exerciseId]; 
-    if (exercise.disabled) {
-      return;
-    }
-    exercise.disabled = true;
-    this.disabledExercises.push(exerciseId);
+    this.disabledExercises[exerciseId] = true;
   }
 
   enableExercise(exerciseId: number) {
-    let exercise = this.exercises[exerciseId]; 
-    if (!exercise.disabled) {
-      return;
-    }
-    exercise.disabled = false;
-    let index = this.disabledExercises.indexOf(exerciseId);
-    this.disabledExercises.splice(index, 1);
+    delete this.disabledExercises[exerciseId];
   }
 
   get exercisesLoaded() {
@@ -145,11 +138,9 @@ class ExerciseSet implements IExerciseSet{
     .map(exerciseSet => {
       let exercises = <Array<Object>>exerciseSet['exercises'];
       for (let exercise of exercises) {
-        let disabled = this.disabledExercises.indexOf(exercise['id']) >= 0;
         this.exercises[exercise['id']] = new Exercise(exercise, user);
       }
       this._exercisesLoaded = true;
-
     });
   }
 
@@ -157,7 +148,6 @@ class ExerciseSet implements IExerciseSet{
     for (let key in this.exerciseOrdering) {
       delete this.exercises[key];
     }
-    this.exerciseOrdering.length = 0;
     this._exercisesLoaded = false;
   }
 
@@ -170,6 +160,7 @@ class ExerciseSet implements IExerciseSet{
   }
 
   initIterator (ignoreDisabled = true) {
+    this.ignoreDisabled = ignoreDisabled;
     this.currentExercise = null;
     this.nextIndex = -1;
     this.setupNextExercise();
@@ -184,7 +175,7 @@ class ExerciseSet implements IExerciseSet{
   private getNextEnabledIndex(index: number): number {
     let nextIdx = index + 1;
     while (nextIdx < this.exerciseOrdering.length) {
-      if (!this.getExerciseByIndex(nextIdx).disabled) {
+      if (!this.disabledExercises.hasOwnProperty(nextIdx)) {
         return nextIdx;
       }
       nextIdx++;
@@ -205,7 +196,6 @@ export interface IExercise {
   display: Array<ExerciseElement>;
   comments: string;
   getNumberOfBeats(): number;
-  disabled: boolean;
 }
 
 // beats per measure must be bounded because of count in recording constraints
@@ -216,7 +206,6 @@ class Exercise implements IExercise {
   public name: string;
   public category: string;
   public comments: string;
-  public disabled = false;
 
   constructor(rawExercise: Object, user: IAuthUser) {
     this._display = Encoding.decode(rawExercise['notation']);

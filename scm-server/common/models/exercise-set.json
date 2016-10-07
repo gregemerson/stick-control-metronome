@@ -9,8 +9,7 @@
   "properties": {
     "created": {
       "type": "Date",
-      "required": false,
-      "default": ""
+      "required": false
     },
     "name": {
       "type": "string",
@@ -33,6 +32,11 @@
       "type": "array",
       "required": false,
       "default": "[]"
+    },
+    "comments": {
+      "type": "string",
+      "required": false,
+      "length": 500
     }
   },
   "validations": [],

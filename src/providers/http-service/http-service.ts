@@ -16,7 +16,7 @@ export class HttpService extends Observable<HttpServiceErrors> {
   
   private subscribers: {[key: string]: Subscriber<HttpServiceErrors>} = {};
   private static globalErrorCodes = {
-    INVALID_TOKEN: 'Your log in has expired.',
+    INVALID_TOKEN: 'Your session has expired, please re-log in.',
     AUTHORIZATION_REQUIRED: 'Unauthorized access attempt.'
   }
 
