@@ -13,9 +13,7 @@ import {BaseObservable} from '../../utilities/base-observable';
 export class Authenticator extends BaseObservable<IAuthUser> {
   private static tokenKey = 'auth_token';
   private static uidKey = 'uid';
-  private token: string;
-  private uid: string;
-  private guestToken = 'MZZKUi7XVyUbsDnkPlUxOSmEJC1bWap2We2Wofnct6LVpumpsuRpZErvvCNFGF3G';
+  private guestToken = 'MCLXGi20lLDTXRBTWkiz7sbQXRx5qk8IPEcwTFBhlYPTDfG0WZDDAhjYHDuIaBEX';
   private guestEmail = 'guest@guest.com';
   private guestPassword = 'guest';
   private guestUid = '57d5a393b1ba1b20289231e0';
@@ -32,9 +30,43 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
   
   private setUser(user: IAuthUser) {
+    if (this._user != null && this._user.id == user.id) {
+      return;
+    }
     this._user = user;
     for (let subscriberId in this.subscribers) {
       this.subscribers[subscriberId].next(user);
+    }
+  }
+
+  private get token(): string {
+    console.log(localStorage.getItem(Authenticator.tokenKey))
+    return localStorage.getItem(Authenticator.tokenKey);
+  }
+
+  private set token(token: string ) {
+    localStorage.setItem(Authenticator.tokenKey, token);
+  }
+
+    private get uid(): number {
+      console.log(localStorage.getItem(Authenticator.uidKey))
+      let id = localStorage.getItem(Authenticator.uidKey);
+      if (id != null) {
+        return parseInt(id);
+      }
+      return null;
+  }
+
+  private set uid(token: number) {
+    localStorage.setItem(Authenticator.uidKey, token.toString());
+  }
+
+  private unsetUser() {
+    this._user = null;
+    localStorage.removeItem(Authenticator.tokenKey);
+    localStorage.removeItem(Authenticator.uidKey);
+    for (let subscriberId in this.subscribers) {
+      this.subscribers[subscriberId].next(null);
     }
   }
 
@@ -55,10 +87,6 @@ export class Authenticator extends BaseObservable<IAuthUser> {
     });
   }
 
-  static get userId(): string {
-    return localStorage.getItem(Authenticator.uidKey);
-  }
-
   loginGuest(): Observable<void> {
     localStorage.setItem(Authenticator.tokenKey, this.guestToken);
     localStorage.setItem(Authenticator.uidKey, this.guestUid);
@@ -76,8 +104,7 @@ export class Authenticator extends BaseObservable<IAuthUser> {
         .map((response : Response) => {
           let data = this.handleErrors(response);
           this.token = data['id'];
-          localStorage.setItem(Authenticator.uidKey, data['userId'])
-          localStorage.setItem(Authenticator.tokenKey, this.token);
+          this.uid = data['userId'];
           return data['userId'];
         })
         .subscribe((id) => {
@@ -117,8 +144,6 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
 
   private handleError (error: any) {
-    // In a real world app, we might use a remote logging infrastructure
-    // We'd also dig deeper into the error to get a better message
     let errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     return ErrorObservable.create(errMsg);
@@ -133,9 +158,8 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
 
   checkLocalAuthData(): Observable<void> {
-    this.token = localStorage.getItem(Authenticator.tokenKey) ;
-    this.uid = localStorage.getItem(Authenticator.uidKey);
-    let hasLocalAuthData = this.token != null && this.uid != null; 
+    let hasLocalAuthData = (this.token != null && this.uid != null);
+    console.log("check  " + hasLocalAuthData); 
     if (!hasLocalAuthData) {
       return Observable.throw(null);
     }
@@ -162,10 +186,7 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   logout(): Observable<void> {
     return this.http.get('/api/Clients/logout', Authenticator.newRequestOptions())
     .map((res : any) => {
-      this.token = null;
-      this._user = null;
-      localStorage.removeItem(Authenticator.tokenKey);
-      localStorage.removeItem(Authenticator.uidKey);
+      this.unsetUser();
     });
   }
 }
@@ -238,10 +259,11 @@ class AuthUserSettings implements IAuthUserSettings {
   numberOfRepititions: number;
   minTempo: number;
   maxTempo: number;
-  tempoStep: number;  
+  tempoStep: number;  ;
 
   constructor(rawSettings: Object) {
-    this.currentExerciseSetId = rawSettings['currentExerciseSet'];
+    let current = rawSettings['currentExerciseSet']
+    this.currentExerciseSetId = current == -1 ? null : current;
     this.numberOfRepititions = rawSettings['numberOfRepititions'];
     this.minTempo = rawSettings['minTempo'];
     this.maxTempo = rawSettings['maxTempo'];
