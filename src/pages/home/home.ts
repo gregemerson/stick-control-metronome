@@ -85,7 +85,7 @@ export class HomePage {
 
   // Info properties
   count: number = 0;
-  repitition: number = 0;
+  repetition: number = 0;
   bpm: number = 0;
 
   constructor(private navCtrl: NavController,
@@ -165,7 +165,7 @@ export class HomePage {
     this.isStarted = false;
     this.topDisplayState = new DummyDisplayState();
     this.bottomDisplayState = new DummyDisplayState();
-    this.repitition = 0;
+    this.repetition = 0;
     this.count = 0;
     this.bpm = this.userSettings.minTempo;
     if (this.topExerciseDisplay) {

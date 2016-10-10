@@ -34,7 +34,7 @@ $colors: (
 $fancy-font: 'Courgette', cursive;
 $fancy-color: black;
 
-[fancy-text] {
+[fancy-text] ion-title {
   font-family: $fancy-font;
   color: $fancy-color;
 }

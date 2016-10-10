@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Platform, Modal, ModalController, PopoverController} from 'ionic-angular';
+import {Platform, Modal, ModalController, PopoverController, LoadingController} from 'ionic-angular';
 import {StatusBar} from 'ionic-native';
 import {TabsPage} from '../pages/tabs/tabs';
 import {UserSettings} from '../providers/user-settings/user-settings';
@@ -7,7 +7,7 @@ import {ResourceLibrary} from '../providers/resource-library/resource-library';
 import {Authenticator, IAuthUser} from '../providers/authenticator/authenticator';
 import {ExerciseSets} from '../providers/exercise-sets/exercise-sets';
 import {LoginPage} from '../pages/login/login';
-import {MessagesPage} from '../pages/messages/messages';
+import {MessagesPage, IMessage, MessageType} from '../pages/messages/messages';
 import {BaseObservableSubscription} from "../utilities/base-observable";
 import {HttpService, IHttpServiceError, HttpServiceErrors} from '../providers/http-service/http-service';
 
@@ -25,34 +25,37 @@ export class StickControlMetronome {
     public authenticator: Authenticator,
     public httpService: HttpService,
     public modalController: ModalController,
-    private popoverController: PopoverController) {
+    private popoverController: PopoverController,
+    private loadingCtrl: LoadingController) {
+
     this.rootPage = TabsPage;
-    
     platform.ready().then(() => {
       // Listen for errors forcing navigation to login page
       this.httpService.subscribe(({next: (errors: HttpServiceErrors) => {
-        let messages: Array<string> = [];
-        let errorsHandled = false;
+        let displayErrors: Array<IHttpServiceError> = [];
         for (let error of errors) {
           if (error.code == 'INVALID_TOKEN') {
-            messages.length = 0;
-            messages.push(error.message);
+            displayErrors.length = 0;
+            displayErrors.push(error);
             this.displayLogInPage();
-            errorsHandled = true;
             break;
           }
           else if (error.code == 'AUTHORIZATION_REQUIRED') {
-            messages.length = 0;
-            messages.push(error.message);
-            errorsHandled = true;
+            displayErrors.length = 0;
+            displayErrors.push(error);
             break;
           }
           else {
-            messages.push(error.message);
+            displayErrors.push(error);
           }
         }
+        let display = new Array<IMessage>();
+        for (let error of displayErrors) {
+          display.push(MessagesPage.createMessage(
+            error.code, error.message, MessageType.Error));
+        }
         this.popoverController.create(
-          MessagesPage, {messages: messages}).present();
+          MessagesPage, {messages: displayErrors}).present();
       }}));
 
       // Listen for the IAuthUser being loaded
@@ -93,12 +96,17 @@ export class StickControlMetronome {
   }
 
   private loadUserData(user: IAuthUser): void {
+    let loading = this.loadingCtrl.create();
+    loading.present();
     this.exerciseSets.load(user).subscribe({
       next: () => {
+        loading.dismiss();
       },
       error: (err: any) => {
-        // @todo handle errors
-        console.log(err);
+        this.popoverController.create(MessagesPage, {
+          messages: [MessagesPage.createMessage(
+            'Error', err, MessageType.Error)]
+        }).present();
       }
     });
   }

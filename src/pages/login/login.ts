@@ -21,6 +21,8 @@ export class LoginPage {
   newPassword1 = '';
   newPassword2 = '';
 
+  showError = false;
+
   private authenticator: Authenticator;
   
   // Usedf to switch between different control groups
@@ -37,7 +39,7 @@ export class LoginPage {
   }
 
   onChange(form: string) {
-
+    this.showError = false;
   }
 
   makeVisible(controlGroup: string) {
@@ -49,6 +51,7 @@ export class LoginPage {
     this.newEmail = '';
     this.newPassword1 = '';
     this.newPassword2 = '';
+    this.showError = false;
   }
 
   logIn() {
@@ -56,10 +59,9 @@ export class LoginPage {
   .subscribe(
       () => {
         this.viewCtrl.dismiss();
-        // Now load the services for user
-        // May "Welcome" + username while services are loading
       }, 
       (err: any) => {
+        this.showError = true;
         console.log(err);
         // Display errors
       }, 

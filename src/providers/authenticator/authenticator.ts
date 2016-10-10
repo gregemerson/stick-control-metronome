@@ -40,7 +40,6 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
 
   private get token(): string {
-    console.log(localStorage.getItem(Authenticator.tokenKey))
     return localStorage.getItem(Authenticator.tokenKey);
   }
 
@@ -49,7 +48,6 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
 
     private get uid(): number {
-      console.log(localStorage.getItem(Authenticator.uidKey))
       let id = localStorage.getItem(Authenticator.uidKey);
       if (id != null) {
         return parseInt(id);
@@ -110,7 +108,7 @@ export class Authenticator extends BaseObservable<IAuthUser> {
         .subscribe((id) => {
           this.internalLoadUser(observer)
             .subscribe();
-        });
+        }, (error: any) => observer.error(error));
       }
       catch(err) {
         observer.error({message: 'Could not log in user.'});
@@ -133,13 +131,16 @@ export class Authenticator extends BaseObservable<IAuthUser> {
 
   private internalLoadUser(observer: Observer<void>): Observable<void> {
     return Observable.create((obs: Observer<void>) => {     
-      this.http.get('/api/Clients/' + localStorage.getItem(Authenticator.uidKey) + this.userLoadFilter,
+      this.http.get('/api/Clients/' + localStorage.getItem(
+          Authenticator.uidKey) + this.userLoadFilter,
         Authenticator.newRequestOptions())
       .map((response : Response) => {
         let user= this.handleErrors(response);
         this.setUser(new AuthUser(user));
       })
-      .subscribe({next: () => {}, error: (err: any) => observer.error(err)});
+      .subscribe({
+        next: () => observer.next(null), 
+          error: (err: any) => observer.error(err)});
     });
   }
 
@@ -159,7 +160,6 @@ export class Authenticator extends BaseObservable<IAuthUser> {
 
   checkLocalAuthData(): Observable<void> {
     let hasLocalAuthData = (this.token != null && this.uid != null);
-    console.log("check  " + hasLocalAuthData); 
     if (!hasLocalAuthData) {
       return Observable.throw(null);
     }

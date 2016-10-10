@@ -6,8 +6,8 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-card fancy-text>
-  <ion-card-header>Welcome to Stick Control Metronome!</ion-card-header>
+  <ion-card>
+  <ion-card-header fancy-text>Welcome to Stick Control Metronome!</ion-card-header>
   <ion-card-content>
     <ion-list [hidden]="invisibilityMap['Menu']">
       <ion-item>
@@ -27,6 +27,7 @@
         <button ion-button (click)="logIn()">Ok</button>
         <button ion-button (click)="makeVisible('Menu')">Cancel</button>
       </ion-item>
+      <ion-item color="danger" [hidden]="!showError">Invalid Credentials</ion-item>
     </ion-list>
     <ion-list ion-list [hidden]="invisibilityMap['CreateAccount']">
       <ion-item>

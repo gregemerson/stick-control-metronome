@@ -1,5 +1,5 @@
 import { Component, ViewChildren, ViewChild, ElementRef, QueryList } from '@angular/core';
-import { NavController, ModalController} from 'ionic-angular';
+import { NavController, ModalController, NavParams} from 'ionic-angular';
 import {ExerciseSets, IExerciseSet, IExercise} from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 
@@ -9,13 +9,15 @@ import {ExerciseDisplay} from '../exercise-display/exercise-display';
 })
 export class ExerciseSetPreviewPage {
   title = '';
-  exerciseSet: IExerciseSet;
+  exerciseSets: ExerciseSets;
   exercises: Array<IExercise> = [];
   modal: ModalController;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
 
-  constructor(private navCtrl: NavController, private exerciseSets: ExerciseSets) {
+  constructor(private navCtrl: NavController, private params: NavParams) {
+    this.exerciseSets = <ExerciseSets>params.get('exerciseSets');
+    this.loadExercises();
   }
 
   newClicked($event) {
@@ -32,7 +34,6 @@ export class ExerciseSetPreviewPage {
   }
 
   ngAfterViewInit() {
-    this.loadExercises();
     let containers = this.contents.toArray();
     let displays = this.displays.toArray();
     for (let i = 0; i < displays.length; i++) {
@@ -40,19 +41,14 @@ export class ExerciseSetPreviewPage {
       let exercise = this.exercises[i];
       let fontSize = 1.5 * Number.parseInt(getComputedStyle(containers[i].nativeElement).fontSize);
       displays[i].draw(exercise, width, Number.MAX_SAFE_INTEGER, fontSize);
-      // Need to set the card height here
-
     }
   }
 
   private loadExercises() {
-    if (this.exerciseSets.currentExerciseSet == null) {
-      return;
-    }
     let exerciseSet = this.exerciseSets.currentExerciseSet;
     exerciseSet.initIterator();
     while (exerciseSet.next() != null) {
-      this.exercises.push(this.exerciseSet.currentExercise);
+      this.exercises.push(exerciseSet.currentExercise);
     }
   }
 }

@@ -37,12 +37,13 @@
     </ion-item>     
     <ion-item>
       <ion-label>Exercise Set</ion-label>
-      <ion-select [(ngModel)]="exerciseSets.currentExerciseSet.name" (ionChange)="onChange($event)">
-        <ion-option *ngFor="let set of exerciseSets.items" [value]="set.name">{{ set.name }}</ion-option>
+      <ion-select [(ngModel)]="selectedExerciseSetName" (ionChange)="onChange($event)">
+        <ion-option *ngFor="let set of exerciseSets.items" [value]="set.id">{{ set.name }}</ion-option>
       </ion-select>
     </ion-item>
     <ion-item>
-      <button ion-button (click)="previewClicked($event)" color="secondary">Preview Exercise Set</button>
+      <button ion-button (click)="createClicked($event)" color="secondary">Create Exercise Set</button>
+      <button ion-button (click)="openClicked($event)" color="secondary" [disabled]="selectedExerciseSetName == null">Open Exercise Set</button>
     </ion-item>
   </ion-list>
   

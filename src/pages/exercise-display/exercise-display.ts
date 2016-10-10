@@ -5,7 +5,7 @@ import * as ES from '../../providers/exercise-sets/exercise-sets';
 @Component({
   selector: 'exercise-display',
   styles: [`.exercise-canvas {
-    border-style: none;
+    border-style: solid;
     border-color: green;
   }`],
   template: '<canvas #exerciseCanvas class="exercise-canvas"></canvas>',
@@ -92,15 +92,21 @@ export class ExerciseDisplay {
     this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.canvas.width = width;
     let lines = this.createLayout(exercise, maxHeight, desiredFontSize);
+    this.canvas.height = lines.length * this.bottomPaddingY;
     let context = this.getContext();
+    context.strokeText('Hello World!', 0, 0);
     let elementIndex = 0;
     let display = exercise.display;
+    console.log('here are the lines: ' + lines);
     for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
       this.resetNoteX();
       let lineStart = this.noteX;
       let lastIndex = lines[lineIdx];
       while (elementIndex <= lastIndex) {
-        let element = display[elementIndex]; 
+        let element = display[elementIndex];
+        if (elementIndex == 1) {
+          console.log(typeof element);
+        }
         if (typeof element == 'StrokeGroup') {
           this.noteX = this.drawNotes(<ES.StrokeGroup>element);
         }
@@ -113,9 +119,11 @@ export class ExerciseDisplay {
         else if (typeof element == 'Repeat') {
           this.noteX = this.drawRepeat(<ES.Repeat>element);
         }
+        elementIndex++;
       }
       this.moveNextLine();
     }
+    console.log('canvas height is: ' + this.canvas.height);
     return this.canvas.height;
   }
 
@@ -134,7 +142,7 @@ export class ExerciseDisplay {
     }
     while (calculatedFontSize > 1) {
       context.font = calculatedFontSize.toString() + this.exerciseFont;
-      let currentWidthNeeded = largestGroup * context.measureText('X').width; 
+      let currentWidthNeeded = largestGroup * context.measureText('X').width;
       if (currentWidthNeeded < this.canvas.width) {
         break;
       }
@@ -142,6 +150,7 @@ export class ExerciseDisplay {
         calculatedFontSize--;
       }
     }
+    
     let fontWidth = context.measureText('X').width;
     let lines = new Array<number>();
     let usedWidth = 0;
@@ -150,7 +159,7 @@ export class ExerciseDisplay {
       let element = exercise.display[elementIndex];
       let nextWidth = (typeof element == 'StrokeGroup') ? 
         fontWidth * (<ES.StrokeGroup>element).hand.length : fontWidth;
-      if ((usedWidth + nextWidth) < this.canvas.width) {
+      if ((usedWidth + nextWidth) <= this.canvas.width) {
         usedWidth += nextWidth;
       }
       else {
@@ -158,12 +167,10 @@ export class ExerciseDisplay {
         usedWidth = 0;
       }
     }
-    this.canvas.height = lines.length * this.noteHeight;
-    this.setupRegions(calculatedFontSize);
-    console.log('setting layout ');
-    for (let j of lines) {
-      console.log(j);
+    if (exercise.display.length > 0) {
+      lines.push(exercise.display.length - 1);
     }
+    this.setupRegions(calculatedFontSize);
     return lines;  
   }
 

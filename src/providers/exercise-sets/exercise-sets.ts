@@ -13,6 +13,7 @@ export class ExerciseSets {
   currentExerciseSet: IExerciseSet;
   private user: IAuthUser;
   items: Array<IExerciseSet>;
+  testid = Math.random();
   
   constructor(private httpService: HttpService) {
   }
@@ -63,10 +64,9 @@ export class ExerciseSets {
   }
   
   public setCurrentExerciseSet(exerciseSetId: number): Observable<void> {
-    if (exerciseSetId == this.currentExerciseSet.id) {
-      return Observable.never<void>();
+    if (this.currentExerciseSet != null) {
+      (<ExerciseSet>this.currentExerciseSet).unloadExercises();
     }
-    (<ExerciseSet>this.currentExerciseSet).unloadExercises();
     this.currentExerciseSet = this.findExerciseSet(exerciseSetId);
     return (<ExerciseSet>this.currentExerciseSet).
       loadExercises(this.httpService, this.user);

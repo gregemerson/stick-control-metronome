@@ -1,7 +1,7 @@
 
 <ion-header>
   <ion-navbar>
-    <ion-title>{{ exerciseSet.name }}</ion-title>
+    <ion-title>{{ exerciseSets.currentExerciseSet.name }}</ion-title>
     <ion-buttons end>
       <button ion-button (click)="newClicked($event)" color="primary">New</button>
       <button ion-button (click)="closeClicked($event)" secondary>Close</button>
@@ -14,8 +14,8 @@
     <ion-card-header>{{ idx + 1 }}</ion-card-header>
     <ion-card-content #displayContainer>
       <exercise-display #exerciseDisplay></exercise-display>
-      <button ion-button (click)="editclicked($event)" color="primary">Edit</button>
-      <button ion-button (click)="deleteClicked($event)" color="primary">Delete</button>
+      <button ion-button (click)="editclicked($event)" color="primary" small>Edit</button>
+      <button ion-button (click)="deleteClicked($event)" color="primary" small>Delete</button>
     </ion-card-content>
 </ion-card>
 </ion-content>
