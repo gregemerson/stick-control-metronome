@@ -17,7 +17,6 @@ export class MessagesPage {
 }
 
 export enum MessageType {
-  None,
   Error,
   Info
 }

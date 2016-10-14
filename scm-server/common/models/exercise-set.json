@@ -36,7 +36,7 @@
     "comments": {
       "type": "string",
       "required": false,
-      "length": 500
+      "length": 200
     }
   },
   "validations": [],

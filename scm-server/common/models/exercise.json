@@ -21,7 +21,7 @@
     "notation": {
       "type": "string",
       "required": false,
-      "default": "|",
+      "default": "#",
       "length": 600
     },
     "isPublic": {
@@ -38,7 +38,7 @@
     "comments": {
       "type": "string",
       "required": false,
-      "length": 300
+      "length": 200
     }
   },
   "validations": [],

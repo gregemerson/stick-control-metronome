@@ -13,6 +13,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
   static get ClientsCollection(): string {return '/api/Clients/'}
   static get ExerciseSetCollection(): string {return '/api/ExerciseSets/';}
   static get ExerciseCollection(): string {return '/api/Exercises/';}
+  static exerciseSetExercises(exerciseSetId: number): string {
+    return '/api/ExerciseSets/' + exerciseSetId.toString() + '/exercises';
+  }
   
   private subscribers: {[key: string]: Subscriber<HttpServiceErrors>} = {};
   private static globalErrorCodes = {

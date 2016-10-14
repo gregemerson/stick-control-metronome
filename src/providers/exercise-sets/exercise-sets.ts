@@ -45,15 +45,13 @@ export class ExerciseSets {
     }
   }
 
-  newExerciseSet(setAsCurrent: boolean): Observable<void> {
+  newExerciseSet(initializer: Object): Observable<number> {
     return this.httpService.postPersistedObject(
-      HttpService.ExerciseSetCollection, {})
+      HttpService.ExerciseSetCollection, initializer)
       .map(result => {
         let newSet = new ExerciseSet(result);
         this.items.push(newSet);
-        if (setAsCurrent) {
-          this.currentExerciseSet = newSet;
-        }
+        return newSet.id;
       });
   }
 
@@ -90,6 +88,7 @@ export interface IExerciseSet {
   category: string;
   next(): IExercise;
   initIterator(): void;
+  newExercise(initializer: Object);
 }
 
 class ExerciseSet implements IExerciseSet{
@@ -118,6 +117,10 @@ class ExerciseSet implements IExerciseSet{
     for (let exerciseId of rawExerciseSet['disabledExercises']) {
       this.disabledExercises[<number>exerciseId] = true;
     }
+  }
+
+  newExercise(initializer: Object): Observable<void> {
+    
   }
 
   disableExercise(exerciseId: number) {
@@ -337,22 +340,19 @@ export class Encoding {
     return elements;
   }
 
-  private static parseStroke(display: string, index: number, stroke: StrokeGroup): number {
+  private static parseStroke(display: string, index: number, strokeGroup: StrokeGroup): number {
     let strokeGroupIndex = index;
-    while (index < display.length && (this.graceStart == display[strokeGroupIndex] || 
+    while (strokeGroupIndex < display.length && (this.graceStart == display[strokeGroupIndex] || 
       this.strokes.includes(display[strokeGroupIndex]))) {
-      stroke.grace.push(null);
+      strokeGroup.grace.push(null);
       if (display[strokeGroupIndex] == this.graceStart) {
-        if (display[index + 2] != this.graceEnd || !this.graces.includes(display[index + 1])) {
-          this.throwInvalid();
-        }
-        stroke.grace[stroke.grace.length - 1] = display[index + 1];
+        strokeGroup.grace[strokeGroup.grace.length - 1] = display[strokeGroupIndex + 1];
         strokeGroupIndex += 3;
       }
       let encodedStroke = display[strokeGroupIndex]; 
       let upperStroke = encodedStroke.toUpperCase();
-      stroke.hand.push(upperStroke);
-      stroke.accented.push((encodedStroke == upperStroke) &&
+      strokeGroup.hand.push(upperStroke);
+      strokeGroup.accented.push((encodedStroke == upperStroke) &&
         ( encodedStroke != this.rest));
       strokeGroupIndex++;
     }

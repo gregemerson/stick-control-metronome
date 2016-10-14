@@ -72,7 +72,7 @@ export class LoginPage {
 
   createAccount() {
     this.authenticator.createUser(this.newEmail, 
-        this.newPassword1, this.newUsername)
+      this.newPassword1, this.newUsername)
     .subscribe(
       () => {
         this.viewCtrl.dismiss();

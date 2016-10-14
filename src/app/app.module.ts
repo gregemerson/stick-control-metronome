@@ -10,6 +10,7 @@ import {ExerciseDisplay} from '../pages/exercise-display/exercise-display';
 import {ExerciseSetPreviewPage} from '../pages/exercise-set-preview/exercise-set-preview'
 import {GuidePage} from '../pages/guide/guide';
 import {LoginPage} from '../pages/login/login';
+import {NewExerciseSetForm} from '../pages/exercise-set-preview/new-exercise-set'
 import {MessagesPage} from '../pages/messages/messages';
 import {SettingsPage} from '../pages/settings/settings';
 import {AudioBuffers} from '../providers/audio-buffers/audio-buffers';
@@ -34,7 +35,8 @@ import {UserSettings} from '../providers/user-settings/user-settings';
     GuidePage,
     LoginPage,
     MessagesPage,
-    SettingsPage
+    SettingsPage,
+    NewExerciseSetForm
   ],
   imports: [
     IonicModule.forRoot(StickControlMetronome, {prodMode: false})
@@ -52,7 +54,8 @@ import {UserSettings} from '../providers/user-settings/user-settings';
     GuidePage,
     LoginPage,
     MessagesPage,
-    SettingsPage
+    SettingsPage,
+    NewExerciseSetForm
   ],
   providers: [
     AudioBuffers,

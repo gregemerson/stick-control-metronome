@@ -182,8 +182,10 @@ export class HomePage {
       return;
     }
     if (this.topDisplayState.isDummy()) {
-      this.topDisplayState = new DisplayState(false, this.topExerciseDisplay);
-      this.bottomDisplayState = new DisplayState(true, this.bottomExerciseDisplay);
+      this.topDisplayState = new DisplayState(false, 
+        this.topContainer, this.topExerciseDisplay);
+      this.bottomDisplayState = new DisplayState(true, 
+        this.bottomContainer, this.bottomExerciseDisplay);
     }
     for (let display of [this.topDisplayState, this.bottomDisplayState]) {
       display.exercise = display.isActive ? nextExercise : currentExercise;
@@ -194,21 +196,11 @@ export class HomePage {
     let bottomFontSize = 1.5 * Number.parseInt(getComputedStyle(
         this.bottomContainer.nativeElement).fontSize);
     let maxHeight = this.content.height() * 0.4;
-    let topWidth = this.topContainer.nativeElement.clientWidth - 
-      this.getHorizontalPadding(this.topContainer);
-    let bottomWidth = this.bottomContainer.nativeElement.clientWidth -
-      this.getHorizontalPadding(this.bottomContainer);
-    this.topDisplayState.draw(topWidth, maxHeight, topFontSize);
-    this.bottomDisplayState.draw(bottomWidth, maxHeight, bottomFontSize);
+    this.topDisplayState.draw(maxHeight, topFontSize);
+    this.bottomDisplayState.draw(maxHeight, bottomFontSize);
     this.topContainer.nativeElement.height = this.topDisplayState.height;
     this.bottomContainer.nativeElement.height = this.bottomDisplayState.height;
     this.changeDetect.detectChanges();
-  }
-
-  private getHorizontalPadding(ref: ElementRef): number {
-    let left = Number.parseFloat(getComputedStyle(ref.nativeElement).paddingLeft);
-    let right = Number.parseFloat(getComputedStyle(ref.nativeElement).paddingRight);
-    return Math.ceil(left + right);
   }
 
   private resetPage(): void {
@@ -265,7 +257,7 @@ export class DisplayState {
   heading: string;
   height = 0;
 
-  constructor(active: boolean, 
+  constructor(active: boolean, private container: ElementRef, 
     public display: ExerciseDisplay)  {
       this.isActive = active;
   }
@@ -274,10 +266,10 @@ export class DisplayState {
     this._exercise = exercise;
   }
 
-  public draw(width: number, maxHeight: number, fontSize: number) {
+  public draw(maxHeight: number, fontSize: number) {
     if (this._exercise != null) {
       this.height = this.display.draw(
-        this._exercise, width, maxHeight, fontSize);
+        this._exercise, this.container, maxHeight, fontSize);
     }
   }
 
@@ -300,7 +292,7 @@ export class DisplayState {
 
 class DummyDisplayState extends DisplayState {
   constructor() {
-    super(false, null);
+    super(false, null, null);
     this.heading  = '';
     this.activationStyle = 'off';
   }
