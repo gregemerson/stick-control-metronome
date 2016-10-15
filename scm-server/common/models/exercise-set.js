@@ -13,8 +13,6 @@ module.exports = function(Exerciseset) {
         Exerciseset.beginTransaction({}, function(err, tx) {
             var app = require('../../server/server');
             try {
-                throw 'Ouch, that hurts!!!';
-                /*
                 if (err) throw err;
                 data.created = Date.now();
                 Exerciseset.findById(id, [], function(err, exerciseSet) {
@@ -36,7 +34,6 @@ module.exports = function(Exerciseset) {
                         });
                     });
                 });
-                */
             }
             catch (err) {
                 tx.rollback(function(err) {});
