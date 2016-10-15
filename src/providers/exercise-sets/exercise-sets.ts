@@ -46,6 +46,8 @@ export class ExerciseSets {
   }
 
   newExerciseSet(initializer: Object): Observable<number> {
+    initializer['clientId'] = this.user.id;
+    initializer['ownerId'] = this.user.id;
     return this.httpService.postPersistedObject(
       HttpService.ExerciseSetCollection, initializer)
       .map(result => {
@@ -55,10 +57,13 @@ export class ExerciseSets {
       });
   }
 
-  newExercise(exerciseSetId: string): Observable<IExercise> {
+  newExercise(exerciseSetId: number, exerciseInitializer: Object): Observable<void> {
     return this.httpService.postPersistedObject(
-      HttpService.ExerciseCollection, {exerciseSetId: exerciseSetId})
-      .map(result => new Exercise(result, this.user));
+      HttpService.exerciseSetExercises(exerciseSetId), exerciseInitializer)
+      .map(result => {
+        let newExercise = new Exercise(result, this.user);
+
+      });
   }
   
   public setCurrentExerciseSet(exerciseSetId: number): Observable<void> {
@@ -88,7 +93,6 @@ export interface IExerciseSet {
   category: string;
   next(): IExercise;
   initIterator(): void;
-  newExercise(initializer: Object);
 }
 
 class ExerciseSet implements IExerciseSet{
@@ -117,10 +121,6 @@ class ExerciseSet implements IExerciseSet{
     for (let exerciseId of rawExerciseSet['disabledExercises']) {
       this.disabledExercises[<number>exerciseId] = true;
     }
-  }
-
-  newExercise(initializer: Object): Observable<void> {
-    
   }
 
   disableExercise(exerciseId: number) {
