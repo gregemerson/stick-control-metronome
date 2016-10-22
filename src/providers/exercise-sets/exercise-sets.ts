@@ -30,7 +30,8 @@ export class ExerciseSets {
     this.currentExerciseSet = null;
     let currentId = user.settings.currentExerciseSetId;
     for (let key in user.rawExerciseSets) {
-      let newSet = new ExerciseSet(user.rawExerciseSets[key]);
+      let newSet = new ExerciseSet(this.httpService,
+        user.rawExerciseSets[key]);
       this.items.push(newSet);
       if (newSet.id == user.settings.currentExerciseSetId) {
         this.currentExerciseSet = newSet;
@@ -51,18 +52,9 @@ export class ExerciseSets {
     return this.httpService.postPersistedObject(
       HttpService.ExerciseSetCollection, initializer)
       .map(result => {
-        let newSet = new ExerciseSet(result);
+        let newSet = new ExerciseSet(this.httpService, result);
         this.items.push(newSet);
         return newSet.id;
-      });
-  }
-
-  newExercise(exerciseSetId: number, exerciseInitializer: Object): Observable<void> {
-    return this.httpService.postPersistedObject(
-      HttpService.exerciseSetExercises(exerciseSetId), exerciseInitializer)
-      .map(result => {
-        let newExercise = new Exercise(result, this.user);
-
       });
   }
   
@@ -93,6 +85,7 @@ export interface IExerciseSet {
   category: string;
   next(): IExercise;
   initIterator(): void;
+  newExercise(exerciseInitializer: Object): Observable<number>;
 }
 
 class ExerciseSet implements IExerciseSet{
@@ -111,7 +104,7 @@ class ExerciseSet implements IExerciseSet{
   private _exercisesLoaded = false;
   private ignoreDisabled: boolean;
 
-  constructor(rawExerciseSet: Object) {
+  constructor(private httpService: HttpService, rawExerciseSet: Object) {
     this.name = rawExerciseSet['name'];
     this.id = rawExerciseSet['id'];
     this.ownerId = rawExerciseSet['ownerId'];
@@ -121,6 +114,16 @@ class ExerciseSet implements IExerciseSet{
     for (let exerciseId of rawExerciseSet['disabledExercises']) {
       this.disabledExercises[<number>exerciseId] = true;
     }
+  }
+
+  newExercise(exerciseInitializer: Object): Observable<number> {
+    return this.httpService.postPersistedObject(
+      HttpService.exerciseSetExercises(this.id), exerciseInitializer)
+      .map(exercise => {
+        this.exercises[exercise['id']] = new Exercise(exercise, true);
+        this.exerciseOrdering.splice(0, 0, exercise['id']);
+        return exercise['id'];
+      });
   }
 
   disableExercise(exerciseId: number) {
@@ -141,7 +144,7 @@ class ExerciseSet implements IExerciseSet{
     .map(exerciseSet => {
       let exercises = <Array<Object>>exerciseSet['exercises'];
       for (let exercise of exercises) {
-        this.exercises[exercise['id']] = new Exercise(exercise, user);
+        this.exercises[exercise['id']] = new Exercise(exercise, user.id == exercise['ownerId']);
       }
       this._exercisesLoaded = true;
     });
@@ -199,24 +202,24 @@ export interface IExercise {
   name: string;
   category: string;
   isOwner: boolean;
-  display: Array<ExerciseElement>;
+  display: ExerciseElements;
   comments: string;
   getNumberOfBeats(): number;
 }
 
 // beats per measure must be bounded because of count in recording constraints
 class Exercise implements IExercise {
-  private _display: Array<ExerciseElement>;
+  private _display: ExerciseElements;
   private _id: string;
   private _isOwner: boolean;
   public name: string;
   public category: string;
   public comments: string;
 
-  constructor(rawExercise: Object, user: IAuthUser) {
+  constructor(rawExercise: Object, isOwner: boolean) {
     this._display = Encoding.decode(rawExercise['notation']);
     this._id = rawExercise['id'];
-    this._isOwner = user.id == rawExercise['ownerId'];
+    this._isOwner = isOwner;
     this.name = rawExercise['name'];
     this.category = rawExercise['category'];
     if (rawExercise.hasOwnProperty('comments')) {
@@ -232,7 +235,7 @@ class Exercise implements IExercise {
     return this._isOwner;
   }
 
-  get display(): Array<ExerciseElement> {
+  get display(): ExerciseElements {
     return this._display;
   }
 
@@ -242,22 +245,19 @@ class Exercise implements IExercise {
     let measureBeats = [];
     let measureIndex = 0;
     // Skip first measure bar
-    let elements = this.display;
-    for (let i = 1; i < elements.length; i++) {
-      if (typeof elements[i] == 'GroupSeparator') {
+    for (let i = 0; i < this.display.length; i++) {
+      let element = this.display.getElement(i);
+      if (element instanceof GroupSeparator) {
         groupCount++;
       }
-      if (typeof elements[i] == 'MeasureSeparator') {
-        if (typeof elements[i - 1] == 'MeasureSeparator') {
-          throw 'Invalid exercise: empty measure';
-        }
+      if (element instanceof MeasureSeparator) {
         measureBeats.push(groupCount);
         numBeats += groupCount;
         groupCount = 0;
       }
-      if (typeof elements[i] == 'Repeat') {
+      if (element instanceof Repeat) {
         let last = measureBeats.length - 1;
-        let repeat = <Repeat>elements[i];
+        let repeat = <Repeat>element;
         let beatTotal = 0;
         for (let j = last; j >= last - repeat.numMeasures; --j) {
           beatTotal += measureBeats[j];
@@ -266,6 +266,89 @@ class Exercise implements IExercise {
       }
     }
     return numBeats;
+  }
+}
+
+export class ExerciseElements {
+  private _cursorPosition;
+  constructor(private elements: ExerciseElement[]) {
+    this.resetCursor();
+  }
+
+  get encoded(): string {
+    return Encoding.encode(this.elements);
+  }
+
+  get length(): number {
+    return this.elements.length;
+  }
+
+  getElement(index: number): ExerciseElement {
+    return this.elements[index];
+  }
+
+  // At the zero position, there is nothing at the cursor
+  elementAtCursorIs(type: any): boolean {
+    if (this._cursorPosition == 0) {
+      return false;
+    }
+    return this.elements[this._cursorPosition - 1] instanceof type;
+  }
+
+  elementAtCursor(): ExerciseElement {
+    if (this._cursorPosition == 0) {
+      return null;
+    }
+    return this.elements[this._cursorPosition - 1];
+  }
+
+  resetCursor() {
+    this._cursorPosition = 0;
+  }
+
+  // Delete the element behind the cursor
+  deleteAtCursor() {
+    if (this._cursorPosition == 0) {
+      return;
+    }
+    this.elements.splice(this._cursorPosition - 1, 1);
+    this.cursorBack();
+  }
+
+  // Insert an element in front of the cursor past the new element.
+  insertAtCursor(element: ExerciseElement) {
+    this.elements.splice(this._cursorPosition, 0, element);
+    this.cursorForward();
+  }
+
+  cursorForward() {
+    this._cursorPosition = Math.min(
+      this.elements.length, this._cursorPosition + 1);
+  }
+
+  cursorBack() {
+    this._cursorPosition = Math.max(
+      0, this._cursorPosition - 1);
+  }
+
+  get cursorPosition(): number {
+    return this._cursorPosition;
+  }
+
+  longestStrokeGroup(): number {
+    let longestGroup = 0;
+    let groupCount = 0;
+    for (let element of this.elements) {
+      if (element instanceof Stroke) {
+        groupCount++;
+      }
+      else {
+        longestGroup = Math.max(
+          longestGroup, groupCount);
+        groupCount = 0;
+      }
+    }
+    return longestGroup;
   }
 }
 
@@ -290,100 +373,55 @@ export class Encoding {
   static repeatEnd = '>';
   static repeatDivider = ':';
   static strokes = 'rlbRLB-';
-  static graces = 'fdrz';
+  static graces = '123z';
 
-  static encode(elements: Array<ExerciseElement>): string {
+  private static exerciseElements: ExerciseElement[];
+
+  static encode(elements: ExerciseElement[]): string {
     let encoding = '';
-    for (let element of elements) {
-      encoding += element.encoding;
+    for (let i = 0; i < elements.length; i++) {
+      encoding += elements[i].encoding;
     }
     return encoding;
   }
 
-  static decode(encoded: string): Array<ExerciseElement> {
+  static decode(encoded: string): ExerciseElements {
     let elements: Array<ExerciseElement> = [];
     let beginExercise = false;
     let encodedIndex = 0;
-     while (encodedIndex < encoded.length) {
+    if (Encoding.exerciseElements == null) {
+      Encoding.exerciseElements = [
+          new Repeat(),
+          new Stroke(),
+          new GroupSeparator(),
+          new MeasureSeparator()
+        ];
+    }
+
+    while (encodedIndex < encoded.length) {
       // Move to the playable portion of the display
       if (!beginExercise) {
         if (encoded[encodedIndex] == this.exerciseStart) {
           beginExercise = true;
         }
-        encodedIndex += this.exerciseStart.length;
+        encodedIndex++;
         continue;
       }
-      if (encoded[encodedIndex] == this.repeatStart) {
-        let repeat = new Repeat(0,0);
-        encodedIndex = this.parseRepeat(encoded, encodedIndex, repeat);
-        elements.push(repeat);
-        continue;
+      let element: ExerciseElement = null;
+      for (let elementObj of this.exerciseElements) {
+        element = elementObj.tryParse(encoded, encodedIndex);
+        if (element != null) {
+          elements.push(element);
+          break;
+        }
       }
-      if (encoded[encodedIndex] == this.graceStart || this.strokes.includes(encoded[encodedIndex])) {
-        let stroke = new StrokeGroup();
-        encodedIndex = this.parseStroke(encoded, encodedIndex, stroke);
-        elements.push(stroke);
-        continue;
+      if (element == null) {
+        throw encoded[encodedIndex] + 
+          ` isn't the start of an exercise element`;
       }
-      if (encoded[encodedIndex] == this.measureSeparator) {
-        elements.push(new MeasureSeparator());
-        encodedIndex += this.measureSeparator.length;
-        continue;
-      }
-      if (encoded[encodedIndex] == this.groupSeparator) {
-        elements.push(new GroupSeparator());
-        encodedIndex += this.groupSeparator.length;
-        continue;
-      }
-      throw encoded[encodedIndex] + " isn't the start of an exercise element";
+      encodedIndex += element.length;
     }
-    return elements;
-  }
-
-  private static parseStroke(display: string, index: number, strokeGroup: StrokeGroup): number {
-    let strokeGroupIndex = index;
-    while (strokeGroupIndex < display.length && (this.graceStart == display[strokeGroupIndex] || 
-      this.strokes.includes(display[strokeGroupIndex]))) {
-      strokeGroup.grace.push(null);
-      if (display[strokeGroupIndex] == this.graceStart) {
-        strokeGroup.grace[strokeGroup.grace.length - 1] = display[strokeGroupIndex + 1];
-        strokeGroupIndex += 3;
-      }
-      let encodedStroke = display[strokeGroupIndex]; 
-      let upperStroke = encodedStroke.toUpperCase();
-      strokeGroup.hand.push(upperStroke);
-      strokeGroup.accented.push((encodedStroke == upperStroke) &&
-        ( encodedStroke != this.rest));
-      strokeGroupIndex++;
-    }
-    return strokeGroupIndex;
-  }
-
-  private static throwInvalid() {
-    throw 'invalid exercise';
-  }
-
-  private static parseRepeat(display: string, index: number, repeat: Repeat): number {
-    if (display[index] != this.repeatStart) {
-      Encoding.throwInvalid();
-    }
-    let end = display.indexOf(this.repeatEnd);
-    if (end <= index + 1) {
-      Encoding.throwInvalid();
-    }
-    let values = display.substring(index + 1, end)
-      .split(this.repeatDivider);
-    if (values.length != 2) {
-      Encoding.throwInvalid();
-    }
-    let numRepeats = +values[0];
-    let numMeasures = +values[1];
-    if (Number.isNaN(numRepeats) || Number.isNaN(numMeasures)) {
-      Encoding.throwInvalid();
-    }
-    repeat.numRepeats = numRepeats;
-    repeat.numMeasures = numMeasures;
-    return end + 1;
+    return new ExerciseElements(elements);
   }
 
   static getMeasureCount(encoding: string) {
@@ -406,51 +444,109 @@ export class Encoding {
 }
 
 export class ExerciseElement {
+  private _length = 1;
+
+  get length(): number {
+    return this._length;
+  }
+
+  protected setLength(l: number) {
+    this._length = l;
+  }
+
+  tryParse(encoded: string, index: number): ExerciseElement {
+    return null;
+  }
+  
   get encoding(): string {
-    throw 'encoding pure virtual';
+    return '';
   }
 }
 
 export class MeasureSeparator extends ExerciseElement {
+  tryParse(encoding: string, index: number): MeasureSeparator {
+    if (encoding[index] == Encoding.measureSeparator) {
+      return new MeasureSeparator();
+    }
+    return null;
+  }
+
   get encoding(): string {
     return Encoding.measureSeparator;
   }
 }
 
 export class GroupSeparator extends ExerciseElement {
+  tryParse(encoding: string, index: number): GroupSeparator {
+    if (encoding[index] == Encoding.groupSeparator) {
+      return new GroupSeparator();
+    }
+    return null;
+  }
+  
   get encoding(): string {
     return Encoding.groupSeparator;
   }
 }
 
 export class Repeat extends ExerciseElement {
-  constructor(public numRepeats: number, public numMeasures: number) {
-    super();
+  numMeasures: number;
+  numRepeats: number;
+
+  tryParse(encoding: string, index: number): Repeat {
+    if (encoding[index] == Encoding.repeatStart) {
+      let start = index;
+      let end = encoding.indexOf(Encoding.repeatEnd);
+      let components = encoding.substring(start + 1, end - 1).
+          split(Encoding.repeatDivider);
+      let repeat = new Repeat();
+      repeat.numMeasures = parseInt(components[0]);
+      repeat.numRepeats = parseInt(components[1]);
+      repeat.setLength(end - start + 1);
+      return repeat;
+    }
+    return null;
   }
+
   get encoding(): string {
     return Encoding.repeatStart + this.numMeasures + 
           Encoding.repeatDivider + this.numRepeats + Encoding.repeatEnd;
   }
 }
 
-export class StrokeGroup extends ExerciseElement {
-  hand: string[] = [];
-  grace: string[] = [];
-  accented: boolean[] = [];
+export class Stroke extends ExerciseElement {
+    hand: string;
+    accented: boolean;
+    grace: string;
 
-  get numberOfStrokes(): number {
-    return this.hand.length;
-  }
-
-  get encoding(): string {
-    let encodedGroup = '';
-    for (let i = 0; i < this.hand.length; i++) {
-      let grace = '';
-      if (this.grace[i] != null) {
-        encodedGroup += Encoding.graceStart + this.grace[i] + Encoding.graceEnd;
+    tryParse(encoding: string, index: number): Stroke {
+      let char = encoding[index];
+      if (!Encoding.strokes.includes(char) && (char != Encoding.graceStart)) {
+        return null;
       }
-      grace += this.accented ? this.hand[i] : this.hand[i].toLowerCase();
+      let strokeIndex = index;
+      let grace = null;
+      if (char == Encoding.graceStart) {
+        grace = encoding[strokeIndex + 1];
+        strokeIndex += 3;
+      }
+      let encodedStroke = encoding[strokeIndex]; 
+      let upperStroke = encodedStroke.toUpperCase();
+      let stroke = new Stroke();
+      stroke.accented = encodedStroke == upperStroke;
+      stroke.grace = grace;
+      stroke.hand = upperStroke;
+      strokeIndex++;
+      stroke.setLength(strokeIndex - index);
+      return stroke;
     }
-    return encodedGroup;
+ 
+    get encoding(): string {
+      let encoded = '';
+      if (this.grace != null) {
+        encoded = Encoding.graceStart + this.grace + Encoding.graceEnd;
+      }
+      encoded += this.accented ? this.hand : this.hand.toLowerCase();
+      return encoded;
+    }
   }
-}

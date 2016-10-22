@@ -1,6 +1,7 @@
 
 
 module.exports = function(Exerciseset) {
+    
     Exerciseset.beforeRemote('upsert', function( ctx, instance, next) {
         if (!ctx.req.body.id) {
             ctx.req.body.created = Date.now();
@@ -9,6 +10,7 @@ module.exports = function(Exerciseset) {
         }
         next();
     });
+
     Exerciseset.createdExercises = function(id, data, cb) {
         Exerciseset.beginTransaction({}, function(err, tx) {
             var app = require('../../server/server');

@@ -34,11 +34,19 @@ $colors: (
 $fancy-font: 'Courgette', cursive;
 $fancy-color: black;
 
-[fancy-text] ion-title {
+ion-title {
   font-family: $fancy-font;
-  color: $fancy-color;
 }
 
+[fancy-text] {
+  font-family: $fancy-font;
+  color: #a4f25c;
+}
+
+.editor-buttons > button {
+  font-family: courier;
+  font-weight: bold;
+}
 
 // App Theme
 // --------------------------------------------------

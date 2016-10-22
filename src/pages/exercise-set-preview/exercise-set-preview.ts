@@ -1,9 +1,10 @@
 import { SimpleChanges, Component, ViewChildren, ViewChild, ElementRef, QueryList } from '@angular/core';
 import { NavController, ModalController, NavParams, LoadingController, Loading, PopoverController} from 'ionic-angular';
-import {ExerciseSets, IExerciseSet, IExercise} from '../../providers/exercise-sets/exercise-sets';
+import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
 import {NewExerciseSetForm} from './new-exercise-set';
+import {NewExerciseForm} from './new-exercise-set';
 
 @Component({
   selector: 'exercise-set-preview',
@@ -11,18 +12,21 @@ import {NewExerciseSetForm} from './new-exercise-set';
 })
 export class ExerciseSetPreviewPage {
   title = '';
-  exercises: Array<IExercise> = [];
-  modal: ModalController;
-  selectedExerciseSetId: number;
+  exercises: Array<ES.IExercise> = [];
+  selectedExerciseSetId: number = null;
+  exerciseEditor: ExerciseEditor;
+  editIndex: number = -1
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
+  private fontFactor = 0.5;
 
   constructor(private navCtrl: NavController, 
-    public exerciseSets: ExerciseSets, 
+    public exerciseSets: ES.ExerciseSets,
     private params: NavParams,
     private loadingCtrl: LoadingController,
-    private popoverCtrl: PopoverController) {
-    //this.exerciseSets = <ExerciseSets>params.get('exerciseSets');
+    private popoverCtrl: PopoverController,
+    private modal: ModalController) {
+    //this.ES.ExerciseSets = <ES.ExerciseSets>params.get('ES.ExerciseSets');
     // this.loadExercises();
   }
 
@@ -46,12 +50,31 @@ export class ExerciseSetPreviewPage {
     }).present();
   }
 
+  newExercise($event) {
+    this.popoverCtrl.create(NewExerciseForm, {
+      create: (formData: Object) => {
+          if (!formData) {
+            return;
+          }
+          this.exerciseSets.newExercise(formData).subscribe({
+            next: (setId: number) => {
+            },
+            error: (err: any) => {
+              this.showMessages([MessagesPage.createMessage(
+                'Error', 'Could not create exercise set.', MessageType.Error
+              )]);
+            }
+          });
+      }
+    }).present();    
+  }
+
   onChange($event) {
     if (!$event) {
+      this.selectedExerciseSetId = null;
       return;
     }
-    let loading = this.loadingCtrl.create();
-    loading.present();
+    let loading = this.showLoading();
     this.exerciseSets.setCurrentExerciseSet($event).subscribe(
       () => {
         loading.dismiss();
@@ -88,19 +111,131 @@ export class ExerciseSetPreviewPage {
     }
   }
 
+  private getFontSize() {
+    if (this.contents.length > 0) {
+      return 1.5 * Number.parseInt(getComputedStyle(
+        this.contents[0].nativeElement).fontSize);
+    }
+  }
+
   private displayExercises() {
     let containers = this.contents.toArray();
     let displays = this.displays.toArray();
     for (let i = 0; i < displays.length; i++) {
-      let exercise = this.exercises[i];
-      let fontSize = 1.5 * Number.parseInt(getComputedStyle(containers[i].nativeElement).fontSize);
-      displays[i].draw(exercise, containers[i], Number.MAX_SAFE_INTEGER, fontSize);
+      this.drawExercise()
+
     }
   }
+
+  private drawExercise(exercise: ES.IExercise, 
+    display: ExerciseDisplay, container: ElementRef) {
+      let fontSize = this.fontFactor * Number.parseInt(
+        getComputedStyle(container.nativeElement).fontSize);
+      display.draw(exercise, container, 
+        Number.MAX_SAFE_INTEGER, fontSize);
+    }
 
   private showMessages(messages: Array<IMessage>) {
     this.popoverCtrl.create(MessagesPage, {
       messages: messages
     }).present();
+  }
+
+  private showLoading(): Loading {
+    let loading = this.loadingCtrl.create();
+    loading.present();
+    return loading;
+  }
+
+  editExercise(idx: number) {
+    this.editIndex = idx;
+    let display = <ExerciseDisplay>this.displays[idx];
+    display.showCursor = true;
+    let container = this.contents[idx];
+    let exercise = this.exercises[idx];
+    this.exerciseEditor = new 
+      ExerciseEditor(exercise.display, () => {
+        this.drawExercise(exercise, display, container);
+      }, (position: number) => {
+        display.drawCursor(position);
+      });
+  }
+
+  deleteExercise(idx: number) {
+  }
+}
+
+export class ExerciseEditor {
+  originalNotation: string;
+  accent = 'accent';
+  grace = 'grace';
+  rightHand = ES.Encoding.right;
+  leftHand = ES.Encoding.left;
+  bothHands = ES.Encoding.both;
+  noHands = ES.Encoding.rest;
+  
+  constructor(private elements: ES.ExerciseElements,
+    private drawExercise: () => void,
+    private drawCursor: (position: number) => void) {
+    this.originalNotation = elements.encoded;
+    elements.resetCursor();
+  }
+
+  private drawAll() {
+    this.drawExercise();
+    this.drawCursor(this.elements.cursorPosition);
+  }
+
+  backspace() {
+    this.elements.deleteAtCursor();
+    if (this.elements.elementAtCursorIs(ES.Repeat)) {
+      this.elements.deleteAtCursor();
+    }
+    this.drawAll();
+  }
+
+  forward() {
+    this.elements.cursorForward();
+    this.drawCursor(this.elements.cursorPosition);
+  }
+
+  back() {
+    this.elements.cursorBack();
+    this.drawCursor(this.elements.cursorPosition);
+  }
+
+  measure() {
+    this.elements.insertAtCursor(new ES.MeasureSeparator());
+    this.drawAll();
+  }
+
+  space() {
+    this.elements.insertAtCursor(new ES.GroupSeparator());
+    this.drawAll();
+  }
+  
+  stroke(hand: string) {
+    let stroke = new ES.Stroke();
+    stroke.accented = false;
+    stroke.grace = null;
+    stroke.hand = hand;
+    this.elements.insertAtCursor(stroke);
+    this.drawAll();
+  }
+
+  modifyStroke(modification: any) {
+    if (!this.elements.elementAtCursorIs(ES.Stroke)) {
+      return;
+    }
+    let stroke = <ES.Stroke>this.elements.elementAtCursor();
+    if (modification == this.grace) {
+      let grace = stroke.grace == null ? 0 : parseInt(stroke.grace);
+      let newGrace = (grace + 1) % 4;
+      stroke.grace = newGrace == 0 ? null : newGrace.toString();
+    }
+    else if (modification == this.accent) {
+      stroke.accented = !stroke.accented;
+    }
+    this.drawAll();
   }
 }

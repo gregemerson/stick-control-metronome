@@ -9,21 +9,48 @@
     <ion-select [(ngModel)]="selectedExerciseSetId"
       (ionChange)="onChange($event)" placeholder="Not Selected">
       <ion-option *ngFor="let set of exerciseSets.items" [value]="set.id">{{ set.name }}</ion-option>
-    </ion-select>  
+    </ion-select>
   </ion-item>
   <ion-item>
-    <button ion-button (click)="newExerciseSet($event)" color="primary">New Exercise Set</button>
+    <ion-buttons>
+      <button ion-button (click)="newExerciseSet($event)">New Exercise Set</button>
+      <button ion-button (click)="newExercise($event)" [disabled]="selectedExerciseSetId">New Exercise</button>    
+    </ion-buttons>
   </ion-item>
-  <ion-card  *ngFor="let exercise of exercises">
+  <ion-card *ngFor="let exercise of exercises; let idx = index">
     <ion-card-header>{{ exercise.name }}</ion-card-header>
-    <ion-card-content #displayContainer>
+    <ion-card-content #displayContainer [style.border]="editIndex == idx ? '2px ridge red' : 'none'" >
       <exercise-display #exerciseDisplay></exercise-display>
-      <button ion-button (click)="editclicked($event)" color="primary" small>
-        <ion-icon name="open"></ion-icon>
-      </button>
-      <button ion-button (click)="deleteClicked($event)" color="primary" small>
-        <ion-icon name="trash"></ion-icon>
-      </button>
     </ion-card-content>
+    <button ion-button (click)="editExercise(idx)" color="primary" small>
+      <ion-icon name="open"></ion-icon>
+    </button>
+    <button ion-button (click)="deleteExercise(idx)" color="primary" small>
+      <ion-icon name="trash"></ion-icon>
+    </button>
 </ion-card>
 </ion-content>
+
+<ion-footer [hidden]="exerciseEditor == null">
+  <ion-toolbar>
+    <ion-buttons left class="editor-buttons">
+      <button ion-button outline>R</button>
+      <button ion-button outline>L</button>
+      <button ion-button outline>B</button>
+      <button ion-button outline>-</button>
+      <button ion-button outline>></button>
+      <button ion-button outline>|</button>
+      <button ion-button outline>/</button>
+      <button ion-button outline>_</button>
+      <button ion-button outline>1</button>
+      <button ion-button outline>2</button>
+      <button ion-button outline>3</button>
+      <button ion-button outline><ion-icon name="backspace"></ion-icon></button>
+      <button ion-button outline><ion-icon name="key"></ion-icon></button>
+    </ion-buttons>
+    <ion-buttons right>
+      <button ion-button><ion-icon name="checkmark" color="primary"></ion-icon></button>
+      <button ion-button><ion-icon name="trash" color="primary"></ion-icon></button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

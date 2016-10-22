@@ -7,7 +7,7 @@ import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
   templateUrl: 'new-exercise.html',
 })
 export class NewExerciseForm {
-  newExerciseSet: FormGroup;
+  newExercise: FormGroup;
   maxNameChars = 40;
   maxCategoryChars = 20;
   maxCommentsChars = 200;
@@ -16,7 +16,7 @@ export class NewExerciseForm {
   constructor(private formBuilder: FormBuilder,
     private navCtrl: NavController, params: NavParams) {
       this.callback = <(Object) => void>params.get('create');
-      this.newExerciseSet = this.formBuilder.group({
+      this.newExercise = this.formBuilder.group({
         name: ['', Validators.maxLength(this.maxNameChars)],
         category: ['', Validators.maxLength(this.maxCategoryChars)],
         comments: ['', Validators.maxLength(this.maxCommentsChars)],
@@ -28,7 +28,7 @@ export class NewExerciseForm {
   }
 
   create() {
-    this.callback(this.newExerciseSet.value);
+    this.callback(this.newExercise.value);
     this.navCtrl.pop();
   }
 
