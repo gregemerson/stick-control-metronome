@@ -7,14 +7,23 @@ import * as ES from '../../providers/exercise-sets/exercise-sets';
   styles: [
     `.exercise-canvas {
         z-index: 2;
+        position: relative;
         border-style: solid;
-        border-color: green;}`,
-    `.cursorCanvas {
-        z-index: 3
-    }`
+        border-color: green;
+     }`,
+    `.cursor-canvas {
+        z-index: 3;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        border-style: dotted;
+        border-color: red;
+     }`
   ],
-  template: `<canvas #exerciseCanvas class="exercise-canvas"></canvas>
-             <canvas #cursorCanvas class="cursor-canvas" [hidden]="!showCursor"></canvas>`,
+  template: `<canvas #exerciseCanvas class="exercise-canvas">
+              <canvas #cursorCanvas class="cursor-canvas" [hidden]="!showCursor">
+              </canvas>
+             </canvas>`,
 })
 export class ExerciseDisplay {
   @ViewChild("exerciseCanvas") canvasElement: ElementRef;
@@ -45,7 +54,7 @@ export class ExerciseDisplay {
   private cursorPosition: number;
   private positionCount: number;
 
-  private lineBreaks = new Array<number>();
+  private endOfLineIndices = new Array<number>();
 
   showCursor = true;
 
@@ -88,43 +97,52 @@ export class ExerciseDisplay {
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, desiredFontSize: number, cursorPosition = -1): number {
+  draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, 
+    desiredFontSize: number, cursorPosition = -1): number {
     this.cursorPosition = cursorPosition;
     this.positionCount = 0;
     this.clearCanvas(this.exerciseCanvas);
     this.clearCanvas(this.cursorCanvas);
     this.exerciseCanvas.width = ExerciseDisplay.getDisplayWidth(container);
     this.createLayout(exercise, maxHeight, desiredFontSize);
-    this.exerciseCanvas.height = this.lineBreaks.length * this.bottomPaddingY;
-    console.log(this.exerciseCanvas.width + '   ' + this.exerciseCanvas.height);
-    // this.cursorCanvas.width = this.exerciseCanvas.width;
-    // this.cursorCanvas.height = this.exerciseCanvas.height;
-    let ctx = this.getCursorContext();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-    ctx.fillRect(0, 0, this.cursorCanvas.width , this.cursorCanvas.height);
+    this.exerciseCanvas.height = this.endOfLineIndices.length * this.bottomPaddingY;
+    this.cursorCanvas.width = 0; //this.exerciseCanvas.width;
+    this.cursorCanvas.height = 0; //this.exerciseCanvas.height;
+    //let ctx = this.getCursorContext();
+    //ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    //ctx.fillRect(0, 0, this.cursorCanvas.width , this.cursorCanvas.height);
     let context = this.getExerciseContext();
     let elementIndex = 0;
     let display = exercise.display;
-    for (let lineIdx = 0; lineIdx < this.lineBreaks.length; lineIdx++) {
+    for (let i = 0; i < display.length; i++) {
+      
+    }
+    
+    for (let lineIdx = 0; lineIdx < this.endOfLineIndices.length; lineIdx++) {
       this.resetNoteX();
       let lineStart = this.noteX;
-      let lastIndex = this.lineBreaks[lineIdx];
+      let lastIndex = this.endOfLineIndices[lineIdx];
+      let firstWrite = true;
       while (elementIndex <= lastIndex) {
-        let element = display[elementIndex];
+        let element = display.getElement(elementIndex);
         if (element instanceof ES.Stroke) {
           let drawInfo = this.drawNotes(display, elementIndex);
-          elementIndex += drawInfo.noteCount;
+          // Move index to end of stroke group
+          elementIndex += drawInfo.noteCount - 1;
           this.noteX = drawInfo.endX;
         }
         else if (element instanceof ES.MeasureSeparator) {
-          this.noteX = this.drawMeasureSeparator();
+          this.noteX += this.drawMeasureSeparator();
         }
         else if (element instanceof ES.GroupSeparator) {
-          this.noteX = this.drawGroupSeparator();
+          if (!firstWrite) {
+            this.noteX += this.drawGroupSeparator();
+          }
         }
         else if (element instanceof ES.Repeat) {
-          this.noteX = this.drawRepeat(<ES.Repeat>element);
+          this.noteX += this.drawRepeat(<ES.Repeat>element);
         }
+        firstWrite = false;
         elementIndex++;
       }
       this.moveNextLine();
@@ -148,7 +166,7 @@ export class ExerciseDisplay {
       }
     }
     // Now find line breaks which can only be ' ' or '|'
-    this.lineBreaks.length = 0;
+    this.endOfLineIndices.length = 0;
     let fontWidth = context.measureText('X').width;
     let usedWidth = 0;
     let breakCandidate = 0;
@@ -160,10 +178,10 @@ export class ExerciseDisplay {
       if ((usedWidth + this.noteWidth) > this.exerciseCanvas.width) {
         let charsAfterBreak = 1;
         if (isBreakable) {
-          this.lineBreaks.push(elementIndex - 1);
+          this.endOfLineIndices.push(elementIndex - 1);
         }
         else {
-          this.lineBreaks.push(breakCandidate);
+          this.endOfLineIndices.push(breakCandidate);
           breakCandidate = elementIndex;
           charsAfterBreak = elementIndex - breakCandidate; 
         }
@@ -173,6 +191,7 @@ export class ExerciseDisplay {
         breakCandidate = elementIndex;
       }
     }
+    this.endOfLineIndices.push(exercise.display.length - 1);
     this.setupRegions(calculatedFontSize);
   }
 
@@ -294,14 +313,11 @@ export class ExerciseDisplay {
     context.strokeText(repeat.numRepeats.toString(), endX - numWidth, this.letterY);
     context.textBaseline = 'top';
     context.strokeText(repeat.numMeasures.toString(), startX, this.letterY);      
-    return endX;
+    return this.noteWidth;
   }
 
   private drawGroupSeparator(): number {
-    let context = this.getExerciseContext();
-    context.textBaseline = 'bottom';
-    context.strokeText(' ', this.noteX, this.letterY);
-    return this.noteX + this.noteWidth;
+    return this.noteWidth;
   }
 
   private drawMeasureSeparator(): number {
@@ -313,7 +329,7 @@ export class ExerciseDisplay {
     context.lineTo(middleX, this.letterY);
     context.stroke();
     context.closePath();
-    return this.noteX + this.noteWidth;
+    return this.noteWidth;
   }
 
   private drawGroupLines(numNotes: number) {
@@ -357,7 +373,10 @@ export class ExerciseDisplay {
 
   ngAfterViewInit() {
     this.exerciseCanvas = <HTMLCanvasElement>this.canvasElement.nativeElement;
+    this.cursorCanvas = <HTMLCanvasElement>this.cursorElement.nativeElement;
     this.exerciseCanvas.width = 0;
+    this.exerciseCanvas.height = 0;
+    this.cursorCanvas.width = 0;
     this.exerciseCanvas.height = 0;
   }
 }

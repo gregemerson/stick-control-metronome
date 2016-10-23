@@ -198,7 +198,7 @@ class ExerciseSet implements IExerciseSet{
 }
 
 export interface IExercise {
-  id: string; 
+  id: number; 
   name: string;
   category: string;
   isOwner: boolean;
@@ -210,7 +210,7 @@ export interface IExercise {
 // beats per measure must be bounded because of count in recording constraints
 class Exercise implements IExercise {
   private _display: ExerciseElements;
-  private _id: string;
+  private _id: number;
   private _isOwner: boolean;
   public name: string;
   public category: string;
@@ -227,7 +227,7 @@ class Exercise implements IExercise {
     }
   }
 
-  get id(): string {
+  get id(): number {
     return this._id;
   }
 

@@ -4,7 +4,7 @@ import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
 import {NewExerciseSetForm} from './new-exercise-set';
-import {NewExerciseForm} from './new-exercise-set';
+import {NewExerciseForm} from './new-exercise';
 
 @Component({
   selector: 'exercise-set-preview',
@@ -18,7 +18,7 @@ export class ExerciseSetPreviewPage {
   editIndex: number = -1
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
-  private fontFactor = 0.5;
+  private fontFactor = 1.5;
 
   constructor(private navCtrl: NavController, 
     public exerciseSets: ES.ExerciseSets,
@@ -53,11 +53,23 @@ export class ExerciseSetPreviewPage {
   newExercise($event) {
     this.popoverCtrl.create(NewExerciseForm, {
       create: (formData: Object) => {
+          let exerciseSet = this.exerciseSets.currentExerciseSet;
           if (!formData) {
             return;
           }
-          this.exerciseSets.newExercise(formData).subscribe({
-            next: (setId: number) => {
+          exerciseSet.newExercise(formData).subscribe({
+            next: (exerciseId: number) => {
+              let index = 0;
+              let exercise = null;
+              exerciseSet.initIterator();
+              while (exerciseSet.next() != null) {
+                if (exerciseSet.currentExercise.id == exerciseId) {
+                  exercise = exerciseSet.currentExercise;
+                  break;
+                }
+                index++;
+              }  
+              this.exercises.splice(index, 0, exercise);
             },
             error: (err: any) => {
               this.showMessages([MessagesPage.createMessage(
@@ -111,19 +123,17 @@ export class ExerciseSetPreviewPage {
     }
   }
 
-  private getFontSize() {
-    if (this.contents.length > 0) {
-      return 1.5 * Number.parseInt(getComputedStyle(
-        this.contents[0].nativeElement).fontSize);
-    }
-  }
-
-  private displayExercises() {
+  private displayExercises(index = -1) {
     let containers = this.contents.toArray();
     let displays = this.displays.toArray();
-    for (let i = 0; i < displays.length; i++) {
-      this.drawExercise()
-
+    let exercises = this.exercises;
+    if (index == -1) {
+      for (let i = 0; i < displays.length; i++) {
+        this.drawExercise(exercises[i], displays[i], containers[i]);
+      }
+    }
+    else {
+      this.drawExercise(exercises[index], displays[index], containers[index]);
     }
   }
 
@@ -162,6 +172,16 @@ export class ExerciseSetPreviewPage {
   }
 
   deleteExercise(idx: number) {
+
+  }
+
+  saveExerciseEditing(index: number) {
+
+  }
+
+  cancelExerciseEditing(index: number) {
+    this.editIndex = -1;
+    this.exerciseEditor = null;
   }
 }
 

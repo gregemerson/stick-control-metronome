@@ -19,15 +19,25 @@
   </ion-item>
   <ion-card *ngFor="let exercise of exercises; let idx = index">
     <ion-card-header>{{ exercise.name }}</ion-card-header>
-    <ion-card-content #displayContainer [style.border]="editIndex == idx ? '2px ridge red' : 'none'" >
+    <ion-card-content #displayContainer [class.editing]="editIndex == idx" >
       <exercise-display #exerciseDisplay></exercise-display>
     </ion-card-content>
-    <button ion-button (click)="editExercise(idx)" color="primary" small>
-      <ion-icon name="open"></ion-icon>
-    </button>
-    <button ion-button (click)="deleteExercise(idx)" color="primary" small>
-      <ion-icon name="trash"></ion-icon>
-    </button>
+    <ion-buttons [hidden]="editIndex == idx">
+      <button ion-button (click)="editExercise(idx)" color="primary" small>
+        <ion-icon name="open"></ion-icon>
+      </button>
+      <button ion-button (click)="deleteExercise(idx)" color="danger" small>
+        <ion-icon name="trash"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-buttons [hidden]="editIndex != idx">
+      <button ion-button (click)="saveExerciseEditing(idx)" color="primary" small>
+        <ion-icon name="open"></ion-icon>
+      </button>
+      <button ion-button (click)="cancelExerciseEditing(idx)" color="danger" small>
+        <ion-icon name="trash"></ion-icon>
+      </button>
+    </ion-buttons>
 </ion-card>
 </ion-content>
 

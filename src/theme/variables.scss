@@ -28,7 +28,7 @@ $colors: (
   danger:     #f53d3d,
   light:      #f4f4f4,
   dark:       #222,
-  favorite:   #69BB7B
+  favorite:   #69BB7B,
 );
 
 $fancy-font: 'Courgette', cursive;
@@ -46,6 +46,12 @@ ion-title {
 .editor-buttons > button {
   font-family: courier;
   font-weight: bold;
+}
+
+.editing {
+  border-color: rgba(184, 188, 224, .7);
+  border-style: ridge;
+  border-width: 5px;
 }
 
 // App Theme
