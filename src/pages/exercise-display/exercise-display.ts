@@ -7,23 +7,18 @@ import * as ES from '../../providers/exercise-sets/exercise-sets';
   styles: [
     `.exercise-canvas {
         z-index: 2;
-        position: relative;
-        border-style: solid;
-        border-color: green;
+        border-style: dotted;
+        border-color: green;       
      }`,
     `.cursor-canvas {
         z-index: 3;
         position: absolute;
-        top: 0px;
-        left: 0px;
         border-style: dotted;
         border-color: red;
      }`
   ],
-  template: `<canvas #exerciseCanvas class="exercise-canvas">
-              <canvas #cursorCanvas class="cursor-canvas" [hidden]="!showCursor">
-              </canvas>
-             </canvas>`,
+  template: `<canvas #exerciseCanvas class="exercise-canvas"></canvas>
+             <canvas #cursorCanvas class="cursor-canvas"></canvas>`,
 })
 export class ExerciseDisplay {
   @ViewChild("exerciseCanvas") canvasElement: ElementRef;
@@ -55,8 +50,9 @@ export class ExerciseDisplay {
   private positionCount: number;
 
   private endOfLineIndices = new Array<number>();
-
-  showCursor = true;
+  private container: ElementRef;
+  showCursor = false;
+  
 
   constructor(private navCtrl: NavController) {
   }
@@ -83,14 +79,46 @@ export class ExerciseDisplay {
     return this._cursorContext;
   }
 
-  private static getDisplayWidth(ref: ElementRef): number {
-    let left = Number.parseFloat(getComputedStyle(ref.nativeElement).paddingLeft);
-    let right = Number.parseFloat(getComputedStyle(ref.nativeElement).paddingRight);
-    return ref.nativeElement.clientWidth - Math.ceil(left + right);
+  private getDisplayWidth(): number {
+    let left = Number.parseFloat(getComputedStyle(this.container.nativeElement).paddingLeft);
+    let right = Number.parseFloat(getComputedStyle(this.container.nativeElement).paddingRight);
+    return this.container.nativeElement.clientWidth - Math.ceil(left + right);
+  }
+
+  private positionInContainer() {
+    let width = this.getDisplayWidth();
+    this.exerciseCanvas.width = width;
+    this.cursorCanvas.width = width;
+    this.cursorCanvas.style.top =  getComputedStyle(
+      this.container.nativeElement).paddingTop;
+    this.cursorCanvas.style.left = getComputedStyle(
+      this.container.nativeElement).paddingLeft; 
   }
 
   drawCursor(position: number) {
-
+    let lineIndex = 0;
+    let noteIndex = 0;
+    let lastBreak = -1;
+    for (let endOfLine of this.endOfLineIndices) {
+      if (position <= endOfLine) {
+        noteIndex = position - (lastBreak + 1);
+        break;
+      }
+      lineIndex++;
+    }
+    this.clearCanvas(this.cursorCanvas);
+    let context = this.getCursorContext();
+    this.resetNoteX();
+    let x = noteIndex * this.noteWidth + this.noteX;
+    let y = lineIndex * this.bottomPaddingY;
+    console.log('drawing at x = ' + x + ' y = ' + y);
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(x, y);
+    y += this.bottomPaddingY;
+    context.lineTo(x, y);
+    context.stroke();
+    context.closePath();
   }
 
   private clearCanvas(canvas: HTMLCanvasElement) {
@@ -98,26 +126,17 @@ export class ExerciseDisplay {
   }
 
   draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, 
-    desiredFontSize: number, cursorPosition = -1): number {
-    this.cursorPosition = cursorPosition;
-    this.positionCount = 0;
+    desiredFontSize: number): number {
+    this.container = container;
     this.clearCanvas(this.exerciseCanvas);
     this.clearCanvas(this.cursorCanvas);
-    this.exerciseCanvas.width = ExerciseDisplay.getDisplayWidth(container);
+    this.positionInContainer();
     this.createLayout(exercise, maxHeight, desiredFontSize);
-    this.exerciseCanvas.height = this.endOfLineIndices.length * this.bottomPaddingY;
-    this.cursorCanvas.width = 0; //this.exerciseCanvas.width;
-    this.cursorCanvas.height = 0; //this.exerciseCanvas.height;
-    //let ctx = this.getCursorContext();
-    //ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-    //ctx.fillRect(0, 0, this.cursorCanvas.width , this.cursorCanvas.height);
+    this.exerciseCanvas.height = this.endOfLineIndices.length * this.bottomPaddingY; 
+    this.cursorCanvas.height = this.exerciseCanvas.height;
     let context = this.getExerciseContext();
     let elementIndex = 0;
     let display = exercise.display;
-    for (let i = 0; i < display.length; i++) {
-      
-    }
-    
     for (let lineIdx = 0; lineIdx < this.endOfLineIndices.length; lineIdx++) {
       this.resetNoteX();
       let lineStart = this.noteX;
@@ -176,16 +195,17 @@ export class ExerciseDisplay {
       // Breakable means that the elements immediately following it can be put on new line.
       let isBreakable = !(element instanceof ES.Stroke);
       if ((usedWidth + this.noteWidth) > this.exerciseCanvas.width) {
-        let charsAfterBreak = 1;
+        let charsAfterBreak;
         if (isBreakable) {
-          this.endOfLineIndices.push(elementIndex - 1);
+          charsAfterBreak= (element instanceof ES.GroupSeparator) ? 0 : 1;
+          this.endOfLineIndices.push(elementIndex - charsAfterBreak);
         }
         else {
           this.endOfLineIndices.push(breakCandidate);
           breakCandidate = elementIndex;
           charsAfterBreak = elementIndex - breakCandidate; 
         }
-        usedWidth = fontSize * charsAfterBreak;
+        usedWidth = calculatedFontSize * charsAfterBreak;
       }
       else if (isBreakable) {
         breakCandidate = elementIndex;

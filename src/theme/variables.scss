@@ -48,8 +48,12 @@ ion-title {
   font-weight: bold;
 }
 
-.editing {
-  border-color: rgba(184, 188, 224, .7);
+.editing-background {
+  background-color: rgb(220, 220, 239);
+}
+
+.editing-border {
+  border-color: rgb(184, 188, 224);
   border-style: ridge;
   border-width: 5px;
 }

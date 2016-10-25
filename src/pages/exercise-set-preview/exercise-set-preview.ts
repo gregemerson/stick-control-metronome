@@ -1,4 +1,4 @@
-import { SimpleChanges, Component, ViewChildren, ViewChild, ElementRef, QueryList } from '@angular/core';
+import { SimpleChanges, ChangeDetectorRef, Component, ViewChildren, ViewChild, ElementRef, QueryList } from '@angular/core';
 import { NavController, ModalController, NavParams, LoadingController, Loading, PopoverController} from 'ionic-angular';
 import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
@@ -9,6 +9,7 @@ import {NewExerciseForm} from './new-exercise';
 @Component({
   selector: 'exercise-set-preview',
   templateUrl: 'exercise-set-preview.html',
+  styles: ['.exercise-container {position: relative;}']
 })
 export class ExerciseSetPreviewPage {
   title = '';
@@ -18,16 +19,15 @@ export class ExerciseSetPreviewPage {
   editIndex: number = -1
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
-  private fontFactor = 1.5;
+  private fontFactor = 1.75;
 
   constructor(private navCtrl: NavController, 
     public exerciseSets: ES.ExerciseSets,
     private params: NavParams,
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
-    private modal: ModalController) {
-    //this.ES.ExerciseSets = <ES.ExerciseSets>params.get('ES.ExerciseSets');
-    // this.loadExercises();
+    private modal: ModalController,
+    private changeDetect: ChangeDetectorRef) {
   }
 
   newExerciseSet($event) {
@@ -141,7 +141,7 @@ export class ExerciseSetPreviewPage {
     display: ExerciseDisplay, container: ElementRef) {
       let fontSize = this.fontFactor * Number.parseInt(
         getComputedStyle(container.nativeElement).fontSize);
-      display.draw(exercise, container, 
+      let height = display.draw(exercise, container, 
         Number.MAX_SAFE_INTEGER, fontSize);
     }
 
@@ -159,7 +159,8 @@ export class ExerciseSetPreviewPage {
 
   editExercise(idx: number) {
     this.editIndex = idx;
-    let display = <ExerciseDisplay>this.displays[idx];
+    let display = <ExerciseDisplay>this.displays.toArray()[idx];
+    console.log('index is ' + idx);
     display.showCursor = true;
     let container = this.contents[idx];
     let exercise = this.exercises[idx];
@@ -199,6 +200,7 @@ export class ExerciseEditor {
     private drawCursor: (position: number) => void) {
     this.originalNotation = elements.encoded;
     elements.resetCursor();
+    this.drawCursor(this.elements.cursorPosition);
   }
 
   private drawAll() {
