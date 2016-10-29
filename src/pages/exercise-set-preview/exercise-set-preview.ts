@@ -5,18 +5,23 @@ import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
 import {NewExerciseSetForm} from './new-exercise-set';
 import {NewExerciseForm} from './new-exercise';
+import {RepeatForm} from './repeat'
 
 @Component({
   selector: 'exercise-set-preview',
   templateUrl: 'exercise-set-preview.html',
-  styles: ['.exercise-container {position: relative;}']
+  styles: [`.exercise-container {
+    position: relative;
+    padding: 10px;
+  }`]
 })
 export class ExerciseSetPreviewPage {
   title = '';
   exercises: Array<ES.IExercise> = [];
   selectedExerciseSetId: number = null;
-  exerciseEditor: ExerciseEditor;
-  editIndex: number = -1
+  editor: ExerciseEditor = null;
+  editing = false;
+  editIndex: number = null;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
   private fontFactor = 1.75;
@@ -82,6 +87,7 @@ export class ExerciseSetPreviewPage {
   }
 
   onChange($event) {
+    this.changeDetect.detectChanges();
     if (!$event) {
       this.selectedExerciseSetId = null;
       return;
@@ -158,18 +164,22 @@ export class ExerciseSetPreviewPage {
   }
 
   editExercise(idx: number) {
-    this.editIndex = idx;
+    this.setEditMode(true, idx);
     let display = <ExerciseDisplay>this.displays.toArray()[idx];
-    console.log('index is ' + idx);
     display.showCursor = true;
     let container = this.contents[idx];
     let exercise = this.exercises[idx];
-    this.exerciseEditor = new 
+    this.editor = new 
       ExerciseEditor(exercise.display, () => {
         this.drawExercise(exercise, display, container);
       }, (position: number) => {
         display.drawCursor(position);
-      });
+      }, () => {
+        // Save
+      }, () => {
+        display.hideCursor();
+        this.cancelExerciseEditing(idx);
+      }, this.modal);
   }
 
   deleteExercise(idx: number) {
@@ -181,26 +191,45 @@ export class ExerciseSetPreviewPage {
   }
 
   cancelExerciseEditing(index: number) {
-    this.editIndex = -1;
-    this.exerciseEditor = null;
+    this.editIndex = null;
+    this.editor = null;
   }
+
+  setEditMode(editing: boolean, editIndex?: number) {
+    this.editing = editing;
+    this.editIndex = editing ? editIndex : null;
+  } 
 }
 
 export class ExerciseEditor {
-  originalNotation: string;
   accent = 'accent';
   grace = 'grace';
   rightHand = ES.Encoding.right;
   leftHand = ES.Encoding.left;
   bothHands = ES.Encoding.both;
   noHands = ES.Encoding.rest;
+
+  enableStroke = false;
+  atStroke = false;
+  enableRepeat = false;
   
   constructor(private elements: ES.ExerciseElements,
     private drawExercise: () => void,
-    private drawCursor: (position: number) => void) {
-    this.originalNotation = elements.encoded;
+    private drawCursor: (position: number) => void,
+    private onSave: () => void,
+    private onCancel: () => void,
+    private modal: ModalController) {
+    elements.onCursorChanged = this.enforceRules;
+    elements.takeSnapShot();
     elements.resetCursor();
     this.drawCursor(this.elements.cursorPosition);
+  }
+
+  enforceRules() {
+    this.enableRepeat = (this.elements.elementAtCursorIs(ES.MeasureSeparator)) &&
+       (this.elements.measuresBeforeCursor() > 0);
+    this.atStroke = this.elements.elementAtCursorIs(ES.Stroke);
+    this.enableStroke = this.elements.elementAtCursorIs(ES.Repeat);
   }
 
   private drawAll() {
@@ -217,22 +246,44 @@ export class ExerciseEditor {
   }
 
   forward() {
+    if (this.elements.cursorPosition == this.elements.length) {
+      return;
+    }
     this.elements.cursorForward();
     this.drawCursor(this.elements.cursorPosition);
   }
 
   back() {
+    if (this.elements.cursorPosition == 0) {
+      return;
+    }
     this.elements.cursorBack();
     this.drawCursor(this.elements.cursorPosition);
   }
 
+  repeat() {
+    this.modal.create(RepeatForm, {
+      maxMeasures: this.elements.measuresBeforeCursor(),
+      create: (numMeasures: number, numRepeats: number) => {
+        let newRepeat = new ES.Repeat();
+        newRepeat.numMeasures = numMeasures;
+        newRepeat.numRepeats = numRepeats;
+        this.elements.insertAtCursor(newRepeat);
+        this.elements.insertAtCursor(new ES.MeasureSeparator());
+        this.drawAll();
+      }
+    }).present();
+  }
+
   measure() {
     this.elements.insertAtCursor(new ES.MeasureSeparator());
+    this.enforceRules();
     this.drawAll();
   }
 
   space() {
     this.elements.insertAtCursor(new ES.GroupSeparator());
+    this.enforceRules();
     this.drawAll();
   }
   
@@ -242,6 +293,7 @@ export class ExerciseEditor {
     stroke.grace = null;
     stroke.hand = hand;
     this.elements.insertAtCursor(stroke);
+    this.enforceRules();
     this.drawAll();
   }
 
@@ -258,6 +310,18 @@ export class ExerciseEditor {
     else if (modification == this.accent) {
       stroke.accented = !stroke.accented;
     }
+    this.enforceRules();
+    this.drawAll();
+  }
+
+  saveExerciseEditing() {
+    this.elements.deleteSnapShot();
+    this.onSave();
+  }
+
+  cancelExerciseEditing() {
+    this.elements.revertToSnapShot();
+    this.onCancel();
     this.drawAll();
   }
 }

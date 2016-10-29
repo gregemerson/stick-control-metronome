@@ -49,13 +49,12 @@ ion-title {
 }
 
 .editing-background {
-  background-color: rgb(220, 220, 239);
+  background-color: rgba(184, 188, 224, 0.5);
 }
 
 .editing-border {
-  border-color: rgb(184, 188, 224);
+  border-color: rgba(184, 188, 224, .7);
   border-style: ridge;
-  border-width: 5px;
 }
 
 // App Theme

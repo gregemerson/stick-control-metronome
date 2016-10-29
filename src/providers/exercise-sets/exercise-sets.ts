@@ -217,7 +217,7 @@ class Exercise implements IExercise {
   public comments: string;
 
   constructor(rawExercise: Object, isOwner: boolean) {
-    this._display = Encoding.decode(rawExercise['notation']);
+    this._display = <ExerciseElements>Encoding.decode(rawExercise['notation']);
     this._id = rawExercise['id'];
     this._isOwner = isOwner;
     this.name = rawExercise['name'];
@@ -271,8 +271,27 @@ class Exercise implements IExercise {
 
 export class ExerciseElements {
   private _cursorPosition;
+  private _onCursorChange: () => void = null;
+  private snapShot: string;
   constructor(private elements: ExerciseElement[]) {
     this.resetCursor();
+  }
+
+  set onCursorChanged(onChanged: () => void) {
+    this._onCursorChange = onChanged;
+  }
+
+  takeSnapShot() {
+    this.snapShot = Encoding.encode(this.elements);
+  }
+
+  revertToSnapShot() {
+    this.elements = <ExerciseElement[]>Encoding.
+      decode(this.snapShot, true);
+  }
+
+  deleteSnapShot() {
+    this.snapShot = null;
   }
 
   get encoded(): string {
@@ -287,48 +306,64 @@ export class ExerciseElements {
     return this.elements[index];
   }
 
-  // At the zero position, there is nothing at the cursor
-  elementAtCursorIs(type: any): boolean {
-    if (this._cursorPosition == 0) {
-      return false;
+  measuresBeforeCursor(): number {
+    let count = 0;
+    for (let i = this.cursorPosition - 1; i > 0; i--) {
+      if (this.elements[i] instanceof MeasureSeparator) {
+        count++;
+      }
     }
-    return this.elements[this._cursorPosition - 1] instanceof type;
+    return count;
   }
 
+
+  elementAtCursorIs(type: any): boolean {
+    return this.elementAtCursor() instanceof type;
+  }
+
+  // At the zero position, there is nothing at (before) the cursor
+  // otherwise test the character before the cursor.
   elementAtCursor(): ExerciseElement {
-    if (this._cursorPosition == 0) {
+    if (this.cursorPosition == 0) {
       return null;
     }
-    return this.elements[this._cursorPosition - 1];
+    return this.elements[this.cursorPosition - 1];
   }
 
   resetCursor() {
-    this._cursorPosition = 0;
+    this.cursorPosition = 0;
   }
 
   // Delete the element behind the cursor
   deleteAtCursor() {
-    if (this._cursorPosition == 0) {
+    if (this.cursorPosition == 0) {
       return;
     }
-    this.elements.splice(this._cursorPosition - 1, 1);
+    this.elements.splice(this.cursorPosition - 1, 1);
     this.cursorBack();
   }
 
   // Insert an element in front of the cursor past the new element.
   insertAtCursor(element: ExerciseElement) {
-    this.elements.splice(this._cursorPosition, 0, element);
+    this.elements.splice(this.cursorPosition, 0, element);
     this.cursorForward();
   }
 
   cursorForward() {
-    this._cursorPosition = Math.min(
-      this.elements.length, this._cursorPosition + 1);
+    this.cursorPosition = Math.min(
+      this.elements.length, this.cursorPosition + 1);
   }
 
   cursorBack() {
-    this._cursorPosition = Math.max(
+    this.cursorPosition = Math.max(
       0, this._cursorPosition - 1);
+  }
+
+  set cursorPosition(position: number) {
+    this._cursorPosition = position;
+    if (this._onCursorChange != null) {
+      this._onCursorChange();
+    }
   }
 
   get cursorPosition(): number {
@@ -385,7 +420,7 @@ export class Encoding {
     return encoding;
   }
 
-  static decode(encoded: string): ExerciseElements {
+  static decode(encoded: string, asArray = false): ExerciseElements | ExerciseElement[] {
     let elements: Array<ExerciseElement> = [];
     let beginExercise = false;
     let encodedIndex = 0;
@@ -420,6 +455,9 @@ export class Encoding {
           ` isn't the start of an exercise element`;
       }
       encodedIndex += element.length;
+    }
+    if (asArray) {
+      return elements;
     }
     return new ExerciseElements(elements);
   }
