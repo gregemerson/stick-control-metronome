@@ -103,6 +103,7 @@ export class StickControlMetronome {
         loading.dismiss();
       },
       error: (err: any) => {
+        loading.dismiss();
         this.popoverController.create(MessagesPage, {
           messages: [MessagesPage.createMessage(
             'Error', err, MessageType.Error)]

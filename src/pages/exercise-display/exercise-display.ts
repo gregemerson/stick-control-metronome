@@ -49,7 +49,6 @@ export class ExerciseDisplay {
   private container: ElementRef;
   private noteWidths: number[];
   private genericNote = 'X';
-  showCursor = false;
   
   constructor(private navCtrl: NavController) {
   }
@@ -313,7 +312,7 @@ export class ExerciseDisplay {
       context.lineWidth = originalLineWidth;
       context.strokeText(stroke.hand, x, this.letterY);
       let noteWidth = this.setNoteEndPosition(stroke.hand);
-      if (stroke.grace != null) {
+      if (stroke.grace != 0) {
         if (stroke.grace == ES.Encoding.buzz) {
           context.lineWidth = 0.1 * regionHeight;
           context.beginPath();
@@ -323,7 +322,7 @@ export class ExerciseDisplay {
           context.closePath();          
         }
         else {
-          let count = parseInt(stroke.grace);
+          let count = stroke.grace;
           let circleDistance = noteWidth/(count + 1);
           let circleCenter = x + circleDistance;
           let radius = Math.min(.33 * circleDistance, .33 * regionHeight);

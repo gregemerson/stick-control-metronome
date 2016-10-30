@@ -86,6 +86,7 @@ export interface IExerciseSet {
   next(): IExercise;
   initIterator(): void;
   newExercise(exerciseInitializer: Object): Observable<number>;
+  saveNotation(exercise: IExercise): Observable<Object>;
 }
 
 class ExerciseSet implements IExerciseSet{
@@ -124,6 +125,15 @@ class ExerciseSet implements IExerciseSet{
         this.exerciseOrdering.splice(0, 0, exercise['id']);
         return exercise['id'];
       });
+  }
+
+  saveNotation(exercise: IExercise): Observable<Object> {
+    let notation = {
+      id: exercise.id,
+      notation: exercise.display.encode()
+    }
+    return this.httpService.putPersistedObject(
+      HttpService.exerciseSetExercises(this.id), notation);   
   }
 
   disableExercise(exerciseId: number) {
@@ -277,6 +287,10 @@ export class ExerciseElements {
     this.resetCursor();
   }
 
+  encode() {
+    return Encoding.encode(this.elements);
+  }
+
   set onCursorChanged(onChanged: () => void) {
     this._onCursorChange = onChanged;
   }
@@ -400,10 +414,13 @@ export class Encoding {
   static exerciseStart = '#';
   static graceStart = '[';
   static graceEnd = ']';
-  static flam = '1';
-  static drag = '2';
-  static ruff = '3';
-  static buzz = 'z';
+  static noGrace = 0;
+  static flam = 1;
+  static drag = 2;
+  static ruff = 3;
+  static buzz = 4;
+  // Keep this up-to-date!!!
+  static graceCount = 5;
   static repeatStart = '<';
   static repeatEnd = '>';
   static repeatDivider = ':';
@@ -555,7 +572,7 @@ export class Repeat extends ExerciseElement {
 export class Stroke extends ExerciseElement {
     hand: string;
     accented: boolean;
-    grace: string;
+    grace: number;
 
     tryParse(encoding: string, index: number): Stroke {
       let char = encoding[index];
@@ -563,9 +580,9 @@ export class Stroke extends ExerciseElement {
         return null;
       }
       let strokeIndex = index;
-      let grace = null;
+      let grace = 0;
       if (char == Encoding.graceStart) {
-        grace = encoding[strokeIndex + 1];
+        grace = parseInt(encoding[strokeIndex + 1]);
         strokeIndex += 3;
       }
       let encodedStroke = encoding[strokeIndex]; 
@@ -578,10 +595,14 @@ export class Stroke extends ExerciseElement {
       stroke.setLength(strokeIndex - index);
       return stroke;
     }
+
+    cycleGrace() {
+      this.grace = (this.grace + 1)%Encoding.graceCount;
+    }
  
     get encoding(): string {
       let encoded = '';
-      if (this.grace != null) {
+      if (this.grace != 0) {
         encoded = Encoding.graceStart + this.grace + Encoding.graceEnd;
       }
       encoded += this.accented ? this.hand : this.hand.toLowerCase();

@@ -166,7 +166,6 @@ export class ExerciseSetPreviewPage {
   editExercise(idx: number) {
     this.setEditMode(true, idx);
     let display = <ExerciseDisplay>this.displays.toArray()[idx];
-    display.showCursor = true;
     let container = this.contents[idx];
     let exercise = this.exercises[idx];
     this.editor = new 
@@ -175,10 +174,24 @@ export class ExerciseSetPreviewPage {
       }, (position: number) => {
         display.drawCursor(position);
       }, () => {
-        // Save
+        let loading = this.showLoading();
+        this.setEditMode(false);
+        this.exerciseSets.currentExerciseSet.
+          saveNotation(exercise).subscribe({
+            next: () => {
+              loading.dismiss();
+            },
+            error: (err: any) => {
+              loading.dismiss();
+              let message = MessagesPage.createMessage(
+                  'Error', err, MessageType.Error);
+              this.showMessages([message]);
+            }
+          });
       }, () => {
+        // Cancel
         display.hideCursor();
-        this.cancelExerciseEditing(idx);
+        this.setEditMode(false);
       }, this.modal);
   }
 
@@ -190,20 +203,14 @@ export class ExerciseSetPreviewPage {
 
   }
 
-  cancelExerciseEditing(index: number) {
-    this.editIndex = null;
-    this.editor = null;
-  }
-
   setEditMode(editing: boolean, editIndex?: number) {
     this.editing = editing;
     this.editIndex = editing ? editIndex : null;
+    this.editor = !editing ? null : this.editor;
   } 
 }
 
 export class ExerciseEditor {
-  accent = 'accent';
-  grace = 'grace';
   rightHand = ES.Encoding.right;
   leftHand = ES.Encoding.left;
   bothHands = ES.Encoding.both;
@@ -212,6 +219,8 @@ export class ExerciseEditor {
   enableStroke = false;
   atStroke = false;
   enableRepeat = false;
+  enableAccent = false;
+  enableGrace = false;
   
   constructor(private elements: ES.ExerciseElements,
     private drawExercise: () => void,
@@ -229,7 +238,13 @@ export class ExerciseEditor {
     this.enableRepeat = (this.elements.elementAtCursorIs(ES.MeasureSeparator)) &&
        (this.elements.measuresBeforeCursor() > 0);
     this.atStroke = this.elements.elementAtCursorIs(ES.Stroke);
-    this.enableStroke = this.elements.elementAtCursorIs(ES.Repeat);
+    this.enableStroke = !this.elements.elementAtCursorIs(ES.Repeat);
+    this.enableAccent = false;
+    let element = this.elements.elementAtCursor();
+    if (element instanceof ES.Stroke) {
+      this.enableAccent = (<ES.Stroke>element).hand != ES.Encoding.rest;
+    }
+    this.enableGrace = this.enableAccent;
   }
 
   private drawAll() {
@@ -275,15 +290,23 @@ export class ExerciseEditor {
     }).present();
   }
 
+  accent() {
+    let stroke = <ES.Stroke>this.elements.elementAtCursor(); 
+    stroke.accented = !stroke.accented;
+    this.drawAll();
+  }
+
+  grace() {
+    (<ES.Stroke>this.elements.elementAtCursor()).cycleGrace();
+  }
+
   measure() {
     this.elements.insertAtCursor(new ES.MeasureSeparator());
-    this.enforceRules();
     this.drawAll();
   }
 
   space() {
     this.elements.insertAtCursor(new ES.GroupSeparator());
-    this.enforceRules();
     this.drawAll();
   }
   
@@ -293,24 +316,6 @@ export class ExerciseEditor {
     stroke.grace = null;
     stroke.hand = hand;
     this.elements.insertAtCursor(stroke);
-    this.enforceRules();
-    this.drawAll();
-  }
-
-  modifyStroke(modification: any) {
-    if (!this.elements.elementAtCursorIs(ES.Stroke)) {
-      return;
-    }
-    let stroke = <ES.Stroke>this.elements.elementAtCursor();
-    if (modification == this.grace) {
-      let grace = stroke.grace == null ? 0 : parseInt(stroke.grace);
-      let newGrace = (grace + 1) % 4;
-      stroke.grace = newGrace == 0 ? null : newGrace.toString();
-    }
-    else if (modification == this.accent) {
-      stroke.accented = !stroke.accented;
-    }
-    this.enforceRules();
     this.drawAll();
   }
 

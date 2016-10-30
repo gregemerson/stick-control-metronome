@@ -7,14 +7,14 @@
 <ion-content padding>
   <ion-item>
     <ion-select [(ngModel)]="selectedExerciseSetId"
-      (ionChange)="onChange($event)" placeholder="Not Selected" [disabled]="editIndex != null">
+      (ionChange)="onChange($event)" placeholder="Not Selected" [disabled]="editing">
       <ion-option *ngFor="let set of exerciseSets.items" [value]="set.id">{{ set.name }}</ion-option>
     </ion-select>
   </ion-item>
   <ion-item>
     <ion-buttons>
-      <button ion-button (click)="newExerciseSet($event)" [disabled]="editIndex != null">New Exercise Set</button>
-      <button ion-button (click)="newExercise($event)" [disabled]="selectedExerciseSetId == null || editIndex != null">New Exercise</button>    
+      <button ion-button (click)="newExerciseSet($event)" [disabled]="editing">New Exercise Set</button>
+      <button ion-button (click)="newExercise($event)" [disabled]="selectedExerciseSetId == null || editing">New Exercise</button>    
     </ion-buttons>
   </ion-item>
   <ion-list>
@@ -24,10 +24,10 @@
         <exercise-display #exerciseDisplay></exercise-display>
       </div>
       <ion-buttons [hidden]="editIndex == idx">
-        <button ion-button (click)="editExercise(idx)" [disabled]="editIndex != null" color="primary" small>
+        <button ion-button (click)="editExercise(idx)" [disabled]="editing" color="primary" small>
           <ion-icon name="open"></ion-icon>
         </button>
-        <button ion-button (click)="deleteExercise(idx)" [disabled]="editIndex != null" color="danger" small>
+        <button ion-button (click)="deleteExercise(idx)" [disabled]="editing" color="danger" small>
           <ion-icon name="trash"></ion-icon>
         </button>
       </ion-buttons>
@@ -43,18 +43,18 @@
   </ion-list>
 </ion-content>
 
-<ion-footer [hidden]="editor == null">
+<ion-footer [hidden]="!editing">
   <ion-toolbar>
     <ion-buttons left class="editor-buttons">
-      <button ion-button outline [disabled]="editor.enableStroke" (click)="editor.stroke(editor.rightHand)">R</button>
-      <button ion-button outline [disabled]="editor.enableStroke" (click)="editor.stroke(editor.leftHand)">L</button>
-      <button ion-button outline [disabled]="editor.enableStroke" (click)="editor.stroke(editor.bothHands)">B</button>
-      <button ion-button outline [disabled]="editor.enableStroke" (click)="editor.stroke(editor.noHands)">-</button>
-      <button ion-button outline [disabled]="editor.atStroke" (click)="editor.measure()">|</button>
-      <button ion-button outline [disabled]="editor.enableRepeat" >/</button>
-      <button ion-button outline></button>
-      <button ion-button outline>G</button>
-      <button ion-button outline (click)="editor.space()"><ion-icon name="square-outline"></ion-icon></button>
+      <button ion-button outline [disabled]="!(editing && editor.enableStroke)" (click)="editor.stroke(editor.rightHand)">R</button>
+      <button ion-button outline [disabled]="!(editing && editor.enableStroke)" (click)="editor.stroke(editor.leftHand)">L</button>
+      <button ion-button outline [disabled]="!(editing && editor.enableStroke)" (click)="editor.stroke(editor.bothHands)">B</button>
+      <button ion-button outline [disabled]="!(editing && editor.enableStroke)" (click)="editor.stroke(editor.noHands)">-</button>
+      <button ion-button outline [disabled]="!(editing && editor.atStroke)" (click)="editor.measure()">|</button>
+      <button ion-button outline [disabled]="!(editing && editor.enableRepeat)" (click)="editor.repeat()">/</button>
+      <button ion-button outline [disabled]="!(editing && editor.enableGrace)" (click)="editor.grace()">G</button>
+      <button ion-button outline [disabled]="!(editing && editor.enableAccent)" (click)="editor.accent()">></button>
+      <button ion-button outline [disabled]="!(editing && editor.atStroke)" (click)="editor.space()"><ion-icon name="square-outline"></ion-icon></button>
       <button ion-button outline (click)="editor.back()"><ion-icon name="arrow-back"></ion-icon></button>
       <button ion-button outline (click)="editor.forward()"><ion-icon name="arrow-forward"></ion-icon></button>
       <button ion-button outline><ion-icon name="backspace"></ion-icon></button>
