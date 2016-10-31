@@ -38,6 +38,7 @@ export class ExerciseDisplay {
   // Define the horzontal placements of note
   private noteX: number;
   private cursorWidth = 2;
+  private defaultLineWidth = -1;
 
   private _exerciseContext: CanvasRenderingContext2D = null;
   private _cursorContext: CanvasRenderingContext2D = null;
@@ -49,6 +50,7 @@ export class ExerciseDisplay {
   private container: ElementRef;
   private noteWidths: number[];
   private genericNote = 'X';
+  private graceColor = '#FF0000';
   
   constructor(private navCtrl: NavController) {
   }
@@ -85,6 +87,7 @@ export class ExerciseDisplay {
     if (this._exerciseContext == null) {
       this._exerciseContext = this.exerciseCanvas.getContext('2d');
       this._exerciseContext.textAlign = 'left';
+      this.defaultLineWidth = this._exerciseContext.lineWidth;
     }
     return this._exerciseContext;
   }
@@ -139,7 +142,7 @@ export class ExerciseDisplay {
     context.lineWidth = this.cursorWidth;
     context.beginPath();
     context.moveTo(x, y);
-    y += this.groupingY;
+    y += this.graceNoteY;
     context.lineTo(x, y);
     context.stroke();
     context.closePath();
@@ -164,6 +167,8 @@ export class ExerciseDisplay {
     let context = this.getExerciseContext();
     context.font = this.selectedFontSize.toString() + this.exerciseFont;
     context.strokeStyle = 'black';
+    context.fillStyle = 'black';
+    context.lineWidth = this.defaultLineWidth;
   }
 
   draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, 
@@ -319,6 +324,7 @@ export class ExerciseDisplay {
       let noteWidth = this.setNoteEndPosition(stroke.hand);
       if (stroke.grace != 0) {
         if (stroke.grace == ES.Encoding.buzz) {
+          context.strokeStyle = this.graceColor;
           context.lineWidth = 0.1 * regionHeight;
           context.beginPath();
           context.moveTo(x, verticalCenter);
@@ -328,17 +334,19 @@ export class ExerciseDisplay {
         }
         else {
           let count = stroke.grace;
-          let circleDistance = noteWidth/(count + 1);
+          let circleDistance = this.getNoteWidth()/(count + 1);
           let circleCenter = x + circleDistance;
-          let radius = Math.min(.33 * circleDistance, .33 * regionHeight);
+          let radius = Math.min(.33 * circleDistance, .55 * regionHeight);
+          context.fillStyle = this.graceColor;
           context.beginPath();
           for (let i = 1; i <= count; i++) {
             context.arc(x + (i * circleDistance), verticalCenter,
-               radius, 0, 2*Math.PI);
+               radius, 0, 2 * Math.PI);
             context.fill();
           }
           context.closePath();
         }
+        this.setNoteFont();
       }
       x += noteWidth;
     }
@@ -389,6 +397,7 @@ export class ExerciseDisplay {
     context.lineTo(middleX, this.letterY);
     context.stroke();
     context.closePath();
+    this.setNoteFont();
     return noteWidth;
   }
 
@@ -427,6 +436,7 @@ export class ExerciseDisplay {
     context.lineTo(x + margin, this.accentY);
     context.stroke();
     context.closePath();
+    this.setNoteFont();
   }
 
   ngAfterViewInit() {
