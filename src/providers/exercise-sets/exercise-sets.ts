@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, Output, EventEmitter} from '@angular/core';
 import {Http} from '@angular/http';
 import {Authenticator, IAuthUser} from '../../providers/authenticator/authenticator';
 import {HttpService} from '../../providers/http-service/http-service';
@@ -283,16 +283,14 @@ export class ExerciseElements {
   private _cursorPosition;
   private _onCursorChange: () => void = null;
   private snapShot: string;
+  @Output() cursorChanged = new EventEmitter<void>();
+
   constructor(private elements: ExerciseElement[]) {
     this.resetCursor();
   }
 
   encode() {
     return Encoding.encode(this.elements);
-  }
-
-  set onCursorChanged(onChanged: () => void) {
-    this._onCursorChange = onChanged;
   }
 
   takeSnapShot() {
@@ -330,8 +328,10 @@ export class ExerciseElements {
     return count;
   }
 
-
   elementAtCursorIs(type: any): boolean {
+    if (this.cursorPosition == 0) {
+      return false;
+    }
     return this.elementAtCursor() instanceof type;
   }
 
@@ -375,9 +375,7 @@ export class ExerciseElements {
 
   set cursorPosition(position: number) {
     this._cursorPosition = position;
-    if (this._onCursorChange != null) {
-      this._onCursorChange();
-    }
+    this.cursorChanged.emit();
   }
 
   get cursorPosition(): number {

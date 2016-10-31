@@ -23,11 +23,11 @@ $background-color:  #fff;
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #387ef5,
-  secondary:  #32db64,
-  danger:     #f53d3d,
-  light:      #f4f4f4,
-  dark:       #222,
+  primary:    #3F9FBF,
+  secondary:  #F5C54B,
+  danger:     #F54B4B,
+  light:      #B8DDE9,
+  dark:       #246074,
   favorite:   #69BB7B,
 );
 
@@ -48,13 +48,16 @@ ion-title {
   font-weight: bold;
 }
 
-.editing-background {
-  background-color: rgba(184, 188, 224, 0.5);
+.exercise-container {
+    position: relative;
 }
 
-.editing-border {
-  border-color: rgba(184, 188, 224, .7);
-  border-style: ridge;
+.exercise-editing {
+  background-color: #faa8a8;
+}
+
+.exercise-static {
+  background-color: #f8d682;
 }
 
 // App Theme

@@ -14,10 +14,6 @@ import {UserSettings} from '../../providers/user-settings/user-settings';
 @Component({
   selector: 'home',
   styles: [
-    `.exercise-set-info {
-      color: #a6a6a6;
-      font-size: .9em
-    }`,
     `.info-label {
       color: #a6a6a6;
       font-size: .9em
@@ -25,9 +21,6 @@ import {UserSettings} from '../../providers/user-settings/user-settings';
     `.info-value {
       padding-left: .5em;
       font-size: 1em;
-    }`,
-    `.exercise-card {
-      overflow: visible;
     }`
   ],
   templateUrl: 'home.html',

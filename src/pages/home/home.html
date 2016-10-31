@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>Stick Control Metronome{{ exerciseSets.currentExerciseSet != null ? ':' : ''}}
-      <span color="primary">{{ exerciseSets.currentExerciseSet != null ? exerciseSets.currentExerciseSet.name : '' }}</span>
+      <span color="primary">{{ exerciseSets.currentExerciseSet?.name }}</span>
     </ion-title>
     <ion-buttons end>
     <button ion-button (click)="loginClicked($event)">
@@ -16,26 +16,27 @@
   <ion-badge>
       <span class="info-value" color="primary">{{ bpm }}</span>
   </ion-badge>
-  <span class="info-label">Count</span>
+    <span class="info-label">Count</span>
   <ion-badge>
     <span class="info-value" color="primary">{{ count }}</span>
   </ion-badge>
-  <span class="info-label">Repetition</span>
+    <span class="info-label">Repetition</span>
   <ion-badge>
     <span class="info-value" color="primary">{{ repetition }}</span>
   </ion-badge>
 
-  <ion-card  [@activation]="topDisplayState.activationStyle" class="exercise-card">
-    <ion-card-content #topContainer class="exercise-container">
-      <exercise-display #topDisplay></exercise-display>
-    </ion-card-content>
-  </ion-card>
-  <ion-card  [@activation]="bottomDisplayState.activationStyle" class="exercise-card">
-    <ion-card-content  #bottomContainer class="exercise-container">
-      <exercise-display #bottomDisplay></exercise-display>
-    </ion-card-content>
-  </ion-card>
-
+  <ion-list>
+    <ion-item  [@activation]="topDisplayState.activationStyle">
+      <div #topContainer class="exercise-container">
+        <exercise-display #topDisplay></exercise-display>
+      </div>
+    </ion-item>
+    <ion-item  [@activation]="bottomDisplayState.activationStyle">
+      <div #bottomContainer class="exercise-container">
+        <exercise-display #bottomDisplay></exercise-display>
+      </div>
+    </ion-item>
+  </ion-list>
   <button ion-button (click)="startClicked($event)">{{ startButtonText }}</button>
   <button ion-button (click)="pauseClicked($event)" [hidden]="!isStarted">{{ pauseButtonText }}</button>
 </ion-content>

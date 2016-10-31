@@ -60,14 +60,18 @@ export class ExerciseDisplay {
   private setNoteEndPosition(note = this.genericNote): number {
     let widths = this.noteWidths;
     let lastWidth = (widths.length == 0) ? 0 : widths[widths.length - 1];
-    let width = this.getNoteWidth(note);
+    let width = this.getTotalNoteWidth(note);
     this.noteWidths.push(lastWidth + width);
     return width;
   }
 
+  private getTotalNoteWidth(note = this.genericNote): number {
+    return this.getNoteWidth(note) + this.noteSpacing;
+  }
+
   private getNoteWidth(note = this.genericNote): number {
     return Math.ceil(this.getExerciseContext().
-      measureText(note).width) + this.noteSpacing;
+      measureText(note).width);
   }
 
   public hide(): void {
@@ -157,8 +161,9 @@ export class ExerciseDisplay {
   }
 
   private setNoteFont() {
-    this.getExerciseContext().font = 
-      this.selectedFontSize.toString() + this.exerciseFont;
+    let context = this.getExerciseContext();
+    context.font = this.selectedFontSize.toString() + this.exerciseFont;
+    context.strokeStyle = 'black';
   }
 
   draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, 
@@ -174,6 +179,7 @@ export class ExerciseDisplay {
     let elementIndex = 0;
     let display = exercise.display;
     this.noteWidths = [];
+    this.setNoteFont();
     for (let lineIdx = 0; lineIdx < this.endOfLineIndices.length; lineIdx++) {
       this.setNewLinePosition();
       this.resetNoteX();
@@ -218,7 +224,7 @@ export class ExerciseDisplay {
     // Guarantee that the longest stroke group will fit within a line
     while (this.selectedFontSize > 0) {
       this.setNoteFont();
-      noteWidth = this.getNoteWidth();
+      noteWidth = this.getTotalNoteWidth();
       let currentWidthNeeded = longestGroupLength * noteWidth;
       if (currentWidthNeeded <= this.exerciseCanvas.width) {
         break;
@@ -265,8 +271,8 @@ export class ExerciseDisplay {
     this.accentY = this.topPaddingY + (0.2 * fontSize);
     this.accentPaddingY = this.accentY + (0.05 * fontSize);
     this.letterY = this.accentPaddingY + fontSize;
-    this.graceNoteY = this.letterY + (0.2 * fontSize);
-    this.groupingY = this.graceNoteY + (0.65 * fontSize);
+    this.graceNoteY = this.letterY + (0.1 * fontSize);
+    this.groupingY = this.graceNoteY + (0.5 * fontSize);
     this.bottomPaddingY = this.groupingY + (0.1 * fontSize);
     this.resetNoteX();
   }
@@ -293,7 +299,6 @@ export class ExerciseDisplay {
     let context = this.getExerciseContext();
     let originalLineWidth = context.lineWidth;
     context.textBaseline = 'bottom';
-    context.strokeStyle = 'black';
     let regionHeight = this.graceNoteY - this.letterY;
     let verticalCenter = this.letterY + (regionHeight/2);
     let end = startIndex;

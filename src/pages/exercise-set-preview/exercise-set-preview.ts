@@ -1,5 +1,5 @@
-import { SimpleChanges, ChangeDetectorRef, Component, ViewChildren, ViewChild, ElementRef, QueryList } from '@angular/core';
-import { NavController, ModalController, NavParams, LoadingController, Loading, PopoverController} from 'ionic-angular';
+import {SimpleChanges, ChangeDetectorRef, Component, ViewChildren, ViewChild, ElementRef, QueryList, EventEmitter} from '@angular/core';
+import {NavController, ModalController, NavParams, LoadingController, Loading, PopoverController} from 'ionic-angular';
 import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
@@ -166,7 +166,7 @@ export class ExerciseSetPreviewPage {
   editExercise(idx: number) {
     this.setEditMode(true, idx);
     let display = <ExerciseDisplay>this.displays.toArray()[idx];
-    let container = this.contents[idx];
+    let container = this.contents.toArray()[idx];
     let exercise = this.exercises[idx];
     this.editor = new 
       ExerciseEditor(exercise.display, () => {
@@ -228,7 +228,7 @@ export class ExerciseEditor {
     private onSave: () => void,
     private onCancel: () => void,
     private modal: ModalController) {
-    elements.onCursorChanged = this.enforceRules;
+    elements.cursorChanged.subscribe(() => this.enforceRules());
     elements.takeSnapShot();
     elements.resetCursor();
     this.drawCursor(this.elements.cursorPosition);
@@ -298,6 +298,7 @@ export class ExerciseEditor {
 
   grace() {
     (<ES.Stroke>this.elements.elementAtCursor()).cycleGrace();
+    this.drawAll();
   }
 
   measure() {
