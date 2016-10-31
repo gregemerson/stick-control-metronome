@@ -174,6 +174,7 @@ export class ExerciseSetPreviewPage {
       }, (position: number) => {
         display.drawCursor(position);
       }, () => {
+        // Save
         let loading = this.showLoading();
         this.setEditMode(false);
         this.exerciseSets.currentExerciseSet.
@@ -199,10 +200,6 @@ export class ExerciseSetPreviewPage {
 
   }
 
-  saveExerciseEditing(index: number) {
-
-  }
-
   setEditMode(editing: boolean, editIndex?: number) {
     this.editing = editing;
     this.editIndex = editing ? editIndex : null;
@@ -211,9 +208,10 @@ export class ExerciseSetPreviewPage {
 }
 
 export class ExerciseEditor {
-  rightHand = ES.Encoding.right;
-  leftHand = ES.Encoding.left;
-  bothHands = ES.Encoding.both;
+  // Need caps versions of these strokes
+  rightHand = ES.Encoding.accectedRight;
+  leftHand = ES.Encoding.accentedLeft;
+  bothHands = ES.Encoding.accentedBoth;
   noHands = ES.Encoding.rest;
 
   enableStroke = false;
@@ -254,9 +252,6 @@ export class ExerciseEditor {
 
   backspace() {
     this.elements.deleteAtCursor();
-    if (this.elements.elementAtCursorIs(ES.Repeat)) {
-      this.elements.deleteAtCursor();
-    }
     this.drawAll();
   }
 
@@ -284,7 +279,6 @@ export class ExerciseEditor {
         newRepeat.numMeasures = numMeasures;
         newRepeat.numRepeats = numRepeats;
         this.elements.insertAtCursor(newRepeat);
-        this.elements.insertAtCursor(new ES.MeasureSeparator());
         this.drawAll();
       }
     }).present();
@@ -310,6 +304,10 @@ export class ExerciseEditor {
     this.elements.insertAtCursor(new ES.GroupSeparator());
     this.drawAll();
   }
+
+  key() {
+
+  }
   
   stroke(hand: string) {
     let stroke = new ES.Stroke();
@@ -322,12 +320,13 @@ export class ExerciseEditor {
 
   saveExerciseEditing() {
     this.elements.deleteSnapShot();
+    this.elements.cursorChanged.unsubscribe();
     this.onSave();
   }
 
   cancelExerciseEditing() {
     this.elements.revertToSnapShot();
+    this.elements.cursorChanged.unsubscribe();
     this.onCancel();
-    this.drawAll();
   }
 }

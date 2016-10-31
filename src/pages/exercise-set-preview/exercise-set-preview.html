@@ -57,10 +57,10 @@
       <button ion-button outline [disabled]="!(editing && editor?.atStroke)" (click)="editor.space()"><ion-icon name="square-outline"></ion-icon></button>
       <button ion-button outline (click)="editor.back()"><ion-icon name="arrow-back"></ion-icon></button>
       <button ion-button outline (click)="editor.forward()"><ion-icon name="arrow-forward"></ion-icon></button>
-      <button ion-button outline><ion-icon name="backspace"></ion-icon></button>
-      <button ion-button outline><ion-icon name="key"></ion-icon></button>
-      <button ion-button><ion-icon name="checkmark" color="primary"></ion-icon></button>
-      <button ion-button><ion-icon name="trash" color="primary"></ion-icon></button>
+      <button ion-button outline (click)="editor.backspace()"><ion-icon name="backspace"></ion-icon></button>
+      <button ion-button outline (click)="editor.key()"><ion-icon name="key"></ion-icon></button>
+      <button ion-button (click)="editor.saveExerciseEditing()"><ion-icon name="checkmark" color="primary"></ion-icon></button>
+      <button ion-button (click)="editor.cancelExerciseEditing()"><ion-icon name="trash" color="primary"></ion-icon></button>
     </ion-buttons>
   </ion-toolbar>
 </ion-footer>

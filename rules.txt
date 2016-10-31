@@ -1,0 +1,11 @@
+Objects: Strokes, MeasureSeparators, GroupSeparators, Repeats
+
+
+Measure Separator Constraints
+- Must be preceeded by Repeat or Stroke
+
+Repeat Constraints
+- Must be enclosed in measure separators
+- Repeats cannot follow one another
+- numMeasures must be less than or equal the number of measures 
+since the previous repeat or exercise beginning, which ever comes first.

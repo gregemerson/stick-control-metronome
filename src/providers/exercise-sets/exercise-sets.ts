@@ -321,6 +321,10 @@ export class ExerciseElements {
   measuresBeforeCursor(): number {
     let count = 0;
     for (let i = this.cursorPosition - 1; i > 0; i--) {
+      if (this.elements[i] instanceof Repeat) {
+        count--;
+        break;
+      }
       if (this.elements[i] instanceof MeasureSeparator) {
         count++;
       }
@@ -355,17 +359,35 @@ export class ExerciseElements {
     }
     this.elements.splice(this.cursorPosition - 1, 1);
     this.cursorBack();
+    if (this.elementAtCursorIs(Repeat)) {
+      this.deleteAtCursor();
+    }
   }
 
   // Insert an element in front of the cursor past the new element.
   insertAtCursor(element: ExerciseElement) {
+    let elementAfterCursor = this.cursorPosition < this.length ? 
+      this.getElement(this.cursorPosition) : '';
+    if (element instanceof GroupSeparator && elementAfterCursor instanceof GroupSeparator)  {
+      return;
+    }
     this.elements.splice(this.cursorPosition, 0, element);
     this.cursorForward();
+    if (element instanceof Repeat) {
+      this.insertAtCursor(new MeasureSeparator());     
+    }
+    // See if we are substituting measure for group separator
+    if (element instanceof MeasureSeparator && 
+      this.cursorPosition < this.length &&
+      this.getElement(this.cursorPosition) instanceof GroupSeparator) {
+        this.cursorForward();
+        this.deleteAtCursor();
+      }
   }
 
   cursorForward() {
     this.cursorPosition = Math.min(
-      this.elements.length, this.cursorPosition + 1);
+      this.length, this.cursorPosition + 1);
   }
 
   cursorBack() {

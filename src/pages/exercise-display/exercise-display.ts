@@ -164,11 +164,19 @@ export class ExerciseDisplay {
   }
 
   private setNoteFont() {
+    this.getExerciseContext().font = this.
+      selectedFontSize.toString() + this.exerciseFont;    
+  }
+
+  private drawNoteFont(note = '', x = -1, y =  -1) {
+    this.setNoteFont();
     let context = this.getExerciseContext();
-    context.font = this.selectedFontSize.toString() + this.exerciseFont;
     context.strokeStyle = 'black';
     context.fillStyle = 'black';
     context.lineWidth = this.defaultLineWidth;
+    if (note != '') {
+      context.strokeText(note, x, y);
+    }
   }
 
   draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, 
@@ -184,7 +192,6 @@ export class ExerciseDisplay {
     let elementIndex = 0;
     let display = exercise.display;
     this.noteWidths = [];
-    this.setNoteFont();
     for (let lineIdx = 0; lineIdx < this.endOfLineIndices.length; lineIdx++) {
       this.setNewLinePosition();
       this.resetNoteX();
@@ -302,7 +309,6 @@ export class ExerciseDisplay {
   private drawNotes(elements: ES.ExerciseElements, startIndex: number): NoteDrawInfo {
     let x = this.noteX;
     let context = this.getExerciseContext();
-    let originalLineWidth = context.lineWidth;
     context.textBaseline = 'bottom';
     let regionHeight = this.graceNoteY - this.letterY;
     let verticalCenter = this.letterY + (regionHeight/2);
@@ -319,12 +325,11 @@ export class ExerciseDisplay {
       if (stroke.accented) {
         this.drawAccent(x);
       }
-      context.lineWidth = originalLineWidth;
-      context.strokeText(stroke.hand, x, this.letterY);
+      this.drawNoteFont(stroke.hand, x, this.letterY);
       let noteWidth = this.setNoteEndPosition(stroke.hand);
       if (stroke.grace != 0) {
+        context.strokeStyle = this.graceColor;
         if (stroke.grace == ES.Encoding.buzz) {
-          context.strokeStyle = this.graceColor;
           context.lineWidth = 0.1 * regionHeight;
           context.beginPath();
           context.moveTo(x, verticalCenter);
@@ -346,7 +351,6 @@ export class ExerciseDisplay {
           }
           context.closePath();
         }
-        this.setNoteFont();
       }
       x += noteWidth;
     }
@@ -355,32 +359,27 @@ export class ExerciseDisplay {
   }
 
   private drawRepeat(repeat: ES.Repeat): number {
+    let repeatWidth = this.setNoteEndPosition();
     let startX = this.noteX;
-    let noteWidth = this.setNoteEndPosition();
-    let endX = this.noteX + noteWidth;
-    let regionHeight = (this.letterY - this.accentPaddingY);
-    let regionHeightDivision = regionHeight/5;
-    let verticalCenter = this.letterY - (regionHeight/2);
+    let endX = this.noteX + this.getNoteWidth();
+    let halfHeight = (this.letterY - this.accentPaddingY)/2;
+    let verticalCenter = this.letterY - halfHeight;
     let context = this.getExerciseContext();
     context.lineWidth = 0.06 * this.selectedFontSize;
     context.beginPath();
-    context.moveTo(startX, this.letterY - regionHeightDivision);
-    context.lineTo(endX, this.letterY - (3 * regionHeightDivision));
-    context.stroke();
-    context.moveTo(startX, this.letterY - (2 * regionHeightDivision));
-    context.lineTo(endX, this.letterY - (4 * regionHeightDivision));
-    context.stroke();    
+    context.moveTo(startX, verticalCenter);
+    context.lineTo(endX, verticalCenter);
+    context.stroke();   
     context.closePath();
 
-    let regionWidthDivision = noteWidth/4;
-    context.font = (2 * regionHeightDivision) + this.exerciseFont;
-    let numWidth = noteWidth;
-    context.textBaseline = 'bottom';
-    context.strokeText(repeat.numRepeats.toString(), endX - numWidth, this.letterY);
+    context.font = (0.8 * halfHeight) + this.exerciseFont;
+    let numWidth = context.measureText('2').width;
+    let offsetX = (repeatWidth - numWidth)/2; 
     context.textBaseline = 'top';
-    context.strokeText(repeat.numMeasures.toString(), startX, this.letterY);
-    this.setNoteFont();
-    return noteWidth;
+    context.strokeText(repeat.numMeasures.toString(), startX + offsetX, this.accentY);
+    context.textBaseline = 'bottom';
+    context.strokeText(repeat.numRepeats.toString(), startX + offsetX, this.letterY);
+    return repeatWidth;
   }
 
   private drawGroupSeparator(): number {
@@ -397,7 +396,6 @@ export class ExerciseDisplay {
     context.lineTo(middleX, this.letterY);
     context.stroke();
     context.closePath();
-    this.setNoteFont();
     return noteWidth;
   }
 
@@ -421,7 +419,6 @@ export class ExerciseDisplay {
     context.lineTo(this.noteX + regionWidth, lineY);
     context.stroke();
     context.closePath();
-    this.setNoteFont();
   }
 
   drawAccent(x: number) {
@@ -436,7 +433,6 @@ export class ExerciseDisplay {
     context.lineTo(x + margin, this.accentY);
     context.stroke();
     context.closePath();
-    this.setNoteFont();
   }
 
   ngAfterViewInit() {
