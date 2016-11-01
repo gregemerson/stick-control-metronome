@@ -86,7 +86,7 @@ export interface IExerciseSet {
   next(): IExercise;
   initIterator(): void;
   newExercise(exerciseInitializer: Object): Observable<number>;
-  saveNotation(exercise: IExercise): Observable<Object>;
+  save(exercise: IExercise, fieldsToSave: string []): Observable<Object>;
 }
 
 class ExerciseSet implements IExerciseSet{
@@ -127,13 +127,19 @@ class ExerciseSet implements IExerciseSet{
       });
   }
 
-  saveNotation(exercise: IExercise): Observable<Object> {
-    let notation = {
-      id: exercise.id,
-      notation: exercise.display.encode()
+  save(exercise: IExercise, fieldsToSave: string[]): Observable<Object> {
+    let newData = new Object();
+    newData['id'] = exercise.id;
+    for (let field of fieldsToSave) {
+      if (field == 'notation') {
+        newData[field] = Encoding.encode(exercise.display);
+      }
+      else {
+        newData[field] = exercise[field];
+      }
     }
     return this.httpService.putPersistedObject(
-      HttpService.exerciseSetExercises(this.id), notation);   
+      HttpService.exerciseSetExercises(this.id), newData);
   }
 
   disableExercise(exerciseId: number) {
@@ -282,7 +288,7 @@ class Exercise implements IExercise {
 export class ExerciseElements {
   private _cursorPosition;
   private _onCursorChange: () => void = null;
-  private snapShot: string;
+  private notationSnapshot: string;
   @Output() cursorChanged = new EventEmitter<void>();
 
   constructor(private elements: ExerciseElement[]) {
@@ -294,16 +300,25 @@ export class ExerciseElements {
   }
 
   takeSnapShot() {
-    this.snapShot = Encoding.encode(this.elements);
+    this.notationSnapshot = Encoding.encode(this.elements);
+  }
+
+  get isDirty() {
+    let newEncoding = Encoding.encode(this);
+    return this.notationSnapshot != newEncoding;
+  }
+
+  get snapShot(): string {
+    return this.snapShot;
   }
 
   revertToSnapShot() {
     this.elements = <ExerciseElement[]>Encoding.
-      decode(this.snapShot, true);
+      decode(this.notationSnapshot, true);
   }
 
   deleteSnapShot() {
-    this.snapShot = null;
+    this.notationSnapshot = null;
   }
 
   get encoded(): string {
@@ -449,10 +464,15 @@ export class Encoding {
 
   private static exerciseElements: ExerciseElement[];
 
-  static encode(elements: ExerciseElement[]): string {
+  static encode(elements: ExerciseElements | ExerciseElement[]): string {
     let encoding = '';
     for (let i = 0; i < elements.length; i++) {
-      encoding += elements[i].encoding;
+      if (elements instanceof ExerciseElements) {
+        encoding += elements.getElement(i).encoding;
+      }
+      else {
+        encoding += elements[i].encoding;
+      }
     }
     return encoding;
   }

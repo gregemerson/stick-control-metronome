@@ -25,6 +25,7 @@ export class ExerciseSetPreviewPage {
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
   private fontFactor = 1.75;
+  private saveFields = ['notation', 'name', 'category', 'comments'];
 
   constructor(private navCtrl: NavController, 
     public exerciseSets: ES.ExerciseSets,
@@ -168,6 +169,7 @@ export class ExerciseSetPreviewPage {
     let display = <ExerciseDisplay>this.displays.toArray()[idx];
     let container = this.contents.toArray()[idx];
     let exercise = this.exercises[idx];
+    exercise.display.takeSnapShot();
     this.editor = new 
       ExerciseEditor(exercise.display, () => {
         this.drawExercise(exercise, display, container);
@@ -177,10 +179,22 @@ export class ExerciseSetPreviewPage {
         // Save
         let loading = this.showLoading();
         this.setEditMode(false);
+        let fieldsToSave: string[] = [];
+        for (let field of this.saveFields) {
+          if (field == 'notation' && exercise.display.isDirty) {
+            fieldsToSave.push(field);
+          }
+          else {
+            if (exercise[field] != this.editor.snapShot[field]) {
+              fieldsToSave.push(field);
+            }
+          }
+        }
         this.exerciseSets.currentExerciseSet.
-          saveNotation(exercise).subscribe({
+          save(exercise, fieldsToSave).subscribe({
             next: () => {
               loading.dismiss();
+
             },
             error: (err: any) => {
               loading.dismiss();
@@ -191,9 +205,17 @@ export class ExerciseSetPreviewPage {
           });
       }, () => {
         // Cancel
+        let snapShot = this.editor.snapShot;
+        exercise.name = snapShot['name'];
+        exercise.comments = snapShot['comments'];
+        exercise.category = snapShot['category'];
         display.hideCursor();
         this.setEditMode(false);
-      }, this.modal);
+      }, this.modal, {
+        comments: exercise.comments,
+        category: exercise.category,
+        name: exercise.name
+      });
   }
 
   deleteExercise(idx: number) {
@@ -225,9 +247,9 @@ export class ExerciseEditor {
     private drawCursor: (position: number) => void,
     private onSave: () => void,
     private onCancel: () => void,
-    private modal: ModalController) {
+    private modal: ModalController,
+    public snapShot: Object) {
     elements.cursorChanged.subscribe(() => this.enforceRules());
-    elements.takeSnapShot();
     elements.resetCursor();
     this.drawCursor(this.elements.cursorPosition);
   }
@@ -319,13 +341,11 @@ export class ExerciseEditor {
   }
 
   saveExerciseEditing() {
-    this.elements.deleteSnapShot();
     this.elements.cursorChanged.unsubscribe();
     this.onSave();
   }
 
   cancelExerciseEditing() {
-    this.elements.revertToSnapShot();
     this.elements.cursorChanged.unsubscribe();
     this.onCancel();
   }

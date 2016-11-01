@@ -387,7 +387,7 @@ export class ExerciseDisplay {
   }
 
   private drawMeasureSeparator(): number {
-    let noteWidth = this.setNoteEndPosition();
+    let noteWidth = this.getNoteWidth();
     let context = this.getExerciseContext();
     let middleX = this.noteX + (noteWidth/2);
     context.lineWidth = noteWidth * 0.1;
@@ -396,7 +396,7 @@ export class ExerciseDisplay {
     context.lineTo(middleX, this.letterY);
     context.stroke();
     context.closePath();
-    return noteWidth;
+    return this.setNoteEndPosition();
   }
 
   private drawGroupLines(groupWidth: number, numNotes: number) {

@@ -19,8 +19,17 @@
   </ion-item>
   <ion-list>
     <ion-item *ngFor="let exercise of exercises; let idx = index">
-      <ion-item-divider>{{ exercise.name }}</ion-item-divider>
-      <div #displayContainer color="editIndex == idx ? 'exercise-editing' : 'exercise-static'" class="exercise-container">
+      <ion-item-divider  [style.background-color]="editIndex == idx ? 'exercise-editing' : 'exercise-static'">
+          <ion-item [hidden]="editIndex == idx">
+            {{ exercise.name + (exercise.comments ? ': ' : '') + exercise.comments? }}
+          </ion-item>
+          <ion-list [hidden]="editIndex != idx">
+            <ion-item><ion-input placeholder="Name" [(ngModel)]="exercise.name"></ion-input></ion-item>
+            <ion-item><ion-input placeholder="Category"  [(ngModel)]="exercise.category"></ion-input></ion-item>
+            <ion-item><ion-textarea placeholder="Comments" [(ngModel)]="exercise.category"></ion-textarea></ion-item>
+          </ion-list>
+      </ion-item-divider>
+      <div #displayContainer class="exercise-container">
         <exercise-display #exerciseDisplay></exercise-display>
       </div>
       <ion-buttons [hidden]="editIndex == idx">
