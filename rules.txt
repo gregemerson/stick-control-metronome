@@ -6,6 +6,12 @@ Measure Separator Constraints
 
 Repeat Constraints
 - Must be enclosed in measure separators
-- Repeats cannot follow one another
 - numMeasures must be less than or equal the number of measures 
 since the previous repeat or exercise beginning, which ever comes first.
+
+GroupSeparators
+- must be preceded by a Stroke
+- must be succeede by a Stroke (or end of exercise while editing)
+
+Strokes
+- no constraints

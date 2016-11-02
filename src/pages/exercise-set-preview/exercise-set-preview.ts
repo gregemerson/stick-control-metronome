@@ -209,6 +209,7 @@ export class ExerciseSetPreviewPage {
         exercise.name = snapShot['name'];
         exercise.comments = snapShot['comments'];
         exercise.category = snapShot['category'];
+        exercise.display.revertToSnapShot();
         display.hideCursor();
         this.setEditMode(false);
       }, this.modal, {

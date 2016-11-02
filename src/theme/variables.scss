@@ -33,6 +33,8 @@ $colors: (
 
 $fancy-font: 'Courgette', cursive;
 $fancy-color: black;
+$editing-color: #faa8a8;
+$static-color: #f8d682;
 
 ion-title {
   font-family: $fancy-font;
@@ -50,14 +52,6 @@ ion-title {
 
 .exercise-container {
     position: relative;
-}
-
-.exercise-editing {
-  background-color: #faa8a8;
-}
-
-.exercise-static {
-  background-color: #f8d682;
 }
 
 // App Theme

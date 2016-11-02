@@ -325,6 +325,10 @@ export class ExerciseElements {
     return Encoding.encode(this.elements);
   }
 
+  get cursorAtEnd(): boolean {
+    return this._cursorPosition == this.length;
+  }
+
   get length(): number {
     return this.elements.length;
   }
@@ -352,6 +356,13 @@ export class ExerciseElements {
       return false;
     }
     return this.elementAtCursor() instanceof type;
+  }
+
+  elementAfterCursorIs(type: any): boolean {
+    if (this.cursorPosition == this.length) {
+      return false;
+    }
+    return this.getElement(this.cursorPosition) instanceof type;
   }
 
   // At the zero position, there is nothing at (before) the cursor
@@ -383,8 +394,11 @@ export class ExerciseElements {
   insertAtCursor(element: ExerciseElement) {
     let elementAfterCursor = this.cursorPosition < this.length ? 
       this.getElement(this.cursorPosition) : '';
-    if (element instanceof GroupSeparator && elementAfterCursor instanceof GroupSeparator)  {
-      return;
+    if (element instanceof GroupSeparator)  {
+      if (!this.elementAtCursorIs(Stroke))  
+      if (!(this.cursorAtEnd || this.elementAfterCursorIs(Stroke))) {
+        return; 
+      }
     }
     this.elements.splice(this.cursorPosition, 0, element);
     this.cursorForward();
