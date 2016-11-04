@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-list [hidden]="editing">
+  <ion-list>
     <ion-item>
       <ion-select [(ngModel)]="selectedExerciseSetId"
         (ionChange)="onChange($event)" placeholder="Not Selected" [disabled]="editing">
@@ -19,27 +19,17 @@
       </ion-buttons>
     </ion-item>
   </ion-list>
+
   <ion-list>
     <ion-item *ngFor="let exercise of exercises; let idx = index">
-      <ion-item [hidden]="editIndex == idx">
+      <div [hidden]="editIndex == idx">
         {{ (exercise.name ? exercise.name : '') +
           (exercise.category ? (' (' + exercise.category + ')') : 'Unnamed')  +
-          (exercise.comments ? (': ' + exercise.comments) : '')}}
-      </ion-item>
-      <ion-item [hidden]="editIndex != idx">
-        <ion-item>
-          <ion-label>Name</ion-label>
-          <ion-input placeholder="Name" [(ngModel)]="exercise.name"></ion-input>
-          <ion-label>Category</ion-label>
-          <ion-input placeholder="Category" [(ngModel)]="exercise.category"></ion-input>
-        <ion-item>
-          <ion-label>Comments</ion-label>
-          <ion-textarea placeholder="Comments" [(ngModel)]="exercise.comments"></ion-textarea>
-        </ion-item>
-      </ion-item>
-      <div #displayContainer class="exercise-container"   [style.background]="editIndex == idx ? 'editing-color' : 'static-color'">
-        <exercise-display #exerciseDisplay></exercise-display>
+          (exercise.comments ? (': ' + exercise.comments) : '') }}
       </div>
+      <div #displayContainer class="exercise-container"   [style.background-color]="editIndex == idx ? 'editing-color' : 'static-color'">
+        <exercise-display #exerciseDisplay></exercise-display>
+      </div> 
       <ion-buttons [hidden]="editIndex == idx">
         <button ion-button (click)="editExercise(idx)" [disabled]="editing" color="primary" small>
           <ion-icon name="open"></ion-icon>
@@ -51,6 +41,9 @@
       <ion-buttons [hidden]="editIndex != idx">
         <button ion-button (click)="editor.saveExerciseEditing()" color="primary" small>
           <ion-icon name="open"></ion-icon>
+        </button>
+        <button ion-button (click)="editor.editExerciseProperties()" color="secondary" small>
+          <ion-icon name="construct"></ion-icon>
         </button>
         <button ion-button (click)="editor.cancelExerciseEditing()" color="danger" small>
           <ion-icon name="trash"></ion-icon>

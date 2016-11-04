@@ -20,6 +20,7 @@ import {HttpService} from '../providers/http-service/http-service';
 import {Metronome} from '../providers/metronome/metronome';
 import {ResourceLibrary} from '../providers/resource-library/resource-library';
 import {UserSettings} from '../providers/user-settings/user-settings';
+import {NewExerciseForm} from '../pages/exercise-set-preview/new-exercise';
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import {UserSettings} from '../providers/user-settings/user-settings';
     LoginPage,
     MessagesPage,
     SettingsPage,
-    NewExerciseSetForm
+    NewExerciseSetForm,
+    NewExerciseForm
   ],
   imports: [
     IonicModule.forRoot(StickControlMetronome, {prodMode: false})
@@ -55,7 +57,8 @@ import {UserSettings} from '../providers/user-settings/user-settings';
     LoginPage,
     MessagesPage,
     SettingsPage,
-    NewExerciseSetForm
+    NewExerciseSetForm,
+    NewExerciseForm
   ],
   providers: [
     AudioBuffers,

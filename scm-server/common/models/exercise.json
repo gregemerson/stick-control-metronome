@@ -16,7 +16,7 @@
       "type": "string",
       "required": false,
       "default": "Unnamed",
-      "length": 40
+      "length": 20
     },
     "notation": {
       "type": "string",
@@ -38,7 +38,7 @@
     "comments": {
       "type": "string",
       "required": false,
-      "length": 200
+      "length": 100
     }
   },
   "validations": [],

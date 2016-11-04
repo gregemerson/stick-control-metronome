@@ -5,7 +5,10 @@ import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
 import {NewExerciseSetForm} from './new-exercise-set';
 import {NewExerciseForm} from './new-exercise';
-import {RepeatForm} from './repeat'
+import {RepeatForm} from './repeat';
+import {ExerciseConstraints} from './exercise-constraints';
+
+import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
 
 @Component({
   selector: 'exercise-set-preview',
@@ -16,7 +19,10 @@ import {RepeatForm} from './repeat'
   }`]
 })
 export class ExerciseSetPreviewPage {
+  testGroup: FormGroup;
+
   title = '';
+  constraints = new ExerciseConstraints();
   exercises: Array<ES.IExercise> = [];
   selectedExerciseSetId: number = null;
   editor: ExerciseEditor = null;
@@ -33,7 +39,13 @@ export class ExerciseSetPreviewPage {
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
     private modal: ModalController,
-    private changeDetect: ChangeDetectorRef) {
+    private changeDetect: ChangeDetectorRef,
+    private formBuilder: FormBuilder) {
+      this.testGroup = this.formBuilder.group({
+        name: ['', Validators.maxLength(this.constraints.maxNameLength)],
+        category: ['', Validators.maxLength(this.constraints.maxCategoryLength)],
+        comments: ['', Validators.maxLength(this.constraints.maxCommentsLength)],
+      });
   }
 
   newExerciseSet($event) {
@@ -164,6 +176,14 @@ export class ExerciseSetPreviewPage {
     return loading;
   }
 
+  private createSnapshot(exercise: ES.IExercise): Object {
+    return {
+      name: exercise.name,
+      category:  exercise.category,
+      comments: exercise.comments
+    }
+  }
+
   editExercise(idx: number) {
     this.setEditMode(true, idx);
     let display = <ExerciseDisplay>this.displays.toArray()[idx];
@@ -193,8 +213,12 @@ export class ExerciseSetPreviewPage {
         this.exerciseSets.currentExerciseSet.
           save(exercise, fieldsToSave).subscribe({
             next: () => {
+              for (let field of fieldsToSave) {
+                if (field != 'notation') {
+                  exercise[field] = this.editor.snapShot[field];
+                }
+              } 
               loading.dismiss();
-
             },
             error: (err: any) => {
               loading.dismiss();
@@ -212,11 +236,7 @@ export class ExerciseSetPreviewPage {
         exercise.display.revertToSnapShot();
         display.hideCursor();
         this.setEditMode(false);
-      }, this.modal, {
-        comments: exercise.comments,
-        category: exercise.category,
-        name: exercise.name
-      });
+      }, this.modal, this.createSnapshot(exercise));
   }
 
   deleteExercise(idx: number) {
@@ -344,6 +364,16 @@ export class ExerciseEditor {
   saveExerciseEditing() {
     this.elements.cursorChanged.unsubscribe();
     this.onSave();
+  }
+
+  editExerciseProperties() {
+    this.modal.create(NewExerciseForm, {
+      create: (formData: Object) => {
+        this.snapShot['name'] = formData['name'];
+        this.snapShot['category'] = formData['category'];
+        this.snapShot['comments'] = formData['comments'];
+      }
+    }).present();
   }
 
   cancelExerciseEditing() {
