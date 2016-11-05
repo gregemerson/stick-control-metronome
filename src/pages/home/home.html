@@ -37,6 +37,6 @@
       </div>
     </ion-item>
   </ion-list>
-  <button ion-button (click)="startClicked($event)">{{ startButtonText }}</button>
-  <button ion-button (click)="pauseClicked($event)" [hidden]="!isStarted">{{ pauseButtonText }}</button>
+  <button [disabled]="!loaded" ion-button (click)="startClicked($event)">{{ startButtonText }}</button>
+  <button [disabled]="!loaded" ion-button (click)="pauseClicked($event)" [hidden]="!isStarted">{{ pauseButtonText }}</button>
 </ion-content>

@@ -37,9 +37,10 @@
       "foreignKey": ""
     },
     "exerciseSets": {
-      "type": "hasMany",
+      "type": "hasAndBelongsToMany",
       "model": "ExerciseSet",
-      "foreignKey": ""
+      "foreignKey": "",
+      "through": "clientexerciseset"
     },
     "exercises": {
       "type": "hasMany",
@@ -47,7 +48,7 @@
       "foreignKey": ""
     },
     "userSettings": {
-      "type": "embedsOne",
+      "type": "hasOne",
       "model": "UserSettings",
       "foreignKey": ""
     }

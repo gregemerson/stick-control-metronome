@@ -28,12 +28,12 @@ export class ExerciseSets {
     this.user = user;
     this.items = [];
     this.currentExerciseSet = null;
-    let currentId = user.settings.currentExerciseSetId;
+    let currentId = user.settings.currentExerciseSet;
     for (let key in user.rawExerciseSets) {
       let newSet = new ExerciseSet(this.httpService,
         user.rawExerciseSets[key]);
       this.items.push(newSet);
-      if (newSet.id == user.settings.currentExerciseSetId) {
+      if (newSet.id == user.settings.currentExerciseSet) {
         this.currentExerciseSet = newSet;
       }
     }

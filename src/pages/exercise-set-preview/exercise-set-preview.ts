@@ -44,7 +44,7 @@ export class ExerciseSetPreviewPage {
       this.testGroup = this.formBuilder.group({
         name: ['', Validators.maxLength(this.constraints.maxNameLength)],
         category: ['', Validators.maxLength(this.constraints.maxCategoryLength)],
-        comments: ['', Validators.maxLength(this.constraints.maxCommentsLength)],
+        comments: ['', Validators.maxLength(this.constraints.maxExerciseCommentsLength)],
       });
   }
 

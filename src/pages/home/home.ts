@@ -9,7 +9,7 @@ import {ExerciseDisplay} from '../exercise-display/exercise-display'
 import {CountDownPage} from '../countdown/countdown';
 import {LoginPage} from '../login/login';
 import {ResourceLibrary} from '../../providers/resource-library/resource-library';
-import {UserSettings} from '../../providers/user-settings/user-settings';
+import {Authenticator, IAuthUserSettings} from '../../providers/authenticator/authenticator';
 
 @Component({
   selector: 'home',
@@ -58,6 +58,8 @@ export class HomePage {
   nextExercise: IExercise = null;
   startButtonText: string = HomePage.startText;
   pauseButtonHidden = true;
+  userSettings: IAuthUserSettings;
+
   // Communication with countdown popover
   @Output() countdown: EventEmitter<number> = new EventEmitter<number>();
   @Output() animateExercises: EventEmitter<void> = new EventEmitter<void>();
@@ -75,6 +77,7 @@ export class HomePage {
   countdownPromise: Promise<any>;
 
   private loading: Loading;
+  private loaded = false;
 
   // Info properties
   count: number = 0;
@@ -88,13 +91,13 @@ export class HomePage {
               private changeDetect: ChangeDetectorRef,
               private popoverController : PopoverController,
               private modalController: ModalController,
-              public userSettings: UserSettings, 
+              public authenticator: Authenticator, 
               public resourceLibrary: ResourceLibrary,
               private loadingController: LoadingController) {
+    // this all needs to be moved to onInitView or something
     this.initializeDisplay();
     this.loading = loadingController.create();
-    userSettings.load()
-    .then(resolve => resourceLibrary.load())
+    resourceLibrary.load()
     .then(resolve => audioBuffers.loadAll('library.json', new AudioContext()))
     .then(resolve => metronome.load(audioBuffers))
     .then(resolve => {
@@ -137,6 +140,7 @@ export class HomePage {
     })
     .then(resolved => {
       //this.loading.dismiss();
+      this.loaded = true;
       this.loading = null;
     })
     .catch(reason => {
@@ -160,7 +164,7 @@ export class HomePage {
     this.bottomDisplayState = new DummyDisplayState();
     this.repetition = 0;
     this.count = 0;
-    this.bpm = this.userSettings.minTempo;
+    this.bpm = 0;
     if (this.topExerciseDisplay) {
       this.topExerciseDisplay.hide();
     }
@@ -209,12 +213,15 @@ export class HomePage {
     }
     else {
       // Start clicked
+      if (!this.userSettings) {
+        this.userSettings = this.authenticator.user.settings;
+      }
       this.startButtonText = HomePage.stopText;
       this.pauseButtonText = HomePage.pauseText;
       this.bpm = this.userSettings.minTempo;
       this.metronome.play(this.exerciseSets.currentExerciseSet, 
         this.bpm, this.userSettings.numberOfRepititions, 
-        this.userSettings.startDelaySeconds);
+        this.userSettings.secondsBeforeStart);
     }
     this.isStarted = !this.isStarted;
   }

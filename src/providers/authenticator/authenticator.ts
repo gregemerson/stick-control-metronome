@@ -17,7 +17,7 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   private guestEmail = 'guest@guest.com';
   private guestPassword = 'guest';
   private guestUid = '57d5a393b1ba1b20289231e0';
-  private userLoadFilter = '?filter[include][exerciseSets]';
+  private userLoadFilter = '?filter[include][exerciseSets,userSettings]';
   private _user: IAuthUser = null;
   errors: Object;
 
@@ -27,6 +27,11 @@ export class Authenticator extends BaseObservable<IAuthUser> {
 
   get user(): IAuthUser {
     return this._user;
+  }
+
+  private saveUserSettings(): Observable<Object> {
+    return this.httpService.putPersistedObject(HttpService.
+      userSettings(this.user.id), this.user.settings);
   }
   
   private setUser(user: IAuthUser) {
@@ -218,9 +223,9 @@ export class AuthErrors {
 
 export interface IAuthUser {
   settings: IAuthUserSettings;
-  id: string;
-  userName: string;
-  membershipExpiry: Date;
+  id: number;
+  username: string;
+  membershipEnds: Date;
   email: string;
   emailVerified: boolean;
   rawExerciseSets: Array<Object>;
@@ -228,47 +233,42 @@ export interface IAuthUser {
 
 class AuthUser implements IAuthUser {
   settings: IAuthUserSettings;
-  id: string;
-  userName: string;
-  membershipExpiry: Date;
+  id: number;
+  username: string;
+  membershipEnds: Date;
   email: string;
   emailVerified: boolean;
   rawExerciseSets: Array<Object>;
   
   constructor(rawUser: Object) {
-    this.id = rawUser['id'];
-    this.settings = new AuthUserSettings(rawUser['_userSettings']);
-    this.userName = rawUser['username'];
-    this.membershipExpiry = new Date(rawUser['membershipExpiry']);
-    this.email = rawUser['email'];
-    this.emailVerified = rawUser['emailVerified'];
+    Object.assign(this, rawUser);
+    this.settings = new AuthUserSettings(rawUser['userSettings']);
+    this.membershipEnds = new Date(rawUser['membershipExpiry']);
     this.rawExerciseSets = rawUser['exerciseSets'];
   }
 }
 
 export interface IAuthUserSettings {
-  currentExerciseSetId: number;
+  currentExerciseSet: number;
   numberOfRepititions: number;
+  secondsBeforeStart: number;
   minTempo: number;
   maxTempo: number;
-  tempoStep: number;  
+  tempoStep: number;
 }
 
 class AuthUserSettings implements IAuthUserSettings {
-  currentExerciseSetId: number;
+  currentExerciseSet: number;
   numberOfRepititions: number;
+  secondsBeforeStart: number;
   minTempo: number;
   maxTempo: number;
-  tempoStep: number;  ;
+  tempoStep: number;
+  id: number;
 
   constructor(rawSettings: Object) {
-    let current = rawSettings['currentExerciseSet']
-    this.currentExerciseSetId = current == -1 ? null : current;
-    this.numberOfRepititions = rawSettings['numberOfRepititions'];
-    this.minTempo = rawSettings['minTempo'];
-    this.maxTempo = rawSettings['maxTempo'];
-    this.tempoStep = rawSettings['tempoStep'];
-  }
+    Object.assign(this, rawSettings);
+  }  
 }
 
 class LoginSubscription extends Subscription {

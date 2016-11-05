@@ -2,7 +2,6 @@ import {Component} from '@angular/core';
 import {Platform, Modal, ModalController, PopoverController, LoadingController} from 'ionic-angular';
 import {StatusBar} from 'ionic-native';
 import {TabsPage} from '../pages/tabs/tabs';
-import {UserSettings} from '../providers/user-settings/user-settings';
 import {ResourceLibrary} from '../providers/resource-library/resource-library';
 import {Authenticator, IAuthUser} from '../providers/authenticator/authenticator';
 import {ExerciseSets} from '../providers/exercise-sets/exercise-sets';
@@ -13,13 +12,12 @@ import {HttpService, IHttpServiceError, HttpServiceErrors} from '../providers/ht
 
 @Component({
   template: '<ion-nav [root]="rootPage"></ion-nav>',
-  providers: [UserSettings, ResourceLibrary, ExerciseSets, Authenticator, ModalController, PopoverController, HttpService]
+  providers: [ResourceLibrary, ExerciseSets, Authenticator, ModalController, PopoverController, HttpService]
 })
 export class StickControlMetronome {
   rootPage: any;
   private userLoadedSubscription: BaseObservableSubscription;
   constructor(private platform: Platform, 
-    public userSettings: UserSettings, 
     public resourceLibrary: ResourceLibrary,
     public exerciseSets: ExerciseSets,
     public authenticator: Authenticator,

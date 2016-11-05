@@ -15,7 +15,7 @@
       "type": "string",
       "required": false,
       "default": "Unnamed",
-      "length": 40
+      "length": 20
     },
     "category": {
       "type": "string",
@@ -50,6 +50,12 @@
       "type": "belongsTo",
       "model": "Client",
       "foreignKey": ""
+    },
+    "clients": {
+      "type": "hasAndBelongsToMany",
+      "model": "Exercise",
+      "foreignKey": "",
+      "through": "clientexerciseset"
     }
   },
   "acls": [

@@ -7,33 +7,44 @@
   },
   "properties": {
     "currentExerciseSet": {
-      "type": "string",
-      "required": true,
-      "default": "\"\""
+      "type": "number",
+      "required": false,
+      "default": -1
     },
     "numberOfRepititions": {
       "type": "number",
-      "required": true,
+      "required": false,
       "default": 20
     },
     "minTempo": {
       "type": "number",
-      "required": true,
+      "required": false,
       "default": 80
     },
     "maxTempo": {
       "type": "number",
-      "required": true,
+      "required": false,
       "default": 80
     },
     "tempoStep": {
       "type": "number",
-      "required": true,
+      "required": false,
+      "default": 10
+    },
+    "secondsBeforeStart": {
+      "type": "number",
+      "required": false,
       "default": 10
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "owner": {
+      "type": "belongsTo",
+      "model": "Client",
+      "foreignKey": ""
+    }    
+  },
   "acls": [
   ],
   "methods": {}
