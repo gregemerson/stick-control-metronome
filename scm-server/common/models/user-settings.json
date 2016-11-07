@@ -39,13 +39,12 @@
   },
   "validations": [],
   "relations": {
-    "owner": {
+    "client": {
       "type": "belongsTo",
       "model": "Client",
       "foreignKey": ""
-    }    
+    }
   },
-  "acls": [
-  ],
+  "acls": [],
   "methods": {}
 }

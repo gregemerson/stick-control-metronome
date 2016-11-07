@@ -41,72 +41,66 @@
   },
   "validations": [],
   "relations": {
-    "exercises": {
-      "type": "hasAndBelongsToMany",
-      "model": "Exercise",
-      "foreignKey": ""
-    },
     "owner": {
       "type": "belongsTo",
       "model": "Client",
       "foreignKey": ""
     },
-    "clients": {
+    "exercises": {
       "type": "hasAndBelongsToMany",
       "model": "Exercise",
-      "foreignKey": "",
-      "through": "clientexerciseset"
+      "foreignKey": ""
     }
   },
   "acls": [
     {
-      "model": "ExerciseSet",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "administrator",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "model": "ExerciseSet"
     },
     {
-      "model": "ExerciseSet",
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "guest",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "model": "ExerciseSet"
     },
     {
-      "model": "ExerciseSet",
       "accessType": "WRITE",
       "principalType": "ROLE",
       "principalId": "guest",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "ExerciseSet"
     },
     {
-      "model": "ExerciseSet",
       "accessType": "EXECUTE",
       "principalType": "ROLE",
       "principalId": "guest",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "ExerciseSet"
     },
     {
-      "model": "ExerciseSet",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$owner",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "model": "ExerciseSet"
     },
     {
-      "model": "ExerciseSet",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$authenticated",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "ExerciseSet"
     },
     {
-      "model": "ExerciseSet",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$unauthenticated",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "ExerciseSet"
     }
   ],
   "methods": {}

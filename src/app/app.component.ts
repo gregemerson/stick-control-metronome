@@ -23,7 +23,6 @@ export class StickControlMetronome {
     public authenticator: Authenticator,
     public httpService: HttpService,
     public modalController: ModalController,
-    private popoverController: PopoverController,
     private loadingCtrl: LoadingController) {
 
     this.rootPage = TabsPage;
@@ -52,7 +51,7 @@ export class StickControlMetronome {
           display.push(MessagesPage.createMessage(
             error.code, error.message, MessageType.Error));
         }
-        this.popoverController.create(
+        this.modalController.create(
           MessagesPage, {messages: displayErrors}).present();
       }}));
 
@@ -102,7 +101,7 @@ export class StickControlMetronome {
       },
       error: (err: any) => {
         loading.dismiss();
-        this.popoverController.create(MessagesPage, {
+        this.modalController.create(MessagesPage, {
           messages: [MessagesPage.createMessage(
             'Error', err, MessageType.Error)]
         }).present();

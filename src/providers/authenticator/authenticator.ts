@@ -17,7 +17,7 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   private guestEmail = 'guest@guest.com';
   private guestPassword = 'guest';
   private guestUid = '57d5a393b1ba1b20289231e0';
-  private userLoadFilter = '?filter[include][exerciseSets,userSettings]';
+  private userLoadFilter = '?filter[include]=userSettings&filter[include]=exerciseSets';
   private _user: IAuthUser = null;
   errors: Object;
 

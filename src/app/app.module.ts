@@ -20,6 +20,7 @@ import {HttpService} from '../providers/http-service/http-service';
 import {Metronome} from '../providers/metronome/metronome';
 import {ResourceLibrary} from '../providers/resource-library/resource-library';
 import {NewExerciseForm} from '../pages/exercise-set-preview/new-exercise';
+import {RepeatForm} from '../pages/exercise-set-preview/repeat';
 
 
 @NgModule({
@@ -32,6 +33,7 @@ import {NewExerciseForm} from '../pages/exercise-set-preview/new-exercise';
     CountDownPage,
     ExerciseDisplay,
     ExerciseSetPreviewPage,
+    RepeatForm,
     GuidePage,
     LoginPage,
     MessagesPage,
@@ -52,6 +54,7 @@ import {NewExerciseForm} from '../pages/exercise-set-preview/new-exercise';
     CountDownPage,
     ExerciseDisplay,
     ExerciseSetPreviewPage,
+    RepeatForm,
     GuidePage,
     LoginPage,
     MessagesPage,

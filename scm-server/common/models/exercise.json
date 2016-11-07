@@ -43,11 +43,6 @@
   },
   "validations": [],
   "relations": {
-    "exerciseSets": {
-      "type": "hasAndBelongsToMany",
-      "model": "ExerciseSet",
-      "foreignKey": ""
-    },
     "owner": {
       "type": "belongsTo",
       "model": "Client",
@@ -56,46 +51,46 @@
   },
   "acls": [
     {
-      "model": "Exercise",
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "$authenticated",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "model": "Exercise"
     },
     {
-      "model": "Exercise",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$authenticated",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "Exercise"
     },
     {
-      "model": "Exercise",
       "accessType": "WRITE",
       "principalType": "ROLE",
       "principalId": "$owner",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "model": "Exercise"
     },
     {
-      "model": "Exercise",
       "accessType": "WRITE",
       "principalType": "ROLE",
       "principalId": "guest",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "Exercise"
     },
     {
-      "model": "Exercise",
       "accessType": "EXECUTE",
       "principalType": "ROLE",
       "principalId": "guest",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "Exercise"
     },
     {
-      "model": "Exercise",
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$unauthenticated",
-      "permission": "DENY"
+      "permission": "DENY",
+      "model": "Exercise"
     }
   ],
   "methods": {}

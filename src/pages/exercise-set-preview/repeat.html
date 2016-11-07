@@ -7,13 +7,13 @@
     <ion-list>
         <ion-item>
             <ion-label>Number of Measures</ion-label>
-            <ion-range min="minMeasures" max="maxMeasures" [(ngModel)]="numMeasures" color="primary">
-            <ion-label range-left>{{ minMeasures }}</ion-label>
-            <ion-label range-right>{{ maxMeasures }}</ion-label>
+            <ion-range min="minMeasures" max="maxMeasures" [(ngModel)]="numMeasures" color="primary"></ion-range>
+            <ion-label range-left>Max: {{ minMeasures }}</ion-label>
+            <ion-label range-right>Min: {{ maxMeasures }}</ion-label>
         </ion-item>
         <ion-item>
             <ion-label>Number of Repeats</ion-label>
-            <ion-range min="minRepeats" max="maxRepeats" [(ngModel)]="numRepeats" color="primary">
+            <ion-range min="minRepeats" max="maxRepeats" [(ngModel)]="numRepeats" color="primary"></ion-range>
             <ion-label range-left>{{ minRepeats }}</ion-label>
             <ion-label range-right>{{ maxRepeats }}</ion-label>
         </ion-item>

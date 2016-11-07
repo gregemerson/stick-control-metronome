@@ -15,8 +15,8 @@
     },
     "username": {
       "type": "string",
-      "length": 40,
-      "required": true
+      "required": true,
+      "length": 40
     },
     "membershipExpiry": {
       "type": "Date",
@@ -36,12 +36,6 @@
       "model": "Client",
       "foreignKey": ""
     },
-    "exerciseSets": {
-      "type": "hasAndBelongsToMany",
-      "model": "ExerciseSet",
-      "foreignKey": "",
-      "through": "clientexerciseset"
-    },
     "exercises": {
       "type": "hasMany",
       "model": "Exercise",
@@ -50,6 +44,11 @@
     "userSettings": {
       "type": "hasOne",
       "model": "UserSettings",
+      "foreignKey": ""
+    },
+    "exerciseSets": {
+      "type": "hasAndBelongsToMany",
+      "model": "ExerciseSet",
       "foreignKey": ""
     }
   },
@@ -61,20 +60,20 @@
       "permission": "ALLOW"
     },
     {
-      "model": "Client",
       "accessType": "EXECUTE",
       "principalType": "ROLE",
       "principalId": "guest",
       "permission": "DENY",
-      "property": "logout"
+      "property": "logout",
+      "model": "Client"
     },
     {
-      "model": "Client",
       "accessType": "EXECUTE",
       "principalType": "ROLE",
       "principalId": "guest",
       "permission": "DENY",
-      "property": "login"
+      "property": "login",
+      "model": "Client"
     }
   ],
   "methods": {}

@@ -1,0 +1,44 @@
+Objects: Strokes, MeasureSeparators, GroupSeparators, Repeats
+
+Measure Separator Constraints
+- Must be preceeded by Repeat or Stroke
+
+Repeat Constraints
+- Must be enclosed in measure separators
+- numMeasures must be less than or equal the number of measures 
+since the previous repeat or exercise beginning, which ever comes first.
+
+GroupSeparators
+- must be preceded by a Stroke
+- must be succeede by a Stroke (or end of exercise while editing)
+
+Strokes
+- no constraints
+
+Must haves:
+- Different sound on first beat of measure
+- At beginning of measure could have |5   to denote that there are 5 beats in measure
+- Design image that looks like traditional 1/8th note rest and use instead of hyphen
+
+Nice to have:
+- quiet counts (just add to settings)
+- timing meter
+- 
+
+Yet to implement:
+- Get metronome working again
+- Make decision about ordering within exercise sets
+- Email verification
+- Logout
+- Exercise set configuration for new user. Different for unpaid & paid users. Maybe just start
+everyone  with Basic 1 and Tutorial then refer to library. Tutorial should be initial selected exercise set.
+- Library of exercise sets page
+- Key for all editing buttons
+- Hover balloons
+
+Exercise sets to create (all free and show capabilities):
+- Ride patterns
+- Polyrhythms
+- Synchopation
+- Accents
+- Tutorial (use all notations, polyrhythm, mixed time-signatures).
