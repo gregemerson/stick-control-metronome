@@ -7,15 +7,19 @@
     <ion-list>
         <ion-item>
             <ion-label>Number of Measures</ion-label>
-            <ion-range min="minMeasures" max="maxMeasures" [(ngModel)]="numMeasures" color="primary"></ion-range>
-            <ion-label range-left>Max: {{ minMeasures }}</ion-label>
-            <ion-label range-right>Min: {{ maxMeasures }}</ion-label>
+            <ion-range pin="true" [min]="minMeasures" [max]="maxMeasures" [step]="1" [(ngModel)]="numMeasures" color="primary">
+                <ion-label range-left>Min: {{ minMeasures }}</ion-label>
+                <ion-label range-right>Max: {{ maxMeasures }}</ion-label>
+            </ion-range>
+            <ion-badge>{{ numMeasures }}</ion-badge>
         </ion-item>
         <ion-item>
             <ion-label>Number of Repeats</ion-label>
-            <ion-range min="minRepeats" max="maxRepeats" [(ngModel)]="numRepeats" color="primary"></ion-range>
-            <ion-label range-left>{{ minRepeats }}</ion-label>
-            <ion-label range-right>{{ maxRepeats }}</ion-label>
+            <ion-range pin="true" [min]="minRepeats" [max]="maxRepeats" [step]="1" [(ngModel)]="numRepeats" color="primary">
+                <ion-label range-left>Min: {{ minRepeats }}</ion-label>
+                <ion-label range-right>Max: {{ maxRepeats }}</ion-label>
+            </ion-range>
+            <ion-badge>{{ numRepeats }}</ion-badge>
         </ion-item>
         <button ion-button (click)="create()">Create</button>
         <button ion-button (click)="cancel()">Cancel</button>

@@ -270,7 +270,7 @@ export class ExerciseEditor {
     private onCancel: () => void,
     private modal: ModalController,
     public snapShot: Object) {
-    elements.cursorChanged.subscribe(() => this.enforceRules());
+    elements.cursorChanged = () => this.enforceRules();
     elements.resetCursor();
     this.drawCursor(this.elements.cursorPosition);
   }
@@ -362,7 +362,7 @@ export class ExerciseEditor {
   }
 
   saveExerciseEditing() {
-    this.elements.cursorChanged.unsubscribe();
+    this.elements.cursorChanged = null;
     this.onSave();
   }
 
@@ -377,7 +377,7 @@ export class ExerciseEditor {
   }
 
   cancelExerciseEditing() {
-    this.elements.cursorChanged.unsubscribe();
+    this.elements.cursorChanged = null;
     this.onCancel();
   }
 }

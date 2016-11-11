@@ -289,7 +289,7 @@ export class ExerciseElements {
   private _cursorPosition;
   private _onCursorChange: () => void = null;
   private notationSnapshot: string;
-  @Output() cursorChanged = new EventEmitter<void>();
+  cursorChanged: () => void;
 
   constructor(private elements: ExerciseElement[]) {
     this.resetCursor();
@@ -426,7 +426,9 @@ export class ExerciseElements {
 
   set cursorPosition(position: number) {
     this._cursorPosition = position;
-    this.cursorChanged.emit();
+    if (this.cursorChanged) {
+      this.cursorChanged();
+    }
   }
 
   get cursorPosition(): number {

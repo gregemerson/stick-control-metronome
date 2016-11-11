@@ -34,6 +34,7 @@ export class ExerciseDisplay {
   private underscoreY: number;
   private groupingY: number;
   private bottomPaddingY: number;
+  private noteBottomSpacing: number;
 
   // Define the horzontal placements of note
   private noteX: number;
@@ -134,7 +135,7 @@ export class ExerciseDisplay {
     }
     this.clearCanvas(this.cursorCanvas);
     let context = this.getCursorContext();
-    let x = this.noteWidths[widthIndex];
+    let x = this.noteWidths[widthIndex] - (this.noteSpacing);
     let y = (lineIndex * this.bottomPaddingY) + this.topPaddingY;
     context.lineWidth = this.cursorWidth;
     context.beginPath();
@@ -142,16 +143,6 @@ export class ExerciseDisplay {
     y += this.graceNoteY;
     context.lineTo(x, y);
     context.stroke();
-
-    x = this.noteWidths[widthIndex] - (this.noteSpacing);
-    y = (lineIndex * this.bottomPaddingY) + this.topPaddingY;
-    context.lineWidth = this.cursorWidth;
-    context.beginPath();
-    context.moveTo(x, y);
-    y += this.graceNoteY;
-    context.lineTo(x, y);
-    context.stroke();
-
     context.closePath();
   }
 
@@ -172,18 +163,54 @@ export class ExerciseDisplay {
 
   private setNoteFont() {
     this.getExerciseContext().font = this.
-      selectedFontSize.toString() + this.exerciseFont;    
+      selectedFontSize.toString() + this.exerciseFont;
   }
 
-  private drawNoteFont(note = '', x = -1, y =  -1) {
+  private drawNoteFont(note = '', x = -1, y =  -1, 
+    textColor = 'rgba(0, 0, 0, 1)', baseLine = 'bottom') {
     this.setNoteFont();
     let context = this.getExerciseContext();
-    context.strokeStyle = 'black';
-    context.fillStyle = 'black';
+    context.strokeStyle = textColor;
     context.lineWidth = this.defaultLineWidth;
+    context.textBaseline = baseLine;
+    context.fillRect
     if (note != '') {
       context.strokeText(note, x, y);
     }
+  }
+
+  private setFontBottomSpacing() {
+    this.clearCanvas(this.exerciseCanvas);
+    let width = this.getNoteWidth('R');
+    let height = this.selectedFontSize;
+    let ctx = this.getExerciseContext();
+    ctx.fillStyle = 'rgba(200, 0, 0, .8)';
+    ctx.fillRect(0, 0, width, height);
+    this.drawNoteFont('R', 0, height, 'rgba(0, 0, 0, 1)');
+    let imageData = ctx.getImageData(0, 0, width, height).data;
+    let upper = 0;
+    let lower = 0;
+    let middle = 0;
+    let rowLength = 4 * width;
+    for (let row = 0; row < height; row++) {
+      // Scan row
+      let hasNote = false;
+      for (let column = 0; column < width; column++) {
+        if (imageData[(4 * column) + (row * rowLength)] == 0) {
+          hasNote = true;
+          break;
+        }
+      }
+      if (hasNote) {
+        middle++;
+      }
+      else {
+        upper += middle == 0 ? 1 : 0;
+        lower += middle != 0 ? 1 : 0;
+      }
+    }
+    this.noteBottomSpacing = lower - 1;
+    this.clearCanvas(this.exerciseCanvas);
   }
 
   draw(exercise: ES.IExercise, container: ElementRef, maxHeight: number, 
@@ -199,6 +226,7 @@ export class ExerciseDisplay {
     let elementIndex = 0;
     let display = exercise.display;
     this.noteWidths = [];
+    this.setFontBottomSpacing();
     for (let lineIdx = 0; lineIdx < this.endOfLineIndices.length; lineIdx++) {
       this.noteWidths.push(this.noteSpacing);
       this.resetNoteX();
@@ -238,7 +266,7 @@ export class ExerciseDisplay {
     let noteWidth: number;
     let longestGroupLength = exercise.display.longestStrokeGroup();
     // Guarantee that the longest stroke group will fit within a line
-    while (this.selectedFontSize > 0) {
+    while (true) {
       this.setNoteFont();
       noteWidth = this.getTotalNoteWidth();
       let currentWidthNeeded = longestGroupLength * noteWidth;
@@ -246,6 +274,9 @@ export class ExerciseDisplay {
         break;
       }
       else {
+        if (this.selectedFontSize == 0) {
+          break;
+        }
         this.selectedFontSize--;
       }
     }
@@ -254,25 +285,24 @@ export class ExerciseDisplay {
     let usedWidth = 0;
     let breakCandidate = 0;
     let previousBreak = -1;
+    let lastEol = -1;
     for (let elementIndex = 0; elementIndex < exercise.display.length; elementIndex++) {
       let element = exercise.display.getElement(elementIndex);
-      // Breakable means that the elements immediately following it can be put on new line.
-      let isBreakable = !(element instanceof ES.Stroke);
-      if ((usedWidth + noteWidth) > this.exerciseCanvas.width) {
-        let charsAfterBreak;
-        if (isBreakable) {
-          charsAfterBreak= (element instanceof ES.GroupSeparator) ? 0 : 1;
-          this.endOfLineIndices.push(elementIndex - charsAfterBreak);
+      // @todo note type widths should be encapsulated
+      let currentWidth = (element instanceof ES.Repeat) ? 2 * noteWidth : noteWidth;
+      if ((usedWidth + currentWidth) <= this.exerciseCanvas.width) {
+        // See if element can be an eol
+        if (!(element instanceof ES.Stroke) ||
+            elementIndex == exercise.display.length - 1 ||
+            !(exercise.display.getElement(elementIndex + 1) instanceof ES.Stroke)) {
+          lastEol = elementIndex;
         }
-        else {
-          this.endOfLineIndices.push(breakCandidate);
-          breakCandidate = elementIndex;
-          charsAfterBreak = elementIndex - breakCandidate; 
-        }
-        usedWidth = this.selectedFontSize * charsAfterBreak;
+        usedWidth += currentWidth;
       }
-      else if (isBreakable) {
-        breakCandidate = elementIndex;
+      else {
+        this.endOfLineIndices.push(lastEol);
+        elementIndex = lastEol;
+        usedWidth = currentWidth;
       }
     }
     this.endOfLineIndices.push(exercise.display.length - 1);
@@ -287,8 +317,8 @@ export class ExerciseDisplay {
     this.accentY = this.topPaddingY + (0.2 * fontSize);
     this.accentPaddingY = this.accentY + (0.05 * fontSize);
     this.letterY = this.accentPaddingY + fontSize;
-    this.graceNoteY = this.letterY + (0.07 * fontSize);
-    this.groupingY = this.graceNoteY + (0.3 * fontSize);
+    this.graceNoteY = this.letterY + (0.15 * fontSize);
+    this.groupingY = this.graceNoteY + (0.5 * fontSize);
     this.bottomPaddingY = this.groupingY + (0.1 * fontSize);
     this.resetNoteX();
   }
@@ -313,7 +343,6 @@ export class ExerciseDisplay {
   private drawNotes(elements: ES.ExerciseElements, startIndex: number): NoteDrawInfo {
     let x = this.noteX;
     let context = this.getExerciseContext();
-    context.textBaseline = 'bottom';
     let regionHeight = this.graceNoteY - this.letterY;
     let verticalCenter = this.letterY + (regionHeight/2);
     let end = startIndex;
@@ -330,60 +359,64 @@ export class ExerciseDisplay {
         this.drawAccent(x);
       }
       this.drawNoteFont(stroke.hand, x, this.letterY);
-      let noteWidth = this.setNoteEndPosition(stroke.hand);
+      let endPosition = this.setNoteEndPosition(stroke.hand);
+      let noteWidth = this.getNoteWidth(stroke.hand);
       if (stroke.grace != 0) {
+        context.lineWidth = regionHeight/5;
         if (stroke.grace == ES.Encoding.buzz) {
           context.strokeStyle = this.buzzColor;
-          context.lineWidth = 0.3 * regionHeight;
           context.beginPath();
-          context.moveTo(x, verticalCenter);
-          context.lineTo(x + noteWidth, verticalCenter);
+          context.moveTo(x, this.letterY - this.noteBottomSpacing);
+          context.lineTo(x + noteWidth, this.letterY - this.noteBottomSpacing);
           context.stroke();
           context.closePath();          
         }
         else {
-          let count = stroke.grace;
-          let circleDistance = this.getNoteWidth()/(count + 1);
-          let circleCenter = x + circleDistance;
-          let radius = Math.min(.33 * circleDistance, .75 * regionHeight);
-          context.fillStyle = this.graceColor;
+          context.strokeStyle = this.graceColor;
           context.beginPath();
-          for (let i = 1; i <= count; i++) {
-            context.arc(x + (i * circleDistance), verticalCenter,
-               radius, 0, 2 * Math.PI);
-            context.fill();
+          for (let i = 0; i < stroke.grace; i++) {
+            let y =  this.letterY + (2 * i * context.lineWidth) - this.noteBottomSpacing;
+            context.moveTo(x, y);
+            context.lineTo(x + noteWidth, y);
           }
+          context.stroke();
           context.closePath();
         }
       }
-      x += noteWidth;
+      x += endPosition;
     }
     this.drawGroupLines(x - this.noteX - this.noteSpacing, end - startIndex);
     return  new NoteDrawInfo(end - startIndex, x);
   }
 
   private drawRepeat(repeat: ES.Repeat): number {
-    let repeatWidth = this.setNoteEndPosition();
+    let endPosition = this.setNoteEndPosition('XX');
+    let noteWidth = this.getNoteWidth('XX');
     let startX = this.noteX;
-    let endX = this.noteX + this.getNoteWidth();
-    let halfHeight = (this.letterY - this.accentPaddingY)/2;
-    let verticalCenter = this.letterY - halfHeight;
+    let endX = startX + noteWidth;
+    let halfHeight = (this.groupingY - this.accentPaddingY)/2;
+    let verticalCenter = this.groupingY - halfHeight;
     let context = this.getExerciseContext();
+    // Draw divider
     context.lineWidth = 0.06 * this.selectedFontSize;
     context.beginPath();
     context.moveTo(startX, verticalCenter);
     context.lineTo(endX, verticalCenter);
     context.stroke();   
     context.closePath();
-
+    // Draw values
     context.font = (0.8 * halfHeight) + this.exerciseFont;
-    let numWidth = context.measureText('2').width;
-    let offsetX = (repeatWidth - numWidth)/2; 
+    let top = repeat.numMeasures.toString();
+    let bottom = repeat.numRepeats.toString()
+    let topWidth = context.measureText(repeat.numMeasures.toString()).width;
+    let bottomWidth = context.measureText(repeat.numRepeats.toString()).width;
+    let offsetX = (noteWidth - context.measureText(top).width)/2; 
     context.textBaseline = 'top';
-    context.strokeText(repeat.numMeasures.toString(), startX + offsetX, this.accentY);
+    context.strokeText(top, startX + offsetX, this.accentY);
+    offsetX = (noteWidth - context.measureText(bottom).width)/2; 
     context.textBaseline = 'bottom';
-    context.strokeText(repeat.numRepeats.toString(), startX + offsetX, this.letterY);
-    return repeatWidth;
+    context.strokeText(bottom, startX + offsetX, this.letterY);
+    return endPosition;
   }
 
   private drawGroupSeparator(): number {
@@ -397,7 +430,7 @@ export class ExerciseDisplay {
     context.lineWidth = noteWidth * 0.1;
     context.beginPath();
     context.moveTo(middleX, this.accentPaddingY);
-    context.lineTo(middleX, this.letterY);
+    context.lineTo(middleX, this.groupingY);
     context.stroke();
     context.closePath();
     return this.setNoteEndPosition();
@@ -406,6 +439,7 @@ export class ExerciseDisplay {
   private drawGroupLines(groupWidth: number, numNotes: number) {
     let context = this.getExerciseContext();
     context.textBaseline = 'middle';
+    context.strokeStyle = 'black';
     let regionHeight = this.groupingY - this.graceNoteY;
     // Account for notes and note spacing
     let regionWidth = groupWidth;
@@ -413,7 +447,7 @@ export class ExerciseDisplay {
     let halfCharWidth = context.measureText(this.genericNote).width/2;
     let beginNumX = this.noteX + (regionWidth/2) - halfCharWidth;
     let endNumX = this.noteX + (regionWidth/2) + halfCharWidth;
-    let lineY = this.graceNoteY + (regionHeight/2);
+    let lineY = this.graceNoteY + (regionHeight/2) - this.noteBottomSpacing;
     context.strokeText(numNotes.toString(), beginNumX, lineY);
     context.lineWidth = 0.1 * regionHeight;
     context.beginPath();
