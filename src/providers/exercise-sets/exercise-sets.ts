@@ -437,15 +437,21 @@ export class ExerciseElements {
 
   longestStrokeGroup(): number {
     let longestGroup = 0;
-    let groupCount = 0;
+    let currentGroupCount = 0;
+    let inGroup = false;
+    let groupCounts: number[] = [];
     for (let element of this.elements) {
       if (element instanceof Stroke) {
-        groupCount++;
+        if (!inGroup) {
+          inGroup = true;
+          groupCounts.push(1);
+        }
+        else {
+          groupCounts[groupCounts.length - 1] += 1;
+        }
       }
       else {
-        longestGroup = Math.max(
-          longestGroup, groupCount);
-        groupCount = 0;
+        inGroup = false;
       }
     }
     return longestGroup;
