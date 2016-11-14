@@ -16,11 +16,13 @@ export class NewExerciseForm {
     private navCtrl: NavController, params: NavParams) {
       this.callback = <(Object) => void>params.get('create');
       let initializer = <Object>params.get('initializer');
+      console.dir(initializer);
       let defaults = this.getDefaultValues();
       if (initializer) {
         for (let key in defaults) {
           if (initializer.hasOwnProperty(key)) {
             defaults[key] = initializer[key];
+            console.log('setting ' + key + ' to ' + initializer[key]);
           }
         }
       }

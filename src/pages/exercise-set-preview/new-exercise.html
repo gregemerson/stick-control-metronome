@@ -11,6 +11,6 @@
         <ion-label>Comments</ion-label>
         <ion-textarea formControlName="comments"></ion-textarea>
     </ion-item>
-    <button ion-button type="submit" [disabled]="!newExercise.valid" (click)="create()">Save</button>
-    <button ion-button [disabled]="!newExercise.valid" (click)="cancel()">Cancel</button>
+    <button ion-button type="submit" [disabled]="!newExercise.valid" (click)="create()" small>Save</button>
+    <button ion-button [disabled]="!newExercise.valid" (click)="cancel()" small>Cancel</button>
 </form>

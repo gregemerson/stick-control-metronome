@@ -1,5 +1,5 @@
 import {SimpleChanges, ChangeDetectorRef, Component, ViewChildren, ViewChild, ElementRef, QueryList, EventEmitter} from '@angular/core';
-import {NavController, ModalController, NavParams, LoadingController, Loading, PopoverController} from 'ionic-angular';
+import {NavController, NavParams, LoadingController, Loading, ModalController} from 'ionic-angular';
 import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
@@ -37,7 +37,7 @@ export class ExerciseSetPreviewPage {
     public exerciseSets: ES.ExerciseSets,
     private params: NavParams,
     private loadingCtrl: LoadingController,
-    private popoverCtrl: PopoverController,
+    private modalCtrl: ModalController,
     private modal: ModalController,
     private changeDetect: ChangeDetectorRef,
     private formBuilder: FormBuilder) {
@@ -48,8 +48,15 @@ export class ExerciseSetPreviewPage {
       });
   }
 
+  onResize($event) {
+    this.displayExercises();
+    if (this.editor) {
+      this.editor.onResize();
+    }
+  }
+
   newExerciseSet($event) {
-    this.popoverCtrl.create(NewExerciseSetForm, {
+    this.modalCtrl.create(NewExerciseSetForm, {
       create: (formData: Object) => {
           if (!formData) {
             return;
@@ -69,7 +76,7 @@ export class ExerciseSetPreviewPage {
   }
 
   newExercise($event) {
-    this.popoverCtrl.create(NewExerciseForm, {
+    this.modal.create(NewExerciseForm, {
       create: (formData: Object) => {
           let exerciseSet = this.exerciseSets.currentExerciseSet;
           if (!formData) {
@@ -115,7 +122,7 @@ export class ExerciseSetPreviewPage {
       },
       (error: any) => {
         loading.dismiss();
-        this.popoverCtrl.create(MessagesPage, {
+        this.modal.create(MessagesPage, {
           messages: [MessagesPage.createMessage('Error', error, MessageType.Error)]
         }).present();
       }
@@ -165,7 +172,7 @@ export class ExerciseSetPreviewPage {
     }
 
   private showMessages(messages: Array<IMessage>) {
-    this.popoverCtrl.create(MessagesPage, {
+    this.modalCtrl.create(MessagesPage, {
       messages: messages
     }).present();
   }
@@ -185,17 +192,21 @@ export class ExerciseSetPreviewPage {
   }
 
   editExercise(idx: number) {
-    this.setEditMode(true, idx);
     let display = <ExerciseDisplay>this.displays.toArray()[idx];
     let container = this.contents.toArray()[idx];
     let exercise = this.exercises[idx];
     exercise.display.takeSnapShot();
+    this.setEditMode(true, idx);
     this.editor = new 
       ExerciseEditor(exercise.display, () => {
         this.drawExercise(exercise, display, container);
       }, (position: number) => {
+        if (position < 0) {
+          display.hideCursor();
+          return;
+        }
         display.drawCursor(position);
-      }, () => {
+      }, (snapShot: Object) => {
         // Save
         let loading = this.showLoading();
         this.setEditMode(false);
@@ -205,7 +216,7 @@ export class ExerciseSetPreviewPage {
             fieldsToSave.push(field);
           }
           else {
-            if (exercise[field] != this.editor.snapShot[field]) {
+            if (exercise[field] != snapShot[field]) {
               fieldsToSave.push(field);
             }
           }
@@ -266,13 +277,17 @@ export class ExerciseEditor {
   constructor(private elements: ES.ExerciseElements,
     private drawExercise: () => void,
     private drawCursor: (position: number) => void,
-    private onSave: () => void,
+    private onSave: (snapShot: Object) => void,
     private onCancel: () => void,
     private modal: ModalController,
     public snapShot: Object) {
     elements.cursorChanged = () => this.enforceRules();
     elements.resetCursor();
     this.drawCursor(this.elements.cursorPosition);
+  }
+
+  onResize() {
+    this.drawAll();
   }
 
   enforceRules() {
@@ -349,21 +364,21 @@ export class ExerciseEditor {
   }
 
   key() {
-
   }
   
   stroke(hand: string) {
     let stroke = new ES.Stroke();
     stroke.accented = false;
-    stroke.grace = null;
+    stroke.grace = ES.Encoding.noGrace;
     stroke.hand = hand;
     this.elements.insertAtCursor(stroke);
     this.drawAll();
   }
 
   saveExerciseEditing() {
+    this.drawCursor(-1);
     this.elements.cursorChanged = null;
-    this.onSave();
+    this.onSave(this.snapShot);
   }
 
   editExerciseProperties() {
@@ -372,11 +387,13 @@ export class ExerciseEditor {
         this.snapShot['name'] = formData['name'];
         this.snapShot['category'] = formData['category'];
         this.snapShot['comments'] = formData['comments'];
-      }
+      },
+      initilizer: this.snapShot
     }).present();
   }
 
   cancelExerciseEditing() {
+    this.drawCursor(-1);
     this.elements.cursorChanged = null;
     this.onCancel();
   }

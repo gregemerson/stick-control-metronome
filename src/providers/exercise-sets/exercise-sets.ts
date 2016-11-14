@@ -139,7 +139,7 @@ class ExerciseSet implements IExerciseSet{
       }
     }
     return this.httpService.putPersistedObject(
-      HttpService.exerciseSetExercises(this.id), newData);
+      HttpService.exercise(this.id), newData);
   }
 
   disableExercise(exerciseId: number) {
@@ -487,7 +487,7 @@ export class Encoding {
   private static exerciseElements: ExerciseElement[];
 
   static encode(elements: ExerciseElements | ExerciseElement[]): string {
-    let encoding = '';
+    let encoding = Encoding.exerciseStart;
     for (let i = 0; i < elements.length; i++) {
       if (elements instanceof ExerciseElements) {
         encoding += elements.getElement(i).encoding;
@@ -642,7 +642,7 @@ export class Stroke extends ExerciseElement {
         return null;
       }
       let strokeIndex = index;
-      let grace = 0;
+      let grace = Encoding.noGrace;
       if (char == Encoding.graceStart) {
         grace = parseInt(encoding[strokeIndex + 1]);
         strokeIndex += 3;
@@ -650,7 +650,7 @@ export class Stroke extends ExerciseElement {
       let encodedStroke = encoding[strokeIndex]; 
       let upperStroke = encodedStroke.toUpperCase();
       let stroke = new Stroke();
-      stroke.accented = encodedStroke == upperStroke;
+      stroke.accented = encodedStroke == upperStroke && encodedStroke != Encoding.rest;
       stroke.grace = grace;
       stroke.hand = upperStroke;
       strokeIndex++;
@@ -664,7 +664,7 @@ export class Stroke extends ExerciseElement {
  
     get encoding(): string {
       let encoded = '';
-      if (this.grace != 0) {
+      if (this.grace != Encoding.noGrace) {
         encoded = Encoding.graceStart + this.grace + Encoding.graceEnd;
       }
       encoded += this.accented ? this.hand : this.hand.toLowerCase();
