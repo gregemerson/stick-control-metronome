@@ -15,6 +15,10 @@ export class MessagesPage {
   static createMessage(heading: string, body: string, type: MessageType): IMessage {
     return new Message(heading, body, type.toString());
   }
+
+  onOk() {
+    this.navCtrl.pop();
+  }
 }
 
 export enum MessageType {

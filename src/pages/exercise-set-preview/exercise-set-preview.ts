@@ -217,6 +217,7 @@ export class ExerciseSetPreviewPage {
           }
           else {
             if (exercise[field] != snapShot[field]) {
+              exercise[field] = snapShot[field];
               fieldsToSave.push(field);
             }
           }
@@ -224,12 +225,7 @@ export class ExerciseSetPreviewPage {
         this.exerciseSets.currentExerciseSet.
           save(exercise, fieldsToSave).subscribe({
             next: () => {
-              for (let field of fieldsToSave) {
-                if (field != 'notation') {
-                  exercise[field] = this.editor.snapShot[field];
-                }
-              } 
-              loading.dismiss();
+                loading.dismiss();
             },
             error: (err: any) => {
               loading.dismiss();
@@ -362,9 +358,6 @@ export class ExerciseEditor {
     this.elements.insertAtCursor(new ES.GroupSeparator());
     this.drawAll();
   }
-
-  key() {
-  }
   
   stroke(hand: string) {
     let stroke = new ES.Stroke();
@@ -388,7 +381,7 @@ export class ExerciseEditor {
         this.snapShot['category'] = formData['category'];
         this.snapShot['comments'] = formData['comments'];
       },
-      initilizer: this.snapShot
+      initializer: this.snapShot
     }).present();
   }
 

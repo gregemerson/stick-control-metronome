@@ -62,7 +62,7 @@ export class ExerciseDisplay {
   private setNoteEndPosition(note = this.genericNote): number {
     let widths = this.noteWidths;
     let lastWidth = (widths.length == 0) ? 0 : widths[widths.length - 1];
-    let width = this.getTotalNoteWidth(note);
+    let width = note == '' ? 0 : this.getTotalNoteWidth(note);
     this.noteWidths.push(lastWidth + width);
     return width;
   }
@@ -135,7 +135,7 @@ export class ExerciseDisplay {
     context.lineWidth = this.cursorWidth;
     context.beginPath();
     context.moveTo(x, y);
-    y += this.letterY;
+    y = this.letterY;
     context.lineTo(x, y);
     context.stroke();
     context.closePath();
@@ -175,7 +175,7 @@ export class ExerciseDisplay {
     }
   }
 
-  private setFontBottomSpacing() {
+  private setFontVerticalSpacing() {
     this.clearCanvas(this.exerciseCanvas);
     let width = this.getNoteWidth('R');
     let height = this.selectedFontSize;
@@ -205,8 +205,8 @@ export class ExerciseDisplay {
         lower += middle != 0 ? 1 : 0;
       }
     }
-    this.noteTopSpacing = upper;
-    this.noteBottomSpacing = lower;
+    this.noteTopSpacing = upper - 1;
+    this.noteBottomSpacing = lower + 3;
     this.clearCanvas(this.exerciseCanvas);
   }
 
@@ -223,7 +223,7 @@ export class ExerciseDisplay {
     let elementIndex = 0;
     let display = exercise.display;
     this.noteWidths = [];
-    this.setFontBottomSpacing();
+    this.setFontVerticalSpacing();
     for (let lineIdx = 0; lineIdx < this.endOfLineIndices.length; lineIdx++) {
       this.noteWidths.push(this.noteSpacing);
       this.resetNoteX();
@@ -242,9 +242,7 @@ export class ExerciseDisplay {
           this.noteX += this.drawMeasureSeparator();
         }
         else if (element instanceof ES.GroupSeparator) {
-          if (!firstWrite) {
-            this.noteX += this.drawGroupSeparator();
-          }
+          this.noteX += this.drawGroupSeparator(firstWrite);
         }
         else if (element instanceof ES.Repeat) {
           this.noteX += this.drawRepeat(<ES.Repeat>element);
@@ -282,23 +280,21 @@ export class ExerciseDisplay {
     let usedWidth = 0;
     let breakCandidate = 0;
     let previousBreak = -1;
-    let lastEol = -1;
+    let lastNewLine = -1;
     for (let elementIndex = 0; elementIndex < exercise.display.length; elementIndex++) {
       let element = exercise.display.getElement(elementIndex);
       // @todo note type widths should be encapsulated
       let currentWidth = (element instanceof ES.Repeat) ? 2 * noteWidth : noteWidth;
       if ((usedWidth + currentWidth) <= this.exerciseCanvas.width) {
         // See if element can be an eol
-        if (!(element instanceof ES.Stroke) ||
-            elementIndex == exercise.display.length - 1 ||
-            !(exercise.display.getElement(elementIndex + 1) instanceof ES.Stroke)) {
-          lastEol = elementIndex;
+        if (!(element instanceof ES.Stroke)) {
+          lastNewLine = elementIndex;
         }
         usedWidth += currentWidth;
       }
       else {
-        this.endOfLineIndices.push(lastEol);
-        elementIndex = lastEol;
+        this.endOfLineIndices.push(lastNewLine - 1);
+        elementIndex = lastNewLine;
         usedWidth = currentWidth;
       }
     }
@@ -364,8 +360,8 @@ export class ExerciseDisplay {
       let endPosition = this.setNoteEndPosition(stroke.hand);
       let noteWidth = this.getNoteWidth(stroke.hand);
       if (stroke.grace != 0) {
-        context.lineWidth = regionHeight/4;
         if (stroke.grace == ES.Encoding.buzz) {
+          context.lineWidth = regionHeight/2;
           context.strokeStyle = this.buzzColor;
           context.beginPath();
           context.moveTo(x, this.letterY - this.noteBottomSpacing);
@@ -374,6 +370,7 @@ export class ExerciseDisplay {
           context.closePath();          
         }
         else {
+          context.lineWidth = regionHeight/4;
           context.strokeStyle = this.graceColor;
           context.beginPath();
           for (let i = 0; i < stroke.grace; i++) {
@@ -421,8 +418,9 @@ export class ExerciseDisplay {
     return endPosition;
   }
 
-  private drawGroupSeparator(): number {
-    return this.setNoteEndPosition();
+  private drawGroupSeparator(isFirstPositionOnLine = false): number {
+    let char = isFirstPositionOnLine ? '' : 'X';
+    return this.setNoteEndPosition(char);
   }
 
   private drawMeasureSeparator(): number {
