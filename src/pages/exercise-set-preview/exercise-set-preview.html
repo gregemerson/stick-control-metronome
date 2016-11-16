@@ -7,7 +7,7 @@
 <ion-content padding (window:resize)="onResize($event)">
   <ion-list no-lines>
     <ion-item>
-      <ion-select [(ngModel)]="selectedExerciseSetId"
+      <ion-select [(ngModel)]="selectedExerciseSetName"
         (ionChange)="onChange($event)" placeholder="Not Selected" [disabled]="editing">
         <ion-option *ngFor="let set of exerciseSets.items" [value]="set.id">{{ set.name }}</ion-option>
       </ion-select>
@@ -15,7 +15,8 @@
     <ion-item>
       <ion-buttons>
         <button ion-button (click)="newExerciseSet($event)" [disabled]="editing">New Exercise Set</button>
-        <button ion-button (click)="newExercise($event)" [disabled]="selectedExerciseSetId == null || editing">New Exercise</button>    
+        <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="danger">Delete Exercise Set</button>
+        <button ion-button (click)="newExercise($event)" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing">New Exercise</button>    
       </ion-buttons>
     </ion-item>
   </ion-list>
@@ -29,7 +30,7 @@
       <div #displayContainer class="exercise-container"   [style.background-color]="editIndex == idx ? 'editing-color' : 'static-color'">
         <exercise-display #exerciseDisplay></exercise-display>
       </div> 
-      <ion-buttons [hidden]="editIndex == idx">
+      <ion-buttons [hidden]="editIndex == idx || !exercise.isOwner">
         <button ion-button (click)="editExercise(idx)" [disabled]="editing" color="primary" small>
           <ion-icon name="open"></ion-icon>
         </button>

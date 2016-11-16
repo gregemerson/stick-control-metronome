@@ -30,8 +30,9 @@ export class ExerciseSets {
     this.currentExerciseSet = null;
     let currentId = user.settings.currentExerciseSet;
     for (let key in user.rawExerciseSets) {
+      let isOwner = user.rawExerciseSets[key]['ownerId'] == user.id;
       let newSet = new ExerciseSet(this.httpService,
-        user.rawExerciseSets[key]);
+        user.rawExerciseSets[key], isOwner);
       this.items.push(newSet);
       if (newSet.id == user.settings.currentExerciseSet) {
         this.currentExerciseSet = newSet;
@@ -52,19 +53,24 @@ export class ExerciseSets {
     return this.httpService.postPersistedObject(
       HttpService.ExerciseSetCollection, initializer)
       .map(result => {
-        let newSet = new ExerciseSet(this.httpService, result);
+        let newSet = new ExerciseSet(this.httpService, result, true);
         this.items.push(newSet);
         return newSet.id;
       });
   }
   
   public setCurrentExerciseSet(exerciseSetId: number): Observable<void> {
+    this.user.settings.currentExerciseSet = exerciseSetId;
     if (this.currentExerciseSet != null) {
       (<ExerciseSet>this.currentExerciseSet).unloadExercises();
     }
     this.currentExerciseSet = this.findExerciseSet(exerciseSetId);
-    return (<ExerciseSet>this.currentExerciseSet).
-      loadExercises(this.httpService, this.user);
+    return this.httpService.putPersistedObject(
+      HttpService.userSettings(this.user.id), 
+        {currentExerciseSetId: exerciseSetId}).flatMap((obj: Object) => {
+          return (<ExerciseSet>this.currentExerciseSet).
+            loadExercises(this.httpService, this.user);
+      });
   }
 
   private findExerciseSet(exerciseSetId: number): ExerciseSet {
@@ -81,6 +87,7 @@ export interface IExerciseSet {
   id: number;
   currentExercise: IExercise;
   nextExercise: IExercise;
+  isOwner: boolean;
   name: string;
   category: string;
   next(): IExercise;
@@ -96,7 +103,6 @@ class ExerciseSet implements IExerciseSet{
   name: string;
   category: string;
   id: number;
-  private ownerId: number;
   private nextIndex: number = -1;
   private exercises: {[key: number]: Exercise} = {};
   private disabledExercises:  {[key: number]: boolean} = {};
@@ -104,17 +110,22 @@ class ExerciseSet implements IExerciseSet{
   private filter = '?filter[include][exercises]';
   private _exercisesLoaded = false;
   private ignoreDisabled: boolean;
+  private _isOwner = false;
 
-  constructor(private httpService: HttpService, rawExerciseSet: Object) {
+  constructor(private httpService: HttpService, rawExerciseSet: Object, isOwner: boolean) {
     this.name = rawExerciseSet['name'];
     this.id = rawExerciseSet['id'];
-    this.ownerId = rawExerciseSet['ownerId'];
     this.category = rawExerciseSet['category'];
     this.comments = rawExerciseSet['comments']
     this.exerciseOrdering = rawExerciseSet['exerciseOrdering'];
     for (let exerciseId of rawExerciseSet['disabledExercises']) {
       this.disabledExercises[<number>exerciseId] = true;
     }
+    this._isOwner = isOwner;
+  }
+
+  get isOwner(): boolean {
+    return this._isOwner;
   }
 
   newExercise(exerciseInitializer: Object): Observable<number> {

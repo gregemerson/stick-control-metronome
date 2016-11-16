@@ -19,12 +19,10 @@ import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
   }`]
 })
 export class ExerciseSetPreviewPage {
-  testGroup: FormGroup;
-
   title = '';
   constraints = new ExerciseConstraints();
   exercises: Array<ES.IExercise> = [];
-  selectedExerciseSetId: number = null;
+  selectedExerciseSetName: number = null;
   editor: ExerciseEditor = null;
   editing = false;
   editIndex: number = null;
@@ -41,11 +39,6 @@ export class ExerciseSetPreviewPage {
     private modal: ModalController,
     private changeDetect: ChangeDetectorRef,
     private formBuilder: FormBuilder) {
-      this.testGroup = this.formBuilder.group({
-        name: ['', Validators.maxLength(this.constraints.maxNameLength)],
-        category: ['', Validators.maxLength(this.constraints.maxCategoryLength)],
-        comments: ['', Validators.maxLength(this.constraints.maxExerciseCommentsLength)],
-      });
   }
 
   onResize($event) {
@@ -109,14 +102,15 @@ export class ExerciseSetPreviewPage {
   onChange($event) {
     this.changeDetect.detectChanges();
     if (!$event) {
-      this.selectedExerciseSetId = null;
+      this.selectedExerciseSetName = null;
       return;
     }
     let loading = this.showLoading();
     this.exerciseSets.setCurrentExerciseSet($event).subscribe(
-      () => {
+      (x: any) => {
         loading.dismiss();
-        this.selectedExerciseSetId = 
+        console.log('is owner: ' + this.exerciseSets.currentExerciseSet.isOwner);
+        this.selectedExerciseSetName = 
           this.exerciseSets.currentExerciseSet.id;
         this.loadExercises();
       },
@@ -131,7 +125,7 @@ export class ExerciseSetPreviewPage {
 
   ngAfterViewInit() {
     this.contents.changes.subscribe((changes: any) => this.displayExercises());
-    this.selectedExerciseSetId = 
+    this.selectedExerciseSetName = 
       this.exerciseSets.currentExerciseSet ? 
       this.exerciseSets.currentExerciseSet.id : null;
     this.loadExercises();
@@ -247,6 +241,10 @@ export class ExerciseSetPreviewPage {
   }
 
   deleteExercise(idx: number) {
+
+  }
+
+  deleteExerciseSet() {
 
   }
 

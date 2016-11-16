@@ -54,7 +54,7 @@ export class ExerciseDisplay {
   private genericNote = 'X';
   private graceColor = '#FF0000';
   private buzzColor = '#3F9FBF';
-  private restFillColor = '#e6e9ef';
+  private restFillColor = '#9d9ea0';
 
   constructor(private navCtrl: NavController) {
   }

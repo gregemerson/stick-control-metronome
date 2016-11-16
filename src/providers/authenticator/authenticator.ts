@@ -97,55 +97,29 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
 
   login(email: String, password: String): Observable<void> {
-    return Observable.create((observer: Observer<void>) => {
-      try {
-        this.token = '';
-        this.http.post('/api/Clients/login', JSON.stringify({
-          email: email,
-          password: password
-        }), Authenticator.newRequestOptions())
-        .map((response : Response) => {
-          let data = this.handleErrors(response);
-          this.token = data['id'];
-          this.uid = data['userId'];
-          return data['userId'];
-        })
-        .subscribe((id) => {
-          this.internalLoadUser(observer)
-            .subscribe();
-        }, (error: any) => observer.error(error));
-      }
-      catch(err) {
-        observer.error({message: 'Could not log in user.'});
-        // @todo remote error logging
-      }
-    });
+    this.token = '';
+    return this.http.post('/api/Clients/login', JSON.stringify({
+      email: email,
+      password: password
+    }), Authenticator.newRequestOptions())
+    .map((response : Response) => {
+      let data = this.handleErrors(response);
+      this.token = data['id'];
+      this.uid = data['userId'];
+      return data['userId'];
+    }).flatMap((id: number, index: number) => {
+      return this.loadUser();
+    })
   }
 
-  loadUser() : Observable<void> {
-    return Observable.create((observer: Observer<void>) => {
-      try {
-        this.internalLoadUser(observer)
-        .subscribe();
-      }
-      catch (err) {
-        observer.error(err);
-      }
-    });
-  }
 
-  private internalLoadUser(observer: Observer<void>): Observable<void> {
-    return Observable.create((obs: Observer<void>) => {     
-      this.http.get('/api/Clients/' + localStorage.getItem(
-          Authenticator.uidKey) + this.userLoadFilter,
-        Authenticator.newRequestOptions())
-      .map((response : Response) => {
-        let user= this.handleErrors(response);
-        this.setUser(new AuthUser(user));
-      })
-      .subscribe({
-        next: () => observer.next(null), 
-          error: (err: any) => observer.error(err)});
+  loadUser(): Observable<void> {
+    return this.http.get('/api/Clients/' + localStorage.getItem(
+      Authenticator.uidKey) + this.userLoadFilter,
+      Authenticator.newRequestOptions())
+    .map((response : Response) => {
+      let user= this.handleErrors(response);
+      this.setUser(new AuthUser(user));
     });
   }
 
