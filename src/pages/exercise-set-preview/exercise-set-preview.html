@@ -24,7 +24,7 @@
     <ion-item *ngFor="let exercise of exercises; let idx = index">
       <div [hidden]="editIndex == idx">
         {{ (exercise.name ? exercise.name : '') +
-          (exercise.category ? (' (' + exercise.category + ')') : 'Unnamed')  +
+          (exercise.category ? (' (' + exercise.category + ')') : '')  +
           (exercise.comments ? (': ' + exercise.comments) : '') }}
       </div>
       <div #displayContainer class="exercise-container"   [style.background-color]="editIndex == idx ? 'editing-color' : 'static-color'">

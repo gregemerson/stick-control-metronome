@@ -1,19 +1,22 @@
 
 
 module.exports = function(Exerciseset) {
-    
-    Exerciseset.beforeRemote('upsert', function( ctx, instance, next) {
-        if (!ctx.req.body.id) {
-            ctx.req.body.created = Date.now();
-            ctx.req.body.clientId = ctx.req.accessToken.userId;
-            ctx.req.body.ownerId = ctx.req.accessToken.userId;
-        }
+    var app = require('../../server/server');
+    Exerciseset.beforeRemote('create', function( ctx, instance, next) {
+        ctx.req.body.created = new Date();
+        ctx.req.body.clientId = ctx.req.accessToken.userId;
+        ctx.req.body.ownerId = ctx.req.accessToken.userId;
+        next();
+    });
+    // need to set the new set as currentExerciseSet
+    Exerciseset.afterRemote('create', function(context, remoteMethodOutput, next) {
+        var settings = app.models.Usersettings;
+        settings.find
         next();
     });
 
     Exerciseset.createdExercises = function(id, data, cb) {
         Exerciseset.beginTransaction({}, function(err, tx) {
-            var app = require('../../server/server');
             try {
                 if (err) throw err;
                 data.created = Date.now();
@@ -24,7 +27,7 @@ module.exports = function(Exerciseset) {
                         if (err) throw err;
                         console.log('exercise: ' + newExercise);
                         let ordering = JSON.parse(exerciseSet.exerciseOrdering);
-                        ordering.unshift(newExercise.id);
+                        ordering.push(newExercise.id);
                         exerciseSet.exerciseOrdering = JSON.stringify(ordering);
                         exerciseSet.save({transaction: tx}, function(err, newSet) {
                             if (err) throw err;

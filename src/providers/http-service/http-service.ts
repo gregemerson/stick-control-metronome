@@ -22,6 +22,12 @@ export class HttpService extends Observable<HttpServiceErrors> {
   static userSettings(userId: number): string {
     return 'api/Clients/' + userId.toString() + '/userSettings';
   }
+  static exerciseSetExercise(exerciseSetId: number, exerciseId: number): string {
+    return 'api/ExerciseSets/' + exerciseSetId.toString() + '/exercises/' + exerciseId.toString();
+  }
+  static clientExerciseSets(clientId: number): string {
+    return 'api/Clients/' + clientId.toString() + '/exerciseSets';
+  }
   
   private subscribers: {[key: string]: Subscriber<HttpServiceErrors>} = {};
   private static globalErrorCodes = {
@@ -88,6 +94,10 @@ export class HttpService extends Observable<HttpServiceErrors> {
         // @todo Remote error logging
       }
     });
+  }
+
+  deletePersistedObject(url: string, requestOptions = Authenticator.newRequestOptions()): Observable<Response> {
+    return this.http.delete(url, requestOptions);
   }
 
   private processResponse(response: Response, observer: Observer<Object>) {

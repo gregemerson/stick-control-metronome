@@ -229,6 +229,7 @@ export interface IAuthUserSettings {
   minTempo: number;
   maxTempo: number;
   tempoStep: number;
+  id: number;
 }
 
 class AuthUserSettings implements IAuthUserSettings {

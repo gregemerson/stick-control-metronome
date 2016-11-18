@@ -9,8 +9,7 @@
   "properties": {
     "created": {
       "type": "Date",
-      "required": false,
-      "default": ""
+      "required": false
     },
     "name": {
       "type": "string",
@@ -31,7 +30,7 @@
     },
     "category": {
       "type": "string",
-      "required": true,
+      "required": false,
       "default": "Uncategorized",
       "length": 20
     },
@@ -58,10 +57,10 @@
       "model": "Exercise"
     },
     {
-      "accessType": "*",
+      "accessType": "EXECUTE",
       "principalType": "ROLE",
       "principalId": "$authenticated",
-      "permission": "DENY",
+      "permission": "ALLOW",
       "model": "Exercise"
     },
     {

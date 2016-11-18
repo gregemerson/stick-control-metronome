@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title color="danger">Deletion Warning</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <ion-card>
+    <ion-card-content>{{ message }}</ion-card-content>
+  </ion-card>
+  <button ion-button (click)="onCancel()" color="primary">
+    <ion-icon name="close">Cancel</ion-icon>
+  </button>
+  <button ion-button (click)="onOk()" color="primary">
+    <ion-icon name="checkmark">Delete</ion-icon>
+  </button>
+</ion-content>

@@ -1,16 +1,22 @@
 <form [formGroup]="newExercise">
     <ion-item>
         <ion-label>Name</ion-label>
-        <ion-input type="text" formControlName="name"></ion-input>
+        <ion-input maxlength="constraints.maxNameLength" type="text" formControlName="name"></ion-input>
     </ion-item>
     <ion-item>
         <ion-label>Category</ion-label>
-        <ion-input type="text" formControlName="category"></ion-input>
+        <ion-input maxlength="constraints.maxCategoryLength" type="text" formControlName="category"></ion-input>
     </ion-item>
     <ion-item>
         <ion-label>Comments</ion-label>
-        <ion-textarea formControlName="comments"></ion-textarea>
+        <ion-textarea maxlength="constraints.maxExerciseCommentsLength" formControlName="comments"></ion-textarea>
     </ion-item>
-    <button ion-button type="submit" [disabled]="!newExercise.valid" (click)="create()" color="primary" small><ion-icon name="checkmark-circle"></ion-icon></button>
-    <button ion-button [disabled]="!newExercise.valid" (click)="cancel()" color="danger" small><ion-icon name="trash"></ion-icon></button>
+    <ion-item>
+        <ion-buttons start>
+            <button ion-button type="submit" [disabled]="!newExercise.valid" (click)="create()" color="primary" small>
+                <ion-icon name="checkmark-circle"></ion-icon></button>
+            <button ion-button (click)="cancel()" color="danger" small>
+                <ion-icon name="trash"></ion-icon></button>
+        </ion-buttons>
+    </ion-item>
 </form>

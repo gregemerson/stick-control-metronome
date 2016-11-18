@@ -51,12 +51,16 @@ export class ExerciseSets {
     initializer['clientId'] = this.user.id;
     initializer['ownerId'] = this.user.id;
     return this.httpService.postPersistedObject(
-      HttpService.ExerciseSetCollection, initializer)
+      HttpService.clientExerciseSets(this.user.id), initializer)
       .map(result => {
         let newSet = new ExerciseSet(this.httpService, result, true);
         this.items.push(newSet);
         return newSet.id;
       });
+  }
+
+  deleteCurrentExerciseSet() {
+
   }
   
   public setCurrentExerciseSet(exerciseSetId: number): Observable<void> {
@@ -67,7 +71,10 @@ export class ExerciseSets {
     this.currentExerciseSet = this.findExerciseSet(exerciseSetId);
     return this.httpService.putPersistedObject(
       HttpService.userSettings(this.user.id), 
-        {currentExerciseSetId: exerciseSetId}).flatMap((obj: Object) => {
+        {
+          id: this.user.settings.id,
+          currentExerciseSet: this.currentExerciseSet.id
+        }).flatMap((obj: Object) => {
           return (<ExerciseSet>this.currentExerciseSet).
             loadExercises(this.httpService, this.user);
       });
@@ -94,6 +101,7 @@ export interface IExerciseSet {
   initIterator(): void;
   newExercise(exerciseInitializer: Object): Observable<number>;
   save(exercise: IExercise, fieldsToSave: string []): Observable<Object>;
+  delete(exercise: IExercise): Observable<Object>;
 }
 
 class ExerciseSet implements IExerciseSet{
@@ -133,7 +141,7 @@ class ExerciseSet implements IExerciseSet{
       HttpService.exerciseSetExercises(this.id), exerciseInitializer)
       .map(exercise => {
         this.exercises[exercise['id']] = new Exercise(exercise, true);
-        this.exerciseOrdering.splice(0, 0, exercise['id']);
+        this.exerciseOrdering.push(exercise['id']);
         return exercise['id'];
       });
   }
@@ -151,6 +159,11 @@ class ExerciseSet implements IExerciseSet{
     }
     return this.httpService.putPersistedObject(
       HttpService.exercise(this.id), newData);
+  }
+
+  delete(exercise: IExercise): Observable<Object> {
+    let url = HttpService.exerciseSetExercise(this.id, exercise.id);
+    return this.httpService.deletePersistedObject(url);
   }
 
   disableExercise(exerciseId: number) {

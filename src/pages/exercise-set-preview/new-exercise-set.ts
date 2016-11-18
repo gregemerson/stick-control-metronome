@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {NavParams, NavController} from 'ionic-angular'
 import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
+import {ExerciseConstraints} from './exercise-constraints';
 
 @Component({
   selector: 'new-exercise-set',
@@ -8,18 +9,16 @@ import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
 })
 export class NewExerciseSetForm {
   newExerciseSet: FormGroup;
-  maxNameChars = 40;
-  maxCategoryChars = 20;
-  maxCommentsChars = 200;
+  constraints = new ExerciseConstraints();
   private callback: (Object) => void;
 
   constructor(private formBuilder: FormBuilder,
     private navCtrl: NavController, params: NavParams) {
       this.callback = <(Object) => void>params.get('create');
       this.newExerciseSet = this.formBuilder.group({
-        name: ['', Validators.maxLength(this.maxNameChars)],
-        category: ['', Validators.maxLength(this.maxCategoryChars)],
-        comments: ['', Validators.maxLength(this.maxCommentsChars)],
+        name: ['', Validators.maxLength(this.constraints.maxNameLength)],
+        category: ['', Validators.maxLength(this.constraints.maxCategoryLength)],
+        comments: ['', Validators.maxLength(this.constraints.maxExerciseSetCommentsLength)],
       });
   }
 

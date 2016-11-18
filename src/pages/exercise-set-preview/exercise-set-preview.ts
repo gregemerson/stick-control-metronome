@@ -1,5 +1,5 @@
 import {SimpleChanges, ChangeDetectorRef, Component, ViewChildren, ViewChild, ElementRef, QueryList, EventEmitter} from '@angular/core';
-import {NavController, NavParams, LoadingController, Loading, ModalController} from 'ionic-angular';
+import {NavController, NavParams, LoadingController, Loading, ModalController, PopoverController, Content} from 'ionic-angular';
 import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
@@ -7,7 +7,7 @@ import {NewExerciseSetForm} from './new-exercise-set';
 import {NewExerciseForm} from './new-exercise';
 import {RepeatForm} from './repeat';
 import {ExerciseConstraints} from './exercise-constraints';
-
+import {WarningPage} from '../messages/warning'
 import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
 
 @Component({
@@ -26,6 +26,7 @@ export class ExerciseSetPreviewPage {
   editor: ExerciseEditor = null;
   editing = false;
   editIndex: number = null;
+  @ViewChild(Content) content: Content;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
   private fontFactor = 1.75;
@@ -37,6 +38,7 @@ export class ExerciseSetPreviewPage {
     private loadingCtrl: LoadingController,
     private modalCtrl: ModalController,
     private modal: ModalController,
+    private popover: PopoverController,
     private changeDetect: ChangeDetectorRef,
     private formBuilder: FormBuilder) {
   }
@@ -87,7 +89,8 @@ export class ExerciseSetPreviewPage {
                 }
                 index++;
               }  
-              this.exercises.splice(index, 0, exercise);
+              this.exercises.push(exercise);
+              this.content.scrollToBottom();
             },
             error: (err: any) => {
               this.showMessages([MessagesPage.createMessage(
@@ -109,7 +112,6 @@ export class ExerciseSetPreviewPage {
     this.exerciseSets.setCurrentExerciseSet($event).subscribe(
       (x: any) => {
         loading.dismiss();
-        console.log('is owner: ' + this.exerciseSets.currentExerciseSet.isOwner);
         this.selectedExerciseSetName = 
           this.exerciseSets.currentExerciseSet.id;
         this.loadExercises();
@@ -241,7 +243,21 @@ export class ExerciseSetPreviewPage {
   }
 
   deleteExercise(idx: number) {
-
+    this.popover.create(WarningPage, {
+      message: 'Do you want to permanantly delete this exercise?',
+      okCallback: () => {
+        this.exerciseSets.currentExerciseSet.delete(
+          this.exercises[idx]).subscribe({
+            next: (obj: Object) => {
+              this.exercises.splice(idx, 1);
+            },
+            error: (err: any) => {
+              let message = MessagesPage.createMessage(
+                "Error", "could not delete exercise", MessageType.Error);
+            }
+          });
+      }
+    })
   }
 
   deleteExerciseSet() {
