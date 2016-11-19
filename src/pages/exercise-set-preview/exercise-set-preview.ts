@@ -50,7 +50,25 @@ export class ExerciseSetPreviewPage {
     }
   }
 
-  newExerciseSet($event) {
+  updateExerciseSetMetadata() {
+    this.modalCtrl.create(NewExerciseSetForm, {
+      create: (formData: Object) => {
+          if (!formData) {
+            return;
+          }
+          this.exerciseSets.updateCurrentExerciseSetMetadata(formData).subscribe({
+            next: () => null,
+            error: (err: any) => {
+              this.showMessages([MessagesPage.createMessage(
+                'Error', 'Could not edit exercise set.', MessageType.Error
+              )]);
+            }
+          });
+      }
+    }).present();
+  }
+
+  newExerciseSet() {
     this.modalCtrl.create(NewExerciseSetForm, {
       create: (formData: Object) => {
           if (!formData) {

@@ -13,7 +13,14 @@ module.exports = function(Client) {
         };
         delete ctx.req.body.membershipExpiry;
         next();
-    }); 
+    });
+
+    Client.beforeRemote('*.__create__exerciseSets', function(ctx, instance, next) {
+        ctx.req.body['created'] = new Date();
+        ctx.req.body['ownerId'] = ctx.req.accessToken.userId;
+        next();
+    });            
+
     Client.beforeRemote('updateAttributes', function(ctx, instance, next) {
         delete ctx.req.body.membershipExpiry;
         next();

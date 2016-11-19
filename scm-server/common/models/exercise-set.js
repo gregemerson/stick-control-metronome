@@ -2,16 +2,23 @@
 
 module.exports = function(Exerciseset) {
     var app = require('../../server/server');
-    Exerciseset.beforeRemote('create', function( ctx, instance, next) {
-        ctx.req.body.created = new Date();
-        ctx.req.body.clientId = ctx.req.accessToken.userId;
-        ctx.req.body.ownerId = ctx.req.accessToken.userId;
+
+
+    Exerciseset.beforeRemote('*.__create__exercises', function(ctx, instance, next) {
+        ctx.req.body['created'] = new Date();
+        ctx.req.body['ownerId'] = ctx.req.accessToken.userId;
         next();
-    });
+    });   
+
     // need to set the new set as currentExerciseSet
-    Exerciseset.afterRemote('create', function(context, remoteMethodOutput, next) {
-        var settings = app.models.Usersettings;
-        settings.find
+    Exerciseset.afterRemote('create', function(ctx, exerciseSet, next) {
+        app.models.Usersettings.find(
+            {where: {clientId: ctx.req.accessToken.userId}},
+                function(err, settings) { 
+                    settings.currentExerciseSet = exerciseSet.id;
+                    settings.save();
+                });
+
         next();
     });
 

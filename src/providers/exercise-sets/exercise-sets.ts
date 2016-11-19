@@ -31,7 +31,7 @@ export class ExerciseSets {
     let currentId = user.settings.currentExerciseSet;
     for (let key in user.rawExerciseSets) {
       let isOwner = user.rawExerciseSets[key]['ownerId'] == user.id;
-      let newSet = new ExerciseSet(this.httpService,
+      let newSet = new ExerciseSet(this.httpService, user,
         user.rawExerciseSets[key], isOwner);
       this.items.push(newSet);
       if (newSet.id == user.settings.currentExerciseSet) {
@@ -48,14 +48,24 @@ export class ExerciseSets {
   }
 
   newExerciseSet(initializer: Object): Observable<number> {
-    initializer['clientId'] = this.user.id;
-    initializer['ownerId'] = this.user.id;
     return this.httpService.postPersistedObject(
       HttpService.clientExerciseSets(this.user.id), initializer)
       .map(result => {
-        let newSet = new ExerciseSet(this.httpService, result, true);
+        let newSet = new ExerciseSet(this.httpService, this.user, result, true);
         this.items.push(newSet);
         return newSet.id;
+      });
+  }
+
+  updateCurrentExerciseSetMetadata(metadata: Object): Observable<void> {
+    let fields = ['name', 'category', 'comments']
+    return this.httpService.putPersistedObject(HttpService.clientExerciseSet(
+      this.user.id, this.currentExerciseSet.id), metadata).map(result => {
+        for (let field in fields) {
+          if (metadata.hasOwnProperty(field)) {
+            this.currentExerciseSet[field] = metadata[field];
+          }
+        }
       });
   }
 
@@ -120,7 +130,9 @@ class ExerciseSet implements IExerciseSet{
   private ignoreDisabled: boolean;
   private _isOwner = false;
 
-  constructor(private httpService: HttpService, rawExerciseSet: Object, isOwner: boolean) {
+  constructor(private httpService: HttpService, 
+    private user: IAuthUser, 
+    rawExerciseSet: Object, isOwner: boolean) {
     this.name = rawExerciseSet['name'];
     this.id = rawExerciseSet['id'];
     this.category = rawExerciseSet['category'];
@@ -136,9 +148,12 @@ class ExerciseSet implements IExerciseSet{
     return this._isOwner;
   }
 
-  newExercise(exerciseInitializer: Object): Observable<number> {
+  newExercise(initializer: Object): Observable<number> {
+    initializer['ownerId'] = this.user.id;
+    initializer['clientId'] = this.user.id;
+    initializer['created'] = new Date();
     return this.httpService.postPersistedObject(
-      HttpService.exerciseSetExercises(this.id), exerciseInitializer)
+      HttpService.exerciseSetExercises(this.id), initializer)
       .map(exercise => {
         this.exercises[exercise['id']] = new Exercise(exercise, true);
         this.exerciseOrdering.push(exercise['id']);
