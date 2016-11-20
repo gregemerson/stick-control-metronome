@@ -31,7 +31,10 @@ export class HttpService extends Observable<HttpServiceErrors> {
   static clientExerciseSet(clientId: number, exerciseSetId: number): string {
     return 'api/Clients/' + clientId.toString() + '/exerciseSets/' + exerciseSetId;
   }
-  
+  static logout(): string {
+    return 'api/Clients/logout';
+  }
+
   private subscribers: {[key: string]: Subscriber<HttpServiceErrors>} = {};
   private static globalErrorCodes = {
     INVALID_TOKEN: 'Your session has expired, please re-log in.',
@@ -52,7 +55,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
     return Observable.create((observer: Observer<Object>) => {
       try {
         this.http.post(url, data, requestOptions)
-          .map(response => this.processResponse(response, observer))
+          .map(response => {
+            this.processResponse(response, observer)
+          })
           .subscribe({
             next: () => {},
             error: (err: any) => observer.error(err)
@@ -104,13 +109,22 @@ export class HttpService extends Observable<HttpServiceErrors> {
   }
 
   private processResponse(response: Response, observer: Observer<Object>) {
-    let obj = <Object>response.json();
-    let errors = this.parseForErrors(obj);
+    let obj: Object = {};
+    let errors: IHttpServiceError[] = [];
+    try {
+      obj = <Object>response.json();
+      errors = this.parseForErrors(obj);
+    }
+    catch (err) {
+      // Nothing to do
+    }
     if (errors.length == 0) {
       observer.next(obj);
       observer.complete();
     }
-    observer.error(errors);
+    else {
+      observer.error(errors);
+    }
   }
 
   private handleError (error: any) {

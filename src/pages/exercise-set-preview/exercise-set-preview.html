@@ -1,10 +1,15 @@
 <ion-header>
   <ion-navbar>
     <ion-title>Exercise Sets</ion-title>
+    <app-buttons></app-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding (window:resize)="onResize($event)">
+  <ion-card [hidden]="!exerciseSets.currentExerciseSet">
+      <ion-card-header>Category: {{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.category : ''}}</ion-card-header>
+      <ion-card-content>{{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.comments : ''}}</ion-card-content>  
+  </ion-card>
   <ion-list no-lines>
     <ion-item>
       <ion-select [(ngModel)]="selectedExerciseSetName"

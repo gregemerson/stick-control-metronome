@@ -162,10 +162,12 @@ export class Authenticator extends BaseObservable<IAuthUser> {
     return authErrors;
   }
 
-  logout(): Observable<void> {
-    return this.http.get('/api/Clients/logout', Authenticator.newRequestOptions())
+  logout(): Observable<Object> {
+    let options = Authenticator.newRequestOptions();
+    this.unsetUser();
+    return this.httpService.postPersistedObject(HttpService.logout(), {}, options)
     .map((res : any) => {
-      this.unsetUser();
+      return res;
     });
   }
 }

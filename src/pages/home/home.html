@@ -3,11 +3,7 @@
     <ion-title>Stick Control Metronome{{ exerciseSets.currentExerciseSet != null ? ':' : ''}}
       <span color="primary">{{ exerciseSets.currentExerciseSet?.name }}</span>
     </ion-title>
-    <ion-buttons end>
-    <button ion-button (click)="loginClicked($event)">
-     <ion-icon name="log-in"></ion-icon>
-   </button>
-    </ion-buttons>
+    <app-buttons></app-buttons>
   </ion-navbar>
 </ion-header>
 

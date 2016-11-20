@@ -21,7 +21,7 @@ import {Metronome} from '../providers/metronome/metronome';
 import {ResourceLibrary} from '../providers/resource-library/resource-library';
 import {NewExerciseForm} from '../pages/exercise-set-preview/new-exercise';
 import {RepeatForm} from '../pages/exercise-set-preview/repeat';
-
+import {AppButtons} from '../pages/app-buttons/app-buttons';
 
 @NgModule({
   declarations: [
@@ -39,7 +39,8 @@ import {RepeatForm} from '../pages/exercise-set-preview/repeat';
     MessagesPage,
     SettingsPage,
     NewExerciseSetForm,
-    NewExerciseForm
+    NewExerciseForm,
+    AppButtons
   ],
   imports: [
     IonicModule.forRoot(StickControlMetronome, {prodMode: false})
@@ -60,7 +61,8 @@ import {RepeatForm} from '../pages/exercise-set-preview/repeat';
     MessagesPage,
     SettingsPage,
     NewExerciseSetForm,
-    NewExerciseForm
+    NewExerciseForm,
+    AppButtons
   ],
   providers: [
     AudioBuffers,

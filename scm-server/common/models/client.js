@@ -33,12 +33,16 @@ module.exports = function(Client) {
     Client.beforeRemote('logout', function(ctx, instance, next) { 
         // Extra protection
         Client.find({where: {username: 'guest'}}, function(err, user){
-            if (user.id == ctx.res.token.userId) {
-                throw 'Guest cannot log out.'
+            if (err || !ctx.req.accessToken || user.id == ctx.req.accessToken.id) {
+                var error = new Error();
+                error.status = 400;
+                error.message = 'Invalid logout';
+                next(error);           
+            }
+            else {
+                next();
             }
         });
-        ctx.req.body.ttl = 60 * 60 * 24 * 7 * 2;
-        next();
     });
     Client.afterRemote('login', function(ctx, auth, next) {
         var accessToken = app.models.AccessToken;

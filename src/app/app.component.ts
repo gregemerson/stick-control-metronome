@@ -55,7 +55,7 @@ export class StickControlMetronome {
           MessagesPage, {messages: displayErrors}).present();
       }}));
 
-      // Listen for the IAuthUser being loaded
+      // Listen for the IAuthUser being loaded or unloaded
       this.userLoadedSubscription = authenticator.subscribe({
         next: (user: IAuthUser) => {
           if (user == null) {
