@@ -71,7 +71,6 @@ export class StickControlMetronome {
           // Has local auth data
         },
         error: (err: any) => {
-          console.log(err);
           let modal = this.modalController.create(
             LoginPage, {authenticator: authenticator});
           modal.present();

@@ -57,15 +57,17 @@ export class ExerciseSets {
       });
   }
 
-  updateCurrentExerciseSetMetadata(metadata: Object): Observable<void> {
+  updateCurrentExerciseSetMetadata(metadata: Object): Observable<Object> {
     let fields = ['name', 'category', 'comments']
     return this.httpService.putPersistedObject(HttpService.clientExerciseSet(
       this.user.id, this.currentExerciseSet.id), metadata).map(result => {
         for (let field in fields) {
           if (metadata.hasOwnProperty(field)) {
+            console.log('updating ' + this.currentExerciseSet[field] + ' to ' + metadata[field]);
             this.currentExerciseSet[field] = metadata[field];
           }
         }
+        return result;
       });
   }
 
@@ -107,6 +109,7 @@ export interface IExerciseSet {
   isOwner: boolean;
   name: string;
   category: string;
+  comments: string;
   next(): IExercise;
   initIterator(): void;
   newExercise(exerciseInitializer: Object): Observable<number>;

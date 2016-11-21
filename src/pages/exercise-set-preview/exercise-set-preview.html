@@ -6,10 +6,6 @@
 </ion-header>
 
 <ion-content padding (window:resize)="onResize($event)">
-  <ion-card [hidden]="!exerciseSets.currentExerciseSet">
-      <ion-card-header>Category: {{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.category : ''}}</ion-card-header>
-      <ion-card-content>{{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.comments : ''}}</ion-card-content>  
-  </ion-card>
   <ion-list no-lines>
     <ion-item>
       <ion-select [(ngModel)]="selectedExerciseSetName"
@@ -17,6 +13,10 @@
         <ion-option *ngFor="let set of exerciseSets.items" [value]="set.id">{{ set.name }}</ion-option>
       </ion-select>
     </ion-item>
+    <ion-card [hidden]="!exerciseSets.currentExerciseSet">
+        <ion-card-header>Category: {{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.category : ''}}</ion-card-header>
+        <ion-card-content>{{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.comments : ''}}</ion-card-content>  
+    </ion-card>
     <ion-item>
       <ion-buttons>
         <button ion-button (click)="newExerciseSet()" [disabled]="editing" color="primary" clear>New Set</button>

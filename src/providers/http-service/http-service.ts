@@ -52,83 +52,62 @@ export class HttpService extends Observable<HttpServiceErrors> {
   }
 
   postPersistedObject(url: string,  data: any, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
-    return Observable.create((observer: Observer<Object>) => {
-      try {
-        this.http.post(url, data, requestOptions)
-          .map(response => {
-            this.processResponse(response, observer)
-          })
-          .subscribe({
-            next: () => {},
-            error: (err: any) => observer.error(err)
-          });
-      }
-      catch(err) {
-        observer.error({message: 'No server response.'});
-        // @todo Remote error logging
-      }
-    });
+       return this.http.post(url, data, requestOptions)
+      .map(response => {
+        let result = this.processResponse(response);
+        if (!(result instanceof PersistedObject)) {
+          throw result;
+        }
+        return result;
+      });
   }
 
-  putPersistedObject(url: string,  data: any, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
-    return Observable.create((observer: Observer<Object>) => {
-      try {
-        this.http.put(url, data, requestOptions)
-          .map(response => this.processResponse(response, observer))
-          .subscribe({
-            next: () => {},
-            error: (err: any) => observer.error(err)
-          });
-      }
-      catch(err) {
-        observer.error({message: 'No server response.'});
-        // @todo Remote error logging
-      }
-    });
+  putPersistedObject(url: string,  data: any, 
+    requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
+    return this.http.put(url, data, requestOptions)
+      .map(response => {
+        let result = this.processResponse(response);
+        if (!(result instanceof PersistedObject)) {
+          throw result;
+        }
+        return result;
+      });
   }
   
   getPersistedObject(url: string, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
-    return Observable.create((observer: Observer<Object>) => {
-      try {
-        this.http.get(url, requestOptions)
-          .map(response => this.processResponse(response, observer))
-          .subscribe({
-            next: () => {},
-            error: (err: any) => observer.error(err)
-          });
-      }
-      catch(err) {
-        observer.error({message: 'No server response.'});
-        // @todo Remote error logging
-      }
-    });
+    return this.http.get(url, requestOptions)
+      .map(response => {
+        let result = this.processResponse(response);
+        if (!(result instanceof PersistedObject)) {
+          throw result;
+        }
+        return result;
+      });
   }
 
   deletePersistedObject(url: string, requestOptions = Authenticator.newRequestOptions()): Observable<Response> {
     return this.http.delete(url, requestOptions);
   }
 
-  private processResponse(response: Response, observer: Observer<Object>) {
-    let obj: Object = {};
+  private processResponse(response: Response): IHttpServiceError[] | PersistedObject {
+    let obj: PersistedObject;
     let errors: IHttpServiceError[] = [];
     try {
       obj = <Object>response.json();
       errors = this.parseForErrors(obj);
     }
     catch (err) {
-      // Nothing to do
+      // Nothing to do..
+      return new PersistedObject();
     }
-    if (errors.length == 0) {
-      observer.next(obj);
-      observer.complete();
+    if (errors.length > 0) {
+      return errors;
     }
-    else {
-      observer.error(errors);
-    }
+    return obj;
   }
 
   private handleError (error: any) {
-    let errMsg = error.message || 'Server error';
+    let errMsg = error.message ? error.message : 'Server error';
     console.log(errMsg); // log to console instead
     return Observable.throw(errMsg);
   }
@@ -189,4 +168,7 @@ class HttpServiceErrorSubscription extends Subscription {
 export interface IHttpServiceError {
   code: string;
   message : string;
+}
+
+export class PersistedObject extends Object {
 }

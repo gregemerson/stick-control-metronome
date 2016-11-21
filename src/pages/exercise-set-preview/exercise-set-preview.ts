@@ -39,8 +39,7 @@ export class ExerciseSetPreviewPage {
     private modalCtrl: ModalController,
     private modal: ModalController,
     private popover: PopoverController,
-    private changeDetect: ChangeDetectorRef,
-    private formBuilder: FormBuilder) {
+    private changeDetect: ChangeDetectorRef) {
   }
 
   onResize($event) {
@@ -49,7 +48,7 @@ export class ExerciseSetPreviewPage {
       this.editor.onResize();
     }
   }
-
+  
   updateExerciseSetMetadata() {
     this.modalCtrl.create(NewExerciseSetForm, {
       create: (formData: Object) => {
@@ -64,6 +63,11 @@ export class ExerciseSetPreviewPage {
               )]);
             }
           });
+      },
+      initializer: {
+        name: this.exerciseSets.currentExerciseSet.name,
+        category: this.exerciseSets.currentExerciseSet.category,
+        comments: this.exerciseSets.currentExerciseSet.comments
       }
     }).present();
   }

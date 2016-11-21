@@ -15,10 +15,19 @@ export class NewExerciseSetForm {
   constructor(private formBuilder: FormBuilder,
     private navCtrl: NavController, params: NavParams) {
       this.callback = <(Object) => void>params.get('create');
+      let initializer = <Object>params.get('initializer');
+      let defaults = this.getDefaultValues();
+      if (initializer) {
+        for (let key in defaults) {
+          if (initializer.hasOwnProperty(key)) {
+            defaults[key] = initializer[key];
+          }
+        }
+      }
       this.newExerciseSet = this.formBuilder.group({
-        name: ['', Validators.maxLength(this.constraints.maxNameLength)],
-        category: ['', Validators.maxLength(this.constraints.maxCategoryLength)],
-        comments: ['', Validators.maxLength(this.constraints.maxExerciseSetCommentsLength)],
+        name: [defaults['name'], Validators.maxLength(this.constraints.maxNameLength)],
+        category: [defaults['category'], Validators.maxLength(this.constraints.maxCategoryLength)],
+        comments: [defaults['comments'], Validators.maxLength(this.constraints.maxExerciseSetCommentsLength)],
       });
   }
 
@@ -33,5 +42,13 @@ export class NewExerciseSetForm {
 
   cancel() {
     this.navCtrl.pop();
+  }
+
+  private getDefaultValues() {
+    return {
+      name: '',
+      category: '',
+      comments: ''
+    }
   }
 }
