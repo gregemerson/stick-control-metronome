@@ -61,14 +61,18 @@ export class ExerciseSets {
     let fields = ['name', 'category', 'comments']
     return this.httpService.putPersistedObject(HttpService.clientExerciseSet(
       this.user.id, this.currentExerciseSet.id), metadata).map(result => {
-        for (let field in fields) {
-          if (metadata.hasOwnProperty(field)) {
-            console.log('updating ' + this.currentExerciseSet[field] + ' to ' + metadata[field]);
-            this.currentExerciseSet[field] = metadata[field];
+        for (let field of fields) {
+          if (result.hasOwnProperty(field)) {
+            console.log('setting ' + this.currentExerciseSet[field] + ' to ' + result[field]);
+            this.currentExerciseSet[field] = result[field];
           }
         }
         return result;
       });
+  }
+
+  removeCurrentExerciseSet() {
+
   }
 
   deleteCurrentExerciseSet() {

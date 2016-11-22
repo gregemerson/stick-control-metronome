@@ -8,7 +8,7 @@ import {ExerciseSets} from '../providers/exercise-sets/exercise-sets';
 import {LoginPage} from '../pages/login/login';
 import {MessagesPage, IMessage, MessageType} from '../pages/messages/messages';
 import {BaseObservableSubscription} from "../utilities/base-observable";
-import {HttpService, IHttpServiceError, HttpServiceErrors} from '../providers/http-service/http-service';
+import {HttpService, HttpServiceError, HttpServiceErrors} from '../providers/http-service/http-service';
 
 @Component({
   template: '<ion-nav [root]="rootPage"></ion-nav>',
@@ -29,7 +29,7 @@ export class StickControlMetronome {
     platform.ready().then(() => {
       // Listen for errors forcing navigation to login page
       this.httpService.subscribe(({next: (errors: HttpServiceErrors) => {
-        let displayErrors: Array<IHttpServiceError> = [];
+        let displayErrors: Array<HttpServiceError> = [];
         for (let error of errors) {
           if (error.code == 'INVALID_TOKEN') {
             displayErrors.length = 0;
@@ -48,6 +48,8 @@ export class StickControlMetronome {
         }
         let display = new Array<IMessage>();
         for (let error of displayErrors) {
+          console.log('error: ');
+          console.dir(error);
           display.push(MessagesPage.createMessage(
             error.code, error.message, MessageType.Error));
         }
@@ -99,6 +101,8 @@ export class StickControlMetronome {
         loading.dismiss();
       },
       error: (err: any) => {
+        console.log('error: ');
+        console.dir(err);
         loading.dismiss();
         this.modalController.create(MessagesPage, {
           messages: [MessagesPage.createMessage(

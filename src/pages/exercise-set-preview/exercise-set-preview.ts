@@ -56,7 +56,7 @@ export class ExerciseSetPreviewPage {
             return;
           }
           this.exerciseSets.updateCurrentExerciseSetMetadata(formData).subscribe({
-            next: () => null,
+            next: () => this.changeDetect.detectChanges(),
             error: (err: any) => {
               this.showMessages([MessagesPage.createMessage(
                 'Error', 'Could not edit exercise set.', MessageType.Error

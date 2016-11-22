@@ -6,7 +6,7 @@ import {ErrorObservable} from 'rxjs/observable/ErrorObservable';
 import {Observer, Subscriber, Subscription} from 'rxjs';
 import 'rxjs/add/operator/map';
 
-export type HttpServiceErrors = Array<IHttpServiceError>;
+export type HttpServiceErrors = Array<HttpServiceError>;
 
 @Injectable()
 export class HttpService extends Observable<HttpServiceErrors> {
@@ -55,7 +55,7 @@ export class HttpService extends Observable<HttpServiceErrors> {
        return this.http.post(url, data, requestOptions)
       .map(response => {
         let result = this.processResponse(response);
-        if (!(result instanceof PersistedObject)) {
+        if (this.isError(result)) {
           throw result;
         }
         return result;
@@ -67,7 +67,7 @@ export class HttpService extends Observable<HttpServiceErrors> {
     return this.http.put(url, data, requestOptions)
       .map(response => {
         let result = this.processResponse(response);
-        if (!(result instanceof PersistedObject)) {
+        if (this.isError(result)) {
           throw result;
         }
         return result;
@@ -78,7 +78,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
     return this.http.get(url, requestOptions)
       .map(response => {
         let result = this.processResponse(response);
-        if (!(result instanceof PersistedObject)) {
+        if (this.isError(result)) {
+          console.log('result is ');
+          console.dir(result);
           throw result;
         }
         return result;
@@ -89,9 +91,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
     return this.http.delete(url, requestOptions);
   }
 
-  private processResponse(response: Response): IHttpServiceError[] | PersistedObject {
+  private processResponse(response: Response): HttpServiceError[] | PersistedObject {
     let obj: PersistedObject;
-    let errors: IHttpServiceError[] = [];
+    let errors: HttpServiceError[] = [];
     try {
       obj = <Object>response.json();
       errors = this.parseForErrors(obj);
@@ -106,6 +108,13 @@ export class HttpService extends Observable<HttpServiceErrors> {
     return obj;
   }
 
+  private isError(aThing: any) {
+    if (aThing instanceof Array && aThing.length > 0) {
+      return aThing[0] instanceof HttpServiceError;
+    }
+    return false;
+  }
+
   private handleError (error: any) {
     let errMsg = error.message ? error.message : 'Server error';
     console.log(errMsg); // log to console instead
@@ -113,10 +122,10 @@ export class HttpService extends Observable<HttpServiceErrors> {
   }
 
   // @todo Need to check for status 200
-  private parseForErrors(obj: Object): Array<IHttpServiceError> {
-    let errors: Array<IHttpServiceError> = [];
+  private parseForErrors(obj: Object): Array<HttpServiceError> {
+    let errors: Array<HttpServiceError> = [];
     if (!obj.hasOwnProperty('error')) {
-      return <[IHttpServiceError]>[];
+      return <[HttpServiceError]>[];
     }
     let error: Object = obj['error'];
     if (error.hasOwnProperty('code')) {
@@ -165,7 +174,7 @@ class HttpServiceErrorSubscription extends Subscription {
   } 
 }
 
-export interface IHttpServiceError {
+export class HttpServiceError {
   code: string;
   message : string;
 }
