@@ -7,8 +7,9 @@ import {NewExerciseSetForm} from './new-exercise-set';
 import {NewExerciseForm} from './new-exercise';
 import {RepeatForm} from './repeat';
 import {ExerciseConstraints} from './exercise-constraints';
-import {WarningPage} from '../messages/warning'
-import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
+import {WarningPage} from '../messages/warning';
+import {ExerciseSetSelectorPage} from './exercise-set-selector';
+import {Validators, FormBuilder, FormGroup, FormControl, FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'exercise-set-preview',
@@ -22,10 +23,11 @@ export class ExerciseSetPreviewPage {
   title = '';
   constraints = new ExerciseConstraints();
   exercises: Array<ES.IExercise> = [];
-  selectedExerciseSetName: number = null;
+  selectedExerciseSet: ES.IExerciseSet = null;
   editor: ExerciseEditor = null;
   editing = false;
   editIndex: number = null;
+  exerciseSetDetails: string;
   @ViewChild(Content) content: Content;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
@@ -48,6 +50,37 @@ export class ExerciseSetPreviewPage {
       this.editor.onResize();
     }
   }
+
+  private get currentExerciseSetId(): number {
+    return this.exerciseSets.currentExerciseSet ? 
+      this.exerciseSets.currentExerciseSet.id : null;
+  }
+
+  private empty(s: string) {
+    return (!s && s.length == 0);
+  }
+
+  private formatExerciseSetDetails() {
+    if (!this.exerciseSets.currentExerciseSet) {
+      this.exerciseSetDetails = null;
+      return;
+    }
+    let set = this.exerciseSets.currentExerciseSet;
+    let category = (!this.empty(set.category)) ? '' : ' (Category: ' + set.category + ')';
+    let comments = (!this.empty(set.comments)) ? '' : set.comments;
+    this.exerciseSetDetails = comments + category;
+  }
+
+  selectExerciseSet() {
+    this.modalCtrl.create(ExerciseSetSelectorPage,
+      {
+        onSelect: (id: number) => {
+          this.changeCurrentExerciseSet(id);
+        },
+        currentSelectionId: this.currentExerciseSetId,
+        exerciseSets: this.exerciseSets.items
+      }).present();
+  }
   
   updateExerciseSetMetadata() {
     this.modalCtrl.create(NewExerciseSetForm, {
@@ -56,7 +89,9 @@ export class ExerciseSetPreviewPage {
             return;
           }
           this.exerciseSets.updateCurrentExerciseSetMetadata(formData).subscribe({
-            next: () => this.changeDetect.detectChanges(),
+            next: () => {
+              this.formatExerciseSetDetails();
+            },
             error: (err: any) => {
               this.showMessages([MessagesPage.createMessage(
                 'Error', 'Could not edit exercise set.', MessageType.Error
@@ -80,7 +115,7 @@ export class ExerciseSetPreviewPage {
           }
           this.exerciseSets.newExerciseSet(formData).subscribe({
             next: (setId: number) => {
-              this.onChange(setId);
+              this.changeCurrentExerciseSet(setId);
             },
             error: (err: any) => {
               this.showMessages([MessagesPage.createMessage(
@@ -124,19 +159,19 @@ export class ExerciseSetPreviewPage {
     }).present();    
   }
 
-  onChange($event) {
+  changeCurrentExerciseSet(exerciseSetId: number) {
     this.changeDetect.detectChanges();
-    if (!$event) {
-      this.selectedExerciseSetName = null;
+    if (!exerciseSetId) {
+      this.selectedExerciseSet = null;
+      this.formatExerciseSetDetails();
       return;
     }
     let loading = this.showLoading();
-    this.exerciseSets.setCurrentExerciseSet($event).subscribe(
+    this.exerciseSets.setCurrentExerciseSet(exerciseSetId).subscribe(
       (x: any) => {
         loading.dismiss();
-        this.selectedExerciseSetName = 
-          this.exerciseSets.currentExerciseSet.id;
         this.loadExercises();
+        this.formatExerciseSetDetails();
       },
       (error: any) => {
         loading.dismiss();
@@ -149,9 +184,7 @@ export class ExerciseSetPreviewPage {
 
   ngAfterViewInit() {
     this.contents.changes.subscribe((changes: any) => this.displayExercises());
-    this.selectedExerciseSetName = 
-      this.exerciseSets.currentExerciseSet ? 
-      this.exerciseSets.currentExerciseSet.id : null;
+    this.formatExerciseSetDetails();
     this.loadExercises();
   }
 

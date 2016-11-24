@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Select Exercise Set</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <ion-list radio-group [(ngModel)]="selectionId">
+    <ion-item-group *ngFor="let category of categories; let idx = index">
+      <ion-item-divider color="secondary">{{ category.name }}</ion-item-divider>
+      <ion-list>
+        <ion-item *ngFor="let selection of category; let idx = index">
+          <ion-label>{{ selection.name }}</ion-label>
+          <ion-radio [value]="selection.id"></ion-radio>
+        </ion-item>
+      </ion-list>   
+    </ion-item-group>
+  </ion-list>
+  <button (click)="onOk()" ion-button color="primary">
+    <ion-icon name="checkmark-circle"></ion-icon>
+  </button>
+  <button (click)="onCancel()" ion-button color="danger">
+    <ion-icon name="close-circle"></ion-icon>
+  </button>
+</ion-content>

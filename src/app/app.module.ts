@@ -10,6 +10,7 @@ import {ExerciseDisplay} from '../pages/exercise-display/exercise-display';
 import {ExerciseSetPreviewPage} from '../pages/exercise-set-preview/exercise-set-preview'
 import {GuidePage} from '../pages/guide/guide';
 import {LoginPage} from '../pages/login/login';
+import {ExerciseSetSelectorPage} from '../pages/exercise-set-preview/exercise-set-selector';
 import {NewExerciseSetForm} from '../pages/exercise-set-preview/new-exercise-set'
 import {MessagesPage} from '../pages/messages/messages';
 import {SettingsPage} from '../pages/settings/settings';
@@ -33,6 +34,7 @@ import {AppButtons} from '../pages/app-buttons/app-buttons';
     CountDownPage,
     ExerciseDisplay,
     ExerciseSetPreviewPage,
+    ExerciseSetSelectorPage,
     RepeatForm,
     GuidePage,
     LoginPage,
@@ -55,6 +57,7 @@ import {AppButtons} from '../pages/app-buttons/app-buttons';
     CountDownPage,
     ExerciseDisplay,
     ExerciseSetPreviewPage,
+    ExerciseSetSelectorPage,
     RepeatForm,
     GuidePage,
     LoginPage,

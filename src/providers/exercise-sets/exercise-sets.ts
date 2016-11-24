@@ -13,7 +13,6 @@ export class ExerciseSets {
   currentExerciseSet: IExerciseSet;
   private user: IAuthUser;
   items: Array<IExerciseSet>;
-  testid = Math.random();
   
   constructor(private httpService: HttpService) {
   }

@@ -7,22 +7,16 @@
 
 <ion-content padding (window:resize)="onResize($event)">
   <ion-list no-lines>
-    <ion-item>
-      <ion-select [(ngModel)]="selectedExerciseSetName"
-        (ionChange)="onChange($event)" placeholder="Not Selected" [disabled]="editing">
-        <ion-option *ngFor="let set of exerciseSets.items" [value]="set.id">{{ set.name }}</ion-option>
-      </ion-select>
-    </ion-item>
     <ion-card [hidden]="!exerciseSets.currentExerciseSet">
-        <ion-card-header>Category: {{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.category : ''}}</ion-card-header>
-        <ion-card-content>{{ exerciseSets.currentExerciseSet ? exerciseSets.currentExerciseSet.comments : ''}}</ion-card-content>  
+        <ion-card-content>{{ exerciseSetDetails }}</ion-card-content>
     </ion-card>
     <ion-item>
       <ion-buttons>
+        <button ion-button (click)="selectExerciseSet()" [disabled]="editing" color="primary" outline>Select Set</button>
         <button ion-button (click)="newExerciseSet()" [disabled]="editing" color="primary" outline>New Set</button>
-        <button ion-button (click)="updateExerciseSetMetadata()" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="secondary" outline>Edit Set</button>
-        <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="danger" color="danger" outline>Delete Set</button>
-        <button ion-button (click)="newExercise($event)" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="dark" outline>New Exercise</button>    
+        <button ion-button (click)="updateExerciseSetMetadata()" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="primary" outline>Edit Set</button>
+        <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="danger" outline>Delete Set</button>
+        <button ion-button (click)="newExercise($event)" [hidden]="!exerciseSets.currentExerciseSet || !exerciseSets.currentExerciseSet.isOwner" [disabled]="editing" color="primary" outline>New Exercise</button>    
       </ion-buttons>
     </ion-item>
   </ion-list>
@@ -37,10 +31,10 @@
         <exercise-display #exerciseDisplay></exercise-display>
       </div> 
       <ion-buttons [hidden]="editIndex == idx || !exercise.isOwner">
-        <button ion-button (click)="editExercise(idx)" [disabled]="editing" color="primary" small>
+        <button ion-button (click)="editExercise(idx)" [hidden]="!exercise.isOwner" [disabled]="editing" color="primary" small>
           <ion-icon name="open"></ion-icon>
         </button>
-        <button ion-button (click)="deleteExercise(idx)" [disabled]="editing" color="danger" small>
+        <button ion-button (click)="deleteExercise(idx)" [hidden]="!exercise.isOwner" [disabled]="editing" color="danger" small>
           <ion-icon name="trash"></ion-icon>
         </button>
       </ion-buttons>

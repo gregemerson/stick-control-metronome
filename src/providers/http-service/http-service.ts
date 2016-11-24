@@ -34,6 +34,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
   static logout(): string {
     return 'api/Clients/logout';
   }
+  static removeExerciseSet(clientId: number, exerciseSetId: number): string {
+    return 'api/Clients/' + clientId.toString() + '/exerciseSets/rel/' + exerciseSetId;
+  }
 
   private subscribers: {[key: string]: Subscriber<HttpServiceErrors>} = {};
   private static globalErrorCodes = {
