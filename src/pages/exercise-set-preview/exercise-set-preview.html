@@ -8,6 +8,7 @@
 <ion-content padding (window:resize)="onResize($event)">
   <ion-list no-lines>
     <ion-card [hidden]="!exerciseSets.currentExerciseSet">
+        <ion-card-header>{{ exerciseSetName }}</ion-card-header>
         <ion-card-content>{{ exerciseSetDetails }}</ion-card-content>
     </ion-card>
     <ion-item>

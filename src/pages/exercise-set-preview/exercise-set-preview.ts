@@ -27,6 +27,7 @@ export class ExerciseSetPreviewPage {
   editor: ExerciseEditor = null;
   editing = false;
   editIndex: number = null;
+  exerciseSetName: string;
   exerciseSetDetails: string;
   @ViewChild(Content) content: Content;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
@@ -63,11 +64,13 @@ export class ExerciseSetPreviewPage {
   private formatExerciseSetDetails() {
     if (!this.exerciseSets.currentExerciseSet) {
       this.exerciseSetDetails = null;
+      this.exerciseSetName = null;
       return;
     }
+    this.exerciseSetName = this.exerciseSets.currentExerciseSet.name;
     let set = this.exerciseSets.currentExerciseSet;
-    let category = (!this.empty(set.category)) ? '' : ' (Category: ' + set.category + ')';
-    let comments = (!this.empty(set.comments)) ? '' : set.comments;
+    let category = (this.empty(set.category)) ? '' : ' (Category: ' + set.category + ')';
+    let comments = (this.empty(set.comments)) ? '' : set.comments;
     this.exerciseSetDetails = comments + category;
   }
 
@@ -297,6 +300,18 @@ export class ExerciseSetPreviewPage {
       }, this.modal, this.createSnapshot(exercise));
   }
 
+  deleteExerciseSet() {
+    this.exerciseSets.removeCurrentExerciseSet().subscribe({
+      next: () => {
+        console.log('ok ');
+      },
+      error: (err: any) => {
+        console.log('error ');
+        console.dir(err);
+      }
+    });
+  }
+
   deleteExercise(idx: number) {
     this.popover.create(WarningPage, {
       message: 'Do you want to permanantly delete this exercise?',
@@ -315,7 +330,7 @@ export class ExerciseSetPreviewPage {
     })
   }
 
-  deleteExerciseSet() {
+  removeExerciseSet() {
 
   }
 

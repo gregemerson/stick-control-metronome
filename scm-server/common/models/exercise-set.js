@@ -3,7 +3,6 @@
 module.exports = function(Exerciseset) {
     var app = require('../../server/server');
 
-
     Exerciseset.beforeRemote('*.__create__exercises', function(ctx, instance, next) {
         ctx.req.body['created'] = new Date();
         ctx.req.body['ownerId'] = ctx.req.accessToken.userId;
@@ -22,6 +21,20 @@ module.exports = function(Exerciseset) {
         next();
     });
 
+    // For diagnostics
+    Exerciseset.beforeRemote('**', function(ctx, exerciseSet, next) {
+        console.log(ctx.methodString, 'was invoked remotely');
+        next();
+    });
+
+    // If no client references the 
+    // Public exercise sets are never deleted
+    // If the set is the current one for user, remove it from user settings
+    /* 
+    Exerciseset.beforeRemote('remove set for user', function(ctx, exerciseSet, next) {
+
+    });
+    */
     Exerciseset.createdExercises = function(id, data, cb) {
         Exerciseset.beginTransaction({}, function(err, tx) {
             try {

@@ -55,43 +55,23 @@ export class HttpService extends Observable<HttpServiceErrors> {
   }
 
   postPersistedObject(url: string,  data: any, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
-       return this.http.post(url, data, requestOptions)
-      .map(response => {
-        let result = this.processResponse(response);
-        if (this.isError(result)) {
-          throw result;
-        }
-        return result;
-      });
+    return this.http.post(url, data, requestOptions)
+      .map(response => this.processResponse(response));  
   }
 
-  putPersistedObject(url: string,  data: any, 
-    requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
+  putPersistedObject(url: string,  data: any, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
     return this.http.put(url, data, requestOptions)
-      .map(response => {
-        let result = this.processResponse(response);
-        if (this.isError(result)) {
-          throw result;
-        }
-        return result;
-      });
+      .map(response => this.processResponse(response));  
   }
   
   getPersistedObject(url: string, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
     return this.http.get(url, requestOptions)
-      .map(response => {
-        let result = this.processResponse(response);
-        if (this.isError(result)) {
-          console.log('result is ');
-          console.dir(result);
-          throw result;
-        }
-        return result;
-      });
+      .map(response => this.processResponse(response));  
   }
 
-  deletePersistedObject(url: string, requestOptions = Authenticator.newRequestOptions()): Observable<Response> {
-    return this.http.delete(url, requestOptions);
+  deletePersistedObject(url: string, requestOptions = Authenticator.newRequestOptions()): Observable<Object> {
+    return this.http.delete(url, requestOptions)
+      .map(response => this.processResponse(response));    
   }
 
   private processResponse(response: Response): HttpServiceError[] | PersistedObject {
@@ -106,16 +86,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
       return new PersistedObject();
     }
     if (errors.length > 0) {
-      return errors;
+      throw errors;
     }
     return obj;
-  }
-
-  private isError(aThing: any) {
-    if (aThing instanceof Array && aThing.length > 0) {
-      return aThing[0] instanceof HttpServiceError;
-    }
-    return false;
   }
 
   private handleError (error: any) {

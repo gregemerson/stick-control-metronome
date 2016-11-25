@@ -42,9 +42,9 @@
   },
   "validations": [],
   "relations": {
-    "owner": {
+    "exerciseSet": {
       "type": "belongsTo",
-      "model": "Client",
+      "model": "ExerciseSet",
       "foreignKey": ""
     }
   },

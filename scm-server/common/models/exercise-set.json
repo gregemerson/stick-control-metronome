@@ -41,14 +41,14 @@
   },
   "validations": [],
   "relations": {
+    "exercises": {
+      "type": "hasMany",
+      "model": "Exercise",
+      "foreignKey": ""
+    },
     "owner": {
       "type": "belongsTo",
       "model": "Client",
-      "foreignKey": ""
-    },
-    "exercises": {
-      "type": "hasAndBelongsToMany",
-      "model": "Exercise",
       "foreignKey": ""
     }
   },

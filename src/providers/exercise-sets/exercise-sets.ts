@@ -62,7 +62,6 @@ export class ExerciseSets {
       this.user.id, this.currentExerciseSet.id), metadata).map(result => {
         for (let field of fields) {
           if (result.hasOwnProperty(field)) {
-            console.log('setting ' + this.currentExerciseSet[field] + ' to ' + result[field]);
             this.currentExerciseSet[field] = result[field];
           }
         }
@@ -71,11 +70,12 @@ export class ExerciseSets {
   }
 
   removeCurrentExerciseSet() {
-
-  }
-
-  deleteCurrentExerciseSet() {
-
+    return this.httpService.deletePersistedObject(
+        HttpService.removeExerciseSet(this.user.id, this.currentExerciseSet.id))
+        .map(result => {
+          // need to slice out removed set then set current set to a random 
+          // one if it exists....see server comments
+        });
   }
   
   public setCurrentExerciseSet(exerciseSetId: number): Observable<void> {
@@ -88,8 +88,11 @@ export class ExerciseSets {
       HttpService.userSettings(this.user.id), 
         {
           id: this.user.settings.id,
-          currentExerciseSet: this.currentExerciseSet.id
+          currentExerciseSet: exerciseSetId
         }).flatMap((obj: Object) => {
+          if (exerciseSetId == null) {
+            return Observable.of(null);
+          }
           return (<ExerciseSet>this.currentExerciseSet).
             loadExercises(this.httpService, this.user);
       });

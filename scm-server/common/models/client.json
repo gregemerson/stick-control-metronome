@@ -36,11 +36,6 @@
       "model": "Client",
       "foreignKey": ""
     },
-    "exercises": {
-      "type": "hasMany",
-      "model": "Exercise",
-      "foreignKey": ""
-    },
     "userSettings": {
       "type": "hasOne",
       "model": "UserSettings",

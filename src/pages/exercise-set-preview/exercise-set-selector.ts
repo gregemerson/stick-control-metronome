@@ -31,7 +31,6 @@ export class ExerciseSetSelectorPage {
 
   private createCategories() {
     let categoriesObj: Object = {};
-    console.dir(this.exerciseSets);
     for (let set of this.exerciseSets) {
       if (!categoriesObj.hasOwnProperty(set.category)) {
         categoriesObj[set.category] =
@@ -47,7 +46,6 @@ export class ExerciseSetSelectorPage {
       this.categories.push(categoriesObj[key]);
     }
     this.sortByName(this.categories);
-    console.dir(this.categories);
   }
 
   private sortByName(a: Named[]) {
