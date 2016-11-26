@@ -66,13 +66,6 @@
     {
       "accessType": "WRITE",
       "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "ALLOW",
-      "model": "Exercise"
-    },
-    {
-      "accessType": "WRITE",
-      "principalType": "ROLE",
       "principalId": "guest",
       "permission": "DENY",
       "model": "Exercise"

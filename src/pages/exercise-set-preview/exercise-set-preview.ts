@@ -29,6 +29,7 @@ export class ExerciseSetPreviewPage {
   editIndex: number = null;
   exerciseSetName: string;
   exerciseSetDetails: string;
+  isOwner: boolean;
   @ViewChild(Content) content: Content;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
@@ -63,10 +64,12 @@ export class ExerciseSetPreviewPage {
 
   private formatExerciseSetDetails() {
     if (!this.exerciseSets.currentExerciseSet) {
+      this.isOwner = false;
       this.exerciseSetDetails = null;
       this.exerciseSetName = null;
       return;
     }
+    this.isOwner = this.exerciseSets.currentExerciseSet.isOwner;
     this.exerciseSetName = this.exerciseSets.currentExerciseSet.name;
     let set = this.exerciseSets.currentExerciseSet;
     let category = (this.empty(set.category)) ? '' : ' (Category: ' + set.category + ')';

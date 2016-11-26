@@ -86,7 +86,11 @@ export class StickControlMetronome {
 
   private displayLogInPage() {
     this.modalController.
-      create(LoginPage,{authenticator: this.authenticator}).present();
+      create(LoginPage,{
+        authenticator: this.authenticator
+      }, {
+        enableBackdropDismiss: false
+      }).present();
   }
 
   private unloadUserData(): void {

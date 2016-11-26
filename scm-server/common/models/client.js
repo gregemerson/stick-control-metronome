@@ -1,3 +1,10 @@
+/*
+    Business Rules.
+    - Clients can have only one access token at a time. Tokens time-out in 2 weeks
+    - Guests cannot login or logout and the guest access token (virtually) never expires
+    - When no client references an exercise set, the set will be deleted
+    - 
+*/
 
 module.exports = function(Client) {
     var app = require('../../server/server');
@@ -19,24 +26,50 @@ module.exports = function(Client) {
         ctx.req.body['created'] = new Date();
         ctx.req.body['ownerId'] = ctx.req.accessToken.userId;
         next();
-    });            
+    });
+
+    Client.beforeRemote('*.__unlink__exerciseSets', function(ctx, exerciseSet, next) {
+        // @todo only admin can set isPublic to true
+        console.log('unlinking');
+        console.dir(ctx);
+        console.dir(exerciseSet);
+/*
+        if (exerciseSet.isPublic) {
+            // Public exercise sets are never deleted only references by clients to them.
+            next();
+            return;
+        }
+        // If no client references the exercise set, delete it and all associated exercises
+*/
+        // If the set is the current one for user, remove it from user settings 
+    });
+
+    // For diagnostics
+    Client.beforeRemote('**', function(ctx, exerciseSet, next) {
+        console.log(ctx.methodString, 'was invoked remotely');
+        next();
+    });
+           
 
     Client.beforeRemote('updateAttributes', function(ctx, instance, next) {
+        // @todo add acl that the membershipExpiry property can only be set by the admin
         delete ctx.req.body.membershipExpiry;
         next();
-    });       
+    });
+
     Client.beforeRemote('login', function(ctx, instance, next) { 
         // Make ttl 2 week in senconds
         ctx.req.body.ttl = 60 * 60 * 24 * 7 * 2;
         next();
     });
+
     Client.beforeRemote('logout', function(ctx, instance, next) { 
         // Extra protection
         Client.find({where: {username: 'guest'}}, function(err, user){
             if (err || !ctx.req.accessToken || user.id == ctx.req.accessToken.id) {
                 var error = new Error();
                 error.status = 400;
-                error.message = 'Invalid logout';
+                error.message = 'Guests cannot logout.';
                 next(error);           
             }
             else {

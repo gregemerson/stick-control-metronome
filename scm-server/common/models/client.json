@@ -42,9 +42,10 @@
       "foreignKey": ""
     },
     "exerciseSets": {
-      "type": "hasAndBelongsToMany",
+      "type": "hasMany",
       "model": "ExerciseSet",
-      "foreignKey": ""
+      "foreignKey": "",
+      "through": "ClientExerciseSet"
     }
   },
   "acls": [

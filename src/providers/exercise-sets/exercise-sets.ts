@@ -158,13 +158,13 @@ class ExerciseSet implements IExerciseSet{
   }
 
   newExercise(initializer: Object): Observable<number> {
-    initializer['ownerId'] = this.user.id;
-    initializer['clientId'] = this.user.id;
+    initializer['exerciseSetId'] = this.id;
     initializer['created'] = new Date();
     return this.httpService.postPersistedObject(
       HttpService.exerciseSetExercises(this.id), initializer)
       .map(exercise => {
-        this.exercises[exercise['id']] = new Exercise(exercise, true);
+        console.log('exercise id is: ' + exercise['id']);
+        this.exercises[exercise['id']] = new Exercise(exercise);
         this.exerciseOrdering.push(exercise['id']);
         return exercise['id'];
       });
@@ -182,7 +182,7 @@ class ExerciseSet implements IExerciseSet{
       }
     }
     return this.httpService.putPersistedObject(
-      HttpService.exercise(this.id), newData);
+      HttpService.exercise(exercise.id), newData);
   }
 
   delete(exercise: IExercise): Observable<Object> {
@@ -208,7 +208,7 @@ class ExerciseSet implements IExerciseSet{
     .map(exerciseSet => {
       let exercises = <Array<Object>>exerciseSet['exercises'];
       for (let exercise of exercises) {
-        this.exercises[exercise['id']] = new Exercise(exercise, user.id == exercise['ownerId']);
+        this.exercises[exercise['id']] = new Exercise(exercise);
       }
       this._exercisesLoaded = true;
     });
@@ -265,7 +265,6 @@ export interface IExercise {
   id: number; 
   name: string;
   category: string;
-  isOwner: boolean;
   display: ExerciseElements;
   comments: string;
   getNumberOfBeats(): number;
@@ -275,15 +274,13 @@ export interface IExercise {
 class Exercise implements IExercise {
   private _display: ExerciseElements;
   private _id: number;
-  private _isOwner: boolean;
   public name: string;
   public category: string;
   public comments: string;
 
-  constructor(rawExercise: Object, isOwner: boolean) {
+  constructor(rawExercise: Object) {
     this._display = <ExerciseElements>Encoding.decode(rawExercise['notation']);
     this._id = rawExercise['id'];
-    this._isOwner = isOwner;
     this.name = rawExercise['name'];
     this.category = rawExercise['category'];
     if (rawExercise.hasOwnProperty('comments')) {
@@ -293,10 +290,6 @@ class Exercise implements IExercise {
 
   get id(): number {
     return this._id;
-  }
-
-  get isOwner(): boolean {
-    return this._isOwner;
   }
 
   get display(): ExerciseElements {

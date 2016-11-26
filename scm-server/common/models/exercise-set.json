@@ -50,6 +50,12 @@
       "type": "belongsTo",
       "model": "Client",
       "foreignKey": ""
+    },
+    "clients": {
+      "type": "hasMany",
+      "model": "Client",
+      "foreignKey": "",
+      "through": "ClientExerciseSet"
     }
   },
   "acls": [

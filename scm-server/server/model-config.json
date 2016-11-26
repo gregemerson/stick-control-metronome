@@ -52,5 +52,9 @@
   "UserSettings": {
     "dataSource": "mysqlDs",
     "public": false
+  },
+  "ClientExerciseSet": {
+    "dataSource": "mysqlDs",
+    "public": false
   }
 }
