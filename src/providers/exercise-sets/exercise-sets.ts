@@ -161,9 +161,11 @@ class ExerciseSet implements IExerciseSet{
     initializer['exerciseSetId'] = this.id;
     initializer['created'] = new Date();
     return this.httpService.postPersistedObject(
-      HttpService.exerciseSetExercises(this.id), initializer)
-      .map(exercise => {
-        console.log('exercise id is: ' + exercise['id']);
+      HttpService.createdExercises(this.id), initializer)
+      .map(result => {
+        let exercise = result['exercise'];
+        console.log('exercise: ' + exercise["id"]);
+        console.dir(exercise);
         this.exercises[exercise['id']] = new Exercise(exercise);
         this.exerciseOrdering.push(exercise['id']);
         return exercise['id'];

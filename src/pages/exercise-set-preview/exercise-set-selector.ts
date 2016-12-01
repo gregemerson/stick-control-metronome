@@ -18,6 +18,7 @@ export class ExerciseSetSelectorPage {
     this.selectionId = navParams.get('currentSelectionId');
     this.exerciseSets = navParams.get('exerciseSets');
     this.createCategories();
+    console.dir(this.categories);
   }
 
   onOk() {
@@ -65,8 +66,25 @@ export interface Named {
 
 export class ExerciseSetCategory extends 
   Array<ExerciseSetSelection> implements Named {
+  private static Icons = ['add-circle', 'remove-circle'];
+  private iconIndex = 0;
+  hidden = true;
+  icon = ExerciseSetCategory.Icons[0];
+
   constructor(public name: string) {
     super();
+    this.hidden = true;
+    this.icon = ExerciseSetCategory.Icons[this.iconIndex];
+  }
+
+  toggleHidden() {
+    this.hidden = !this.hidden;
+    this.toggleIcon();
+  }
+
+  private toggleIcon() {
+    this.iconIndex = (this.iconIndex + 1)%2;
+    this.icon = ExerciseSetCategory.Icons[this.iconIndex];
   }
 }
 

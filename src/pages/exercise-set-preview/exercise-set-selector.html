@@ -6,19 +6,24 @@
 <ion-content padding>
   <ion-list radio-group [(ngModel)]="selectionId">
     <ion-item-group *ngFor="let category of categories; let idx = index">
-      <ion-item-divider color="secondary">{{ category.name }}</ion-item-divider>
-      <ion-list>
+      <ion-item-divider color="light">
+        <button ion-button (click)="category.toggleHidden()" color="primary" small clear icon-left>
+          <ion-icon [name]="category.icon"></ion-icon>
+          {{ category.name }}
+        </button>
+      </ion-item-divider>
+      <ion-list [hidden]="category.hidden">
         <ion-item *ngFor="let selection of category; let idx = index">
-          <ion-label>{{ selection.name }}</ion-label>
+          <ion-label class="radio-selection">{{ selection.name }}</ion-label>
           <ion-radio [value]="selection.id"></ion-radio>
         </ion-item>
       </ion-list>   
     </ion-item-group>
   </ion-list>
-  <button (click)="onOk()" ion-button color="primary">
+  <button (click)="onOk()" ion-button color="primary" small>
     <ion-icon name="checkmark-circle"></ion-icon>
   </button>
-  <button (click)="onCancel()" ion-button color="danger">
+  <button (click)="onCancel()" ion-button color="danger" small>
     <ion-icon name="close-circle"></ion-icon>
   </button>
 </ion-content>

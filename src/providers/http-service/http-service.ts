@@ -16,6 +16,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
   static exerciseSetExercises(exerciseSetId: number): string {
     return '/api/ExerciseSets/' + exerciseSetId.toString() + '/exercises';
   }
+  static createdExercises(exerciseSetId: number): string {
+    return '/api/ExerciseSets/' + exerciseSetId.toString() + '/createdExercises';
+  }
   static exercise(exerciseId: number): string {
     return '/api/Exercises/' + exerciseId.toString();
   }

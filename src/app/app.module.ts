@@ -11,8 +11,9 @@ import {ExerciseSetPreviewPage} from '../pages/exercise-set-preview/exercise-set
 import {GuidePage} from '../pages/guide/guide';
 import {LoginPage} from '../pages/login/login';
 import {ExerciseSetSelectorPage} from '../pages/exercise-set-preview/exercise-set-selector';
-import {NewExerciseSetForm} from '../pages/exercise-set-preview/new-exercise-set'
+import {NewExerciseSetForm} from '../pages/exercise-set-preview/new-exercise-set';
 import {MessagesPage} from '../pages/messages/messages';
+import {WarningPage} from '../pages/messages/warning';
 import {SettingsPage} from '../pages/settings/settings';
 import {AudioBuffers} from '../providers/audio-buffers/audio-buffers';
 import {Authenticator} from '../providers/authenticator/authenticator';
@@ -39,6 +40,7 @@ import {AppButtons} from '../pages/app-buttons/app-buttons';
     GuidePage,
     LoginPage,
     MessagesPage,
+    WarningPage,
     SettingsPage,
     NewExerciseSetForm,
     NewExerciseForm,
@@ -62,6 +64,7 @@ import {AppButtons} from '../pages/app-buttons/app-buttons';
     GuidePage,
     LoginPage,
     MessagesPage,
+    WarningPage,
     SettingsPage,
     NewExerciseSetForm,
     NewExerciseForm,

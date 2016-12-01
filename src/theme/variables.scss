@@ -27,11 +27,12 @@ $colors: (
   secondary:  #32E875,
   danger:     #B24C63,
   light:      #56EEF4,
+  editing:    #faa8a8,
   dark:       #2C374F,
   favorite:   #69BB7B,
-  button1:   #63B249,
-  button2:   #5AA243,
-  button3:   #52923C,
+  button1:    #63B249,
+  button2:    #5AA243,
+  button3:    #52923C,
 );
 
 $fancy-font: 'Courgette', cursive;
@@ -48,6 +49,14 @@ ion-title {
   color: #a4f25c;
 }
 
+.editing-on {
+  background-color: $editing-color;
+}
+
+.editing-off {
+  background-color: $static-color;
+}
+
 .editor-buttons > button {
   font-family: courier;
   font-weight: bold;
@@ -56,6 +65,14 @@ ion-title {
 .exercise-container {
     position: relative;
 }
+
+.radio-selection {
+  font-size: 1.4rem;
+}
+
+$alert-ios-radio-label-padding: 7px;
+$alert-md-radio-label-padding: 7px 26px;
+$alert-wp-radio-label-padding: 7px 26px;
 
 // App Theme
 // --------------------------------------------------

@@ -28,11 +28,30 @@ module.exports = function(Client) {
         next();
     });
 
-    Client.beforeRemote('*.__unlink__exerciseSets', function(ctx, exerciseSet, next) {
-        // @todo only admin can set isPublic to true
-        console.log('unlinking');
-        console.dir(ctx);
-        console.dir(exerciseSet);
+    Client.beforeRemote('*.__unlink__exerciseSets', function(ctx, emptyObj, next) {
+        let exerciseSetId = parseInt(ctx.req.params.fk);
+        app.model.Client.findOne(exerciseSetId, function(err, exerciseSet) {
+            if (err) {
+                next(err);
+            }
+            else {
+                exerciseSet.clients.find({limit: 1}, function(err, clients) {
+                    if (clients.length == 0) {
+                        exerciseSet.destroy(function(err) {
+                            if (err) {
+                                next(err);
+                            }
+                            else {
+                                next();
+                            }
+                        });
+                    }
+                    else {
+                        next();
+                    }
+                });
+            }
+        });
 /*
         if (exerciseSet.isPublic) {
             // Public exercise sets are never deleted only references by clients to them.

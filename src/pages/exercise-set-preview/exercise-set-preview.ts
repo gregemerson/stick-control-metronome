@@ -29,7 +29,9 @@ export class ExerciseSetPreviewPage {
   editIndex: number = null;
   exerciseSetName: string;
   exerciseSetDetails: string;
+  shareEmail: string = null;
   isOwner: boolean;
+  shareWith: FormGroup;
   @ViewChild(Content) content: Content;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
@@ -43,7 +45,11 @@ export class ExerciseSetPreviewPage {
     private modalCtrl: ModalController,
     private modal: ModalController,
     private popover: PopoverController,
-    private changeDetect: ChangeDetectorRef) {
+    private changeDetect: ChangeDetectorRef,
+    private formBuilder: FormBuilder) {
+      this.shareWith = new FormGroup({
+        email: new FormControl("email", Validators.required)
+      });
   }
 
   onResize($event) {
@@ -72,7 +78,7 @@ export class ExerciseSetPreviewPage {
     this.isOwner = this.exerciseSets.currentExerciseSet.isOwner;
     this.exerciseSetName = this.exerciseSets.currentExerciseSet.name;
     let set = this.exerciseSets.currentExerciseSet;
-    let category = (this.empty(set.category)) ? '' : ' (Category: ' + set.category + ')';
+    let category = (this.empty(set.category)) ? '' : ' (category: ' + set.category + ')';
     let comments = (this.empty(set.comments)) ? '' : set.comments;
     this.exerciseSetDetails = comments + category;
   }
@@ -111,6 +117,10 @@ export class ExerciseSetPreviewPage {
         comments: this.exerciseSets.currentExerciseSet.comments
       }
     }).present();
+  }
+
+  shareExerciseSet() {
+    console.log('sharing with ' +  this.shareWith.value.email);
   }
 
   newExerciseSet() {
@@ -322,6 +332,7 @@ export class ExerciseSetPreviewPage {
         this.exerciseSets.currentExerciseSet.delete(
           this.exercises[idx]).subscribe({
             next: (obj: Object) => {
+              console.log('delete next for index' + idx);
               this.exercises.splice(idx, 1);
             },
             error: (err: any) => {
@@ -330,7 +341,7 @@ export class ExerciseSetPreviewPage {
             }
           });
       }
-    })
+    }).present();
   }
 
   removeExerciseSet() {

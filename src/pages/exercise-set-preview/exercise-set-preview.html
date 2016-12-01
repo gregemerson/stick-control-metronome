@@ -13,13 +13,19 @@
     </ion-card>
     <ion-item>
       <ion-buttons>
-        <button ion-button (click)="selectExerciseSet()" [disabled]="editing" color="primary" outline>Select Set</button>
-        <button ion-button (click)="newExerciseSet()" [disabled]="editing" color="primary" outline>New Set</button>
-        <button ion-button (click)="updateExerciseSetMetadata()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline>Edit Set</button>
-        <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="danger" outline>Remove Set</button>
-        <button ion-button (click)="newExercise($event)" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline>New Exercise</button>    
+        <button ion-button (click)="selectExerciseSet()" [disabled]="editing" color="primary" outline small>Select Set</button>
+        <button ion-button (click)="newExerciseSet()" [disabled]="editing" color="primary" outline small>New Set</button>
+        <button ion-button (click)="updateExerciseSetMetadata()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline small>Edit Set</button>
+        <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="danger" outline small>Remove Set</button>
+        <button ion-button (click)="newExercise($event)" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline smal>New Exercise</button>    
       </ion-buttons>
     </ion-item>
+    <form [formGroup]="shareWith">
+      <ion-label floating>Email of user to share with</ion-label>
+        <input formControlName="email" type="email">
+        <button ion-button (click)="shareExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet" 
+          [disabled]="editing || !shareWith.valid" color="primary" outline small>Share Set</button>   
+    </form>
   </ion-list>
   <ion-list>
     <ion-item *ngFor="let exercise of exercises; let idx = index">
@@ -28,7 +34,7 @@
           (exercise.category ? (' (' + exercise.category + ')') : '')  +
           (exercise.comments ? (': ' + exercise.comments) : '') }}
       </div>
-      <div #displayContainer class="exercise-container"   [style.background-color]="editIndex == idx ? 'editing-color' : 'static-color'">
+      <div #displayContainer class="exercise-container" [class.editing-on]="editIndex == idx">
         <exercise-display #exerciseDisplay></exercise-display>
       </div> 
       <ion-buttons [hidden]="editIndex == idx || !isOwner">

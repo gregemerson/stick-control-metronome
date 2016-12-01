@@ -15,6 +15,7 @@ export class WarningPage {
 
   onOk() {
     this.okCallback();
+    this.navCtrl.pop();
   }
 
   onCancel() {
