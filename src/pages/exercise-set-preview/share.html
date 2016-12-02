@@ -1,0 +1,20 @@
+<form [formGroup]="newExercise">
+    <ion-card>
+        <ion-card-content>
+            Enter the email address of the user you would like to share this exercise with.
+        </ion-card-content>
+    </ion-card>
+    <ion-item>
+        <ion-label>Email</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-buttons start>
+            <button ion-button type="submit" [disabled]="!shareForm.valid" (click)="create()" color="primary" small>
+                <ion-icon name="checkmark"></ion-icon></button>
+            <button ion-button (click)="cancel()" color="danger" small>
+                <ion-icon name="close"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-item>
+</form>

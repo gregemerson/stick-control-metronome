@@ -56,5 +56,9 @@
   "ClientExerciseSet": {
     "dataSource": "mysqlDs",
     "public": false
+  },
+  "Share": {
+    "dataSource": "mysqlDs",
+    "public": true
   }
 }

@@ -4,13 +4,17 @@ module.exports = function(Exerciseset) {
     var app = require('../../server/server');
 
     Exerciseset.beforeRemote('*.__create__exercises', function(ctx, instance, next) {
+        // @todo Need to limit number of exercises here
+
         ctx.req.body['created'] = new Date();
         ctx.req.body['ownerId'] = ctx.req.accessToken.userId;
         next();
     });   
 
-    // need to set the new set as currentExerciseSet
+    // Set the new set as currentExerciseSet
     Exerciseset.afterRemote('create', function(ctx, exerciseSet, next) {
+        // @todo Limit number of exercise sets here
+
         app.models.Usersettings.find(
             {where: {clientId: ctx.req.accessToken.userId}},
                 function(err, settings) { 
@@ -64,6 +68,18 @@ module.exports = function(Exerciseset) {
      
     Exerciseset.remoteMethod(
         'createdExercises', 
+        {
+          accepts: [
+              {arg: 'id', type: 'number', required: true},
+              {arg: 'data', type: 'Object', http: {source: 'body'}, required: true}
+            ],
+          http: {path: '/:id/createdExercises', verb: 'post'},
+          returns: {arg: 'exercise', type: 'Object'}
+        }
+    );
+
+    Exerciseset.remoteMethod(
+        'share', 
         {
           accepts: [
               {arg: 'id', type: 'number', required: true},

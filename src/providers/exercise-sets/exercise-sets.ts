@@ -123,7 +123,7 @@ export interface IExerciseSet {
   delete(exercise: IExercise): Observable<Object>;
 }
 
-class ExerciseSet implements IExerciseSet{
+class ExerciseSet implements IExerciseSet {
   comments: string;
   currentExercise: IExercise;
   nextExercise: IExercise;
@@ -145,7 +145,7 @@ class ExerciseSet implements IExerciseSet{
     this.name = rawExerciseSet['name'];
     this.id = rawExerciseSet['id'];
     this.category = rawExerciseSet['category'];
-    this.comments = rawExerciseSet['comments']
+    this.comments = rawExerciseSet['comments'];
     this.exerciseOrdering = rawExerciseSet['exerciseOrdering'];
     for (let exerciseId of rawExerciseSet['disabledExercises']) {
       this.disabledExercises[<number>exerciseId] = true;
@@ -155,6 +155,11 @@ class ExerciseSet implements IExerciseSet{
 
   get isOwner(): boolean {
     return this._isOwner;
+  }
+
+  share(email: string): Observable<void> {
+    
+    return null;
   }
 
   newExercise(initializer: Object): Observable<number> {

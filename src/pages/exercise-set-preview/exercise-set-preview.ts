@@ -143,7 +143,7 @@ export class ExerciseSetPreviewPage {
     }).present();
   }
 
-  newExercise($event) {
+  newExercise() {
     this.modal.create(NewExerciseForm, {
       create: (formData: Object) => {
           let exerciseSet = this.exerciseSets.currentExerciseSet;

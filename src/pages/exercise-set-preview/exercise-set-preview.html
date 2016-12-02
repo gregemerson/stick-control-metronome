@@ -17,15 +17,10 @@
         <button ion-button (click)="newExerciseSet()" [disabled]="editing" color="primary" outline small>New Set</button>
         <button ion-button (click)="updateExerciseSetMetadata()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline small>Edit Set</button>
         <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="danger" outline small>Remove Set</button>
-        <button ion-button (click)="newExercise($event)" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline smal>New Exercise</button>    
+        <button ion-button (click)="newExercise()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline smal>New Exercise</button>
+        <button ion-button (click)="shareExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet" [disabled]="editing" color="primary" outline small>Share Set</button> 
       </ion-buttons>
     </ion-item>
-    <form [formGroup]="shareWith">
-      <ion-label floating>Email of user to share with</ion-label>
-        <input formControlName="email" type="email">
-        <button ion-button (click)="shareExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet" 
-          [disabled]="editing || !shareWith.valid" color="primary" outline small>Share Set</button>   
-    </form>
   </ion-list>
   <ion-list>
     <ion-item *ngFor="let exercise of exercises; let idx = index">

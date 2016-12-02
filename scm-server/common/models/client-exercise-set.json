@@ -18,14 +18,14 @@
   "validations": [],
   "relations": {
     "clients": {
-        "type": "belongsTo",
-        "model": "Client",
-        "foreignKey": "clientId"
+      "type": "belongsTo",
+      "model": "Client",
+      "foreignKey": "clientId"
     },
     "exerciseSets": {
-        "type": "belongsTo",
-        "model": "ExerciseSet",
-        "foreignKey": "exerciseSetId"
+      "type": "belongsTo",
+      "model": "ExerciseSet",
+      "foreignKey": "exerciseSetId"
     }
   },
   "acls": [],
