@@ -17,7 +17,7 @@
         <button ion-button (click)="newExerciseSet()" [disabled]="editing" color="primary" outline small>New Set</button>
         <button ion-button (click)="updateExerciseSetMetadata()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline small>Edit Set</button>
         <button ion-button (click)="deleteExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="danger" outline small>Remove Set</button>
-        <button ion-button (click)="newExercise()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline smal>New Exercise</button>
+        <button ion-button (click)="newExercise()" [hidden]="!exerciseSets.currentExerciseSet || !isOwner" [disabled]="editing" color="primary" outline small>New Exercise</button>
         <button ion-button (click)="shareExerciseSet()" [hidden]="!exerciseSets.currentExerciseSet" [disabled]="editing" color="primary" outline small>Share Set</button> 
       </ion-buttons>
     </ion-item>

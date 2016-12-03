@@ -86,16 +86,14 @@ module.exports = function(Client) {
         // Extra protection
         Client.find({where: {username: 'guest'}}, function(err, user){
             if (err || !ctx.req.accessToken || user.id == ctx.req.accessToken.id) {
-                var error = new Error();
-                error.status = 400;
-                error.message = 'Guests cannot logout.';
-                next(error);           
+                next(Client.createClientError('Guests cannot logout.'));           
             }
             else {
                 next();
             }
         });
     });
+
     Client.afterRemote('login', function(ctx, auth, next) {
         var accessToken = app.models.AccessToken;
         var deleteCallback = function(err, info) {
@@ -105,7 +103,72 @@ module.exports = function(Client) {
         accessToken.destroyAll({and: [{userId: auth.userId}, {id: {neq: auth.id}}]}, deleteCallback);
         next();
     });
+
+    Client.createClientError = function(message) {
+        var error = new Error();
+        error.status = 400;
+        error.message = message;
+        return error;
+    }
+
     Client.validatesUniquenessOf('username');
     Client.validatesUniquenessOf('email');
     Client.validatesLengthOf('email', {max: 40, min: 1});
+
+    Client.beforeRemote('sharedExerciseSets', function(ctx, instance, next) {
+        ctx.req.body['sharerId'] = ctx.req.accessToken.userId;
+    });
+
+    Client.sharedExerciseSets = function(id, shareIn, cb) {
+        try {
+            shareIn.created = Date.now();
+            shareIn.sharerId = id;
+            Client.findOne({where: {email: shareIn.receiverEmail}}, function(err, receiver){
+                if (err) throw err;
+                if (!receiver) {
+                    return cb(Client.createClientError("User does not exist"));
+                }
+                shareIn.receiverId = receiver.id;
+                Client.findOne({where: {id: id}}, function(err, sharer){
+                    if (err) throw err;
+                    sharer.exerciseSets.findOne({where: {id: shareIn.exerciseSetId}}, function(err, exerciseSet) {
+                        if (err) throw err;
+                        if (!exerciseSet) {
+                            return cb(Client.createClientError(
+                                'Sharer does not have the exercise set'));
+                        }
+                        app.models.SharedExerciseSet.findOne({where: {
+                            exerciseSetId: shareIn.exerciseSetId,
+                            sharerId: shareIn.sharerId,
+                            receiverId: shareIn.receiverId
+                        }}, function(err, existingShare) {
+                            if (err) throw err;
+                            if (existingShare) {
+                                return cb(existingShare);
+                            }
+                            app.models.SharedExerciseSet.create(shareIn, function(err, instance) {
+                                if (err) throw err;
+                                return cb(instance);
+                            })
+                        })
+                    })
+                })
+            })
+        }
+        catch (err) {
+            return cb(err);
+        }
+    }    
+
+    Client.remoteMethod(
+        'sharedExerciseSets',
+        {
+          accepts: [
+              {arg: 'id', type: 'number', required: true},
+              {arg: 'data', type: 'Object', http: {source: 'body'}, required: true}
+            ],
+          http: {path: '/:id/sharedExerciseSets', verb: 'post'},
+          returns: {arg: 'share', type: 'Object'}
+        }
+    );
 };

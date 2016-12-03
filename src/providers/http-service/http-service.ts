@@ -40,6 +40,9 @@ export class HttpService extends Observable<HttpServiceErrors> {
   static removeExerciseSet(clientId: number, exerciseSetId: number): string {
     return 'api/Clients/' + clientId.toString() + '/exerciseSets/rel/' + exerciseSetId;
   }
+  static shareExerciseSet(clientId: number): string {
+    return 'api/Clients/' + clientId.toString() + '/sharedExerciseSets';
+  }
 
   private subscribers: {[key: string]: Subscriber<HttpServiceErrors>} = {};
   private static globalErrorCodes = {

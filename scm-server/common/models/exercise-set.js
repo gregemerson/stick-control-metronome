@@ -77,16 +77,4 @@ module.exports = function(Exerciseset) {
           returns: {arg: 'exercise', type: 'Object'}
         }
     );
-
-    Exerciseset.remoteMethod(
-        'share', 
-        {
-          accepts: [
-              {arg: 'id', type: 'number', required: true},
-              {arg: 'data', type: 'Object', http: {source: 'body'}, required: true}
-            ],
-          http: {path: '/:id/createdExercises', verb: 'post'},
-          returns: {arg: 'exercise', type: 'Object'}
-        }
-    );
 };

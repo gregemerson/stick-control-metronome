@@ -1,5 +1,5 @@
 import {SimpleChanges, ChangeDetectorRef, Component, ViewChildren, ViewChild, ElementRef, QueryList, EventEmitter} from '@angular/core';
-import {NavController, NavParams, LoadingController, Loading, ModalController, PopoverController, Content} from 'ionic-angular';
+import {NavController, NavParams, LoadingController, Loading, ModalController, PopoverController, Content, ToastController} from 'ionic-angular';
 import * as ES from '../../providers/exercise-sets/exercise-sets';
 import {ExerciseDisplay} from '../exercise-display/exercise-display';
 import {MessagesPage, MessageType, IMessage} from '../messages/messages';
@@ -9,6 +9,7 @@ import {RepeatForm} from './repeat';
 import {ExerciseConstraints} from './exercise-constraints';
 import {WarningPage} from '../messages/warning';
 import {ExerciseSetSelectorPage} from './exercise-set-selector';
+import {ShareExerciseSetForm} from './share-exercise-set';
 import {Validators, FormBuilder, FormGroup, FormControl, FormsModule} from '@angular/forms';
 
 @Component({
@@ -29,9 +30,7 @@ export class ExerciseSetPreviewPage {
   editIndex: number = null;
   exerciseSetName: string;
   exerciseSetDetails: string;
-  shareEmail: string = null;
   isOwner: boolean;
-  shareWith: FormGroup;
   @ViewChild(Content) content: Content;
   @ViewChildren(ExerciseDisplay) displays: QueryList<ExerciseDisplay>;
   @ViewChildren('displayContainer') contents: QueryList<ElementRef>;
@@ -46,10 +45,7 @@ export class ExerciseSetPreviewPage {
     private modal: ModalController,
     private popover: PopoverController,
     private changeDetect: ChangeDetectorRef,
-    private formBuilder: FormBuilder) {
-      this.shareWith = new FormGroup({
-        email: new FormControl("email", Validators.required)
-      });
+    private toastCtrl: ToastController) {
   }
 
   onResize($event) {
@@ -119,8 +115,31 @@ export class ExerciseSetPreviewPage {
     }).present();
   }
 
+  private presentToast(message: string) {
+    this.toastCtrl.create({
+      message: message,
+      duration: 3000
+    }).present();
+  }
+
   shareExerciseSet() {
-    console.log('sharing with ' +  this.shareWith.value.email);
+    this.modalCtrl.create(ShareExerciseSetForm, {
+      emailCallback: (email: string) => {
+          if (!email) {
+            return;
+          }
+          this.exerciseSets.currentExerciseSet.shareExerciseSet(email).subscribe({
+            next: (result: Object) => {
+              this.presentToast('Shared with ' + email);
+            },
+            error: (err: any) => {
+              this.showMessages([MessagesPage.createMessage(
+                'Error', 'Could not share exercise set.', MessageType.Error
+              )]);
+            }
+          });
+      }
+    }).present();
   }
 
   newExerciseSet() {

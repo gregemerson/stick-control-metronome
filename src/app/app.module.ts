@@ -22,6 +22,7 @@ import {HttpService} from '../providers/http-service/http-service';
 import {Metronome} from '../providers/metronome/metronome';
 import {ResourceLibrary} from '../providers/resource-library/resource-library';
 import {NewExerciseForm} from '../pages/exercise-set-preview/new-exercise';
+import {ShareExerciseSetForm} from '../pages/exercise-set-preview/share-exercise-set';
 import {RepeatForm} from '../pages/exercise-set-preview/repeat';
 import {AppButtons} from '../pages/app-buttons/app-buttons';
 
@@ -43,6 +44,7 @@ import {AppButtons} from '../pages/app-buttons/app-buttons';
     WarningPage,
     SettingsPage,
     NewExerciseSetForm,
+    ShareExerciseSetForm,
     NewExerciseForm,
     AppButtons
   ],
@@ -67,6 +69,7 @@ import {AppButtons} from '../pages/app-buttons/app-buttons';
     WarningPage,
     SettingsPage,
     NewExerciseSetForm,
+    ShareExerciseSetForm,
     NewExerciseForm,
     AppButtons
   ],

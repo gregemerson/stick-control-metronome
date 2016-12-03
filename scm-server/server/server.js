@@ -25,23 +25,3 @@ boot(app, __dirname, function(err) {
   if (require.main === module)
     app.start();
 });
-
-/*
-  var Role = app.models.Role;
-  var RoleMapping = app.models.RoleMapping;
-
-Role.create({
-  name: 'administrator'
-
-}, function(err, role) {
-  if (err) console.log(err);
-  console.log('Creating role');
-  //make greg an admin
-  role.principals.create({
-    principalType: RoleMapping.USER,
-    principalId: "57d063748af6032008459866"
-  }, function(err, principal) {
-    console.log(err);
-  });
-});
-*/

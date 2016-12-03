@@ -121,6 +121,7 @@ export interface IExerciseSet {
   newExercise(exerciseInitializer: Object): Observable<number>;
   save(exercise: IExercise, fieldsToSave: string []): Observable<Object>;
   delete(exercise: IExercise): Observable<Object>;
+  shareExerciseSet(email: string): Observable<Object>;
 }
 
 class ExerciseSet implements IExerciseSet {
@@ -157,9 +158,13 @@ class ExerciseSet implements IExerciseSet {
     return this._isOwner;
   }
 
-  share(email: string): Observable<void> {
-    
-    return null;
+  shareExerciseSet(email: string): Observable<Object> {
+    return this.httpService.postPersistedObject(
+      HttpService.shareExerciseSet(this.user.id), {
+        comments: "here are my comments",
+        receiverEmail: email,
+        exerciseSetId: this.id,
+      });
   }
 
   newExercise(initializer: Object): Observable<number> {

@@ -3,35 +3,27 @@ import {NavParams, NavController} from 'ionic-angular'
 import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
 
 @Component({
-  selector: 'share',
-  templateUrl: 'share.html',
+  selector: 'share-exercise-set',
+  templateUrl: 'share-exercise-set.html',
 })
-export class ShareForm {
+export class ShareExerciseSetForm {
   shareForm: FormGroup;
-  private callback: (email: string) => void;
+  private emailCallback: (email: string) => void;
 
   constructor(private formBuilder: FormBuilder,
     private navCtrl: NavController, params: NavParams) {
-      this.callback = <(Object) => void>params.get('share');
+      this.emailCallback = <(email: string) => void>params.get('emailCallback');
       this.shareForm = this.formBuilder.group({
-
+        'email': ['', Validators.required]
       });
   }
 
   create() {
-    this.callback(this.shareForm.value.email);
+    this.emailCallback(this.shareForm.value.email);
     this.navCtrl.pop();
   }
 
   cancel() {
     this.navCtrl.pop();
-  }
-
-  private getDefaultValues() {
-    return {
-      name: '',
-      category: '',
-      comments: ''
-    }
   }
 }

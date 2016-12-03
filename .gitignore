@@ -5,6 +5,8 @@
 *.sw[mnpcod]
 *.log
 *.tmp
+*.map
+*.js
 *.tmp.*
 log.txt
 *.sublime-project

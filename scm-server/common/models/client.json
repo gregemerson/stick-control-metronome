@@ -46,6 +46,18 @@
       "model": "ExerciseSet",
       "foreignKey": "",
       "through": "ClientExerciseSet"
+    },
+    "receivedExerciseSets": {
+      "type": "hasMany",
+      "model": "ExerciseSet",
+      "foreignKey": "receiverId",
+      "through": "SharedExerciseSet"
+    },
+    "sharedExerciseSets": {
+      "type": "hasMany",
+      "model": "ExerciseSet",
+      "foreignKey": "sharerId",
+      "through": "SharedExerciseSet"
     }
   },
   "acls": [
