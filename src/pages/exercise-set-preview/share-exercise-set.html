@@ -1,12 +1,17 @@
 <form [formGroup]="shareForm">
     <ion-card>
         <ion-card-content>
-            Enter the email address of the user you would like to share this exercise with.
+            Enter the email address of the user you would like to share this exercise with. Comments are optional.
         </ion-card-content>
     </ion-card>
     <ion-item>
         <ion-label>Email</ion-label>
         <ion-input type="email" formControlName="email"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label>Comments</ion-label>
+        <ion-input type="textarea" formControlName="comments" maxLength="constraints.maxSharedExerciseComments"))>
+    </ion-input>
     </ion-item>
     <ion-item>
         <ion-buttons start>

@@ -41,7 +41,7 @@
       "type": "belongsTo",
       "model": "Client",
       "foreignKey": "receiverId"
-    }    
+    }
   },
   "acls": [],
   "methods": {}

@@ -83,7 +83,8 @@ export class Authenticator extends BaseObservable<IAuthUser> {
   }
 
   createUser(email: string, password: string, username: string): Observable<Object> {
-    return this.httpService.postPersistedObject(HttpService.ClientsCollection, {
+    console.log('create user using ' + HttpService.newUser);
+    return this.httpService.postPersistedObject(HttpService.newUser, {
       username: username,
       password: password,
       email: email

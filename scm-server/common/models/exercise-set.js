@@ -2,6 +2,11 @@
 
 module.exports = function(Exerciseset) {
     var app = require('../../server/server');
+    var constraints = require('../constraints');
+
+    Exerciseset.validatesLengthOf('name', {max: constraints.exercise.maxNameLength});
+    Exerciseset.validatesLengthOf('category', {max: constraints.exercise.maxCategoryLength});
+    Exerciseset.validatesLengthOf('comments', {max: constraints.exercise.maxExerciseSetCommentsLength});
 
     Exerciseset.beforeRemote('*.__create__exercises', function(ctx, instance, next) {
         // @todo Need to limit number of exercises here
@@ -31,26 +36,27 @@ module.exports = function(Exerciseset) {
         next();
     });
 */
+    Exerciseset.rb = function(err, tx, cb) {
+        tx.rollback();
+        return cb(err);
+    }
 
     Exerciseset.createdExercises = function(id, data, cb) {
         Exerciseset.beginTransaction({}, function(err, tx) {
             try {
-                if (err) throw err;
+                if (err) return Exerciseset.rb(err, tx, cb);
                 data.created = Date.now();
                 Exerciseset.findById(id, [], function(err, exerciseSet) {
-                    if (err) throw err;
-                    console.log('exercise set: ' + exerciseSet);
+                    if (err) return Exerciseset.rb(err, tx, cb);
                     exerciseSet.exercises.create(data, {transaction: tx}, function(err, newExercise) {
-                        if (err) throw err;
-                        console.log('exercise: ' + newExercise);
+                        if (err) return Exerciseset.rb(err, tx, cb);
                         let ordering = JSON.parse(exerciseSet.exerciseOrdering);
                         ordering.push(newExercise.id);
                         exerciseSet.exerciseOrdering = JSON.stringify(ordering);
                         exerciseSet.save({transaction: tx}, function(err, newSet) {
-                            if (err) throw err;
-                            console.log('new exercise set: ' + newSet);
+                            if (err) return Exerciseset.rb(err, tx, cb);
                             tx.commit(function(err) {
-                                if (err) throw err;
+                                if (err) return Exerciseset.rb(err, tx, cb);
                             });
                             cb(null, newExercise);
                         });
@@ -58,10 +64,7 @@ module.exports = function(Exerciseset) {
                 });
             }
             catch (err) {
-                tx.rollback(function(err) {});
-                var error = new Error("Could not create exercise.");
-                error.status = 500;
-                return cb(error);
+                Exerciseset.rb(err, tx, cb);
             }
         });
     }

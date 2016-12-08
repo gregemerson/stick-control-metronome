@@ -57,7 +57,7 @@
 
 <ion-footer [hidden]="!editing">
   <ion-toolbar>
-    <ion-buttons left class="editor-buttons">
+    <ion-buttons class="editor-buttons">
       <button ion-button outline [disabled]="!(editing && editor?.enableStroke)" (click)="editor.stroke(editor.rightHand)">R</button>
       <button ion-button outline [disabled]="!(editing && editor?.enableStroke)" (click)="editor.stroke(editor.leftHand)">L</button>
       <button ion-button outline [disabled]="!(editing && editor?.enableStroke)" (click)="editor.stroke(editor.bothHands)">B</button>

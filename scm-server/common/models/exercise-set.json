@@ -11,17 +11,20 @@
       "type": "Date",
       "required": false
     },
+    "public": {
+      "type": "boolean",
+      "required": false,
+      "default": false
+    },
     "name": {
       "type": "string",
       "required": false,
-      "default": "Unnamed",
-      "length": 20
+      "default": "Unnamed"
     },
     "category": {
       "type": "string",
       "required": false,
-      "default": "Uncategorized",
-      "length": 20
+      "default": "Uncategorized"
     },
     "disabledExercises": {
       "type": "array",
@@ -35,8 +38,7 @@
     },
     "comments": {
       "type": "string",
-      "required": false,
-      "length": 200
+      "required": false
     }
   },
   "validations": [],

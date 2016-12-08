@@ -14,30 +14,21 @@
     "name": {
       "type": "string",
       "required": false,
-      "default": "Unnamed",
-      "length": 20
+      "default": "Unnamed"
     },
     "notation": {
       "type": "string",
       "required": false,
-      "default": "#",
-      "length": 600
-    },
-    "isPublic": {
-      "type": "boolean",
-      "required": false,
-      "default": false
+      "default": "#"
     },
     "category": {
       "type": "string",
       "required": false,
-      "default": "Uncategorized",
-      "length": 20
+      "default": "Uncategorized"
     },
     "comments": {
       "type": "string",
-      "required": false,
-      "length": 100
+      "required": false
     }
   },
   "validations": [],

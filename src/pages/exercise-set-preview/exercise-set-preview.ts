@@ -124,13 +124,13 @@ export class ExerciseSetPreviewPage {
 
   shareExerciseSet() {
     this.modalCtrl.create(ShareExerciseSetForm, {
-      emailCallback: (email: string) => {
-          if (!email) {
+      callback: (initializer: Object) => {
+          if (!initializer) {
             return;
           }
-          this.exerciseSets.currentExerciseSet.shareExerciseSet(email).subscribe({
+          this.exerciseSets.currentExerciseSet.shareExerciseSet(initializer).subscribe({
             next: (result: Object) => {
-              this.presentToast('Shared with ' + email);
+              this.presentToast('Shared with ' + initializer['email']);
             },
             error: (err: any) => {
               this.showMessages([MessagesPage.createMessage(

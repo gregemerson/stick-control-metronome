@@ -48,13 +48,13 @@
       "through": "ClientExerciseSet"
     },
     "receivedExerciseSets": {
-      "type": "hasMany",
+      "type": "hasAndBelongsToMany",
       "model": "ExerciseSet",
       "foreignKey": "receiverId",
       "through": "SharedExerciseSet"
     },
     "sharedExerciseSets": {
-      "type": "hasMany",
+      "type": "hasAndBelongsToMany",
       "model": "ExerciseSet",
       "foreignKey": "sharerId",
       "through": "SharedExerciseSet"
@@ -82,6 +82,13 @@
       "permission": "DENY",
       "property": "login",
       "model": "Client"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "ALLOW",
+      "property": "createNewUser"
     }
   ],
   "methods": {}

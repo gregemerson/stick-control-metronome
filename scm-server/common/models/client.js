@@ -15,39 +15,10 @@ module.exports = function(Client) {
     Client.validatesLengthOf('email', {max: constraints.email.maxEmailLength});
 
     Client.beforeRemote('create', function(ctx, instance, next) {
-        ctx.req.body.created = new Date();
-        ctx.req.body.lastUpdated = new Date();
-        // @todo put into config file
-        ctx.req.body._userSettings = {
-            "currentExerciseSet": -1,
-            "numberOfRepititions": 20,
-            "minTempo": 80,
-            "maxTempo": 80,
-            "tempoStep": 10
-        };
-        delete ctx.req.body.membershipExpiry;
-        next();
-    });
-
-    Client.addExerciseSets = function(client, exerciseSets, next, error) {
-        if (exerciseSets.length > 0 && !error) {
-            client.exerciseSets.add(exerciseSets.pop, function(err, instance) {
-                Client.addExerciseSets(client, exerciseSets, next, err);
-            });
-        }
-        else {
-            if (error) {
-                next(error);
-                return;
-            }
-            next();
-        }
-    }
-
-    Client.afterRemote('create', function(err, newClient, next) {
-        app.models.Exerciseset.find({where: {public: 1}}, function(err, sets) {
-            Client.addExerciseSets(newClient, sets, next, err);
-        });
+        // ctx.req.body.created = new Date();
+        // ctx.req.body.lastUpdated = new Date();
+        // delete ctx.req.body.membershipExpiry;
+        next(Client.createClientError('Create should not being called directly.'));
     });
 
     Client.beforeRemote('*.__create__exerciseSets', function(ctx, instance, next) {
@@ -127,7 +98,78 @@ module.exports = function(Client) {
         error.status = 400;
         error.message = message;
         return error;
-    }  
+    }
+
+    Client.rollbackOnError = function(err, tx, cb) {
+        tx.rollback();
+        return cb(err); 
+    }
+
+    Client.DefaultUserSettings = function(clientId) {
+        this.clientId = clientId;
+        this.currentExerciseSet = -1;
+        this.numberOfRepititions = 20;
+        this.minTempo = 80;
+        this.maxTempo = 80;
+        this.tempoStep = 10;       
+    }
+
+    Client.remoteMethod(
+        'createNewUser',
+        {
+          accepts: [
+              {arg: 'initializer', type: 'Object', http: {source: 'body'}, required: true}
+            ],
+            http: {path: '/createNewUser', verb: 'post'},
+            returns: {arg: 'userInfo', type: 'Object'}
+        }
+    );
+
+    Client.addExerciseSets = function(client, exerciseSets, err, tx, done) {
+        if (exerciseSets.length > 0 && !err) {
+            client.exerciseSets.add(exerciseSets.pop(), {transaction: tx}, function(err, instance) {
+                Client.addExerciseSets(client, exerciseSets, err, tx, done);
+            });
+        }
+        else {
+            done(err);
+        }
+    }
+
+    Client.createNewUser = function(initializer, cb) {
+        initializer.created = new Date();
+        initializer.lastUpdated = new Date();
+        var tx = null;
+        try{
+            Client.beginTransaction({timeout: 10000}, function(err, trans) {
+                if (err) return cb(err);
+                tx = trans;
+                Client.create(initializer, {transaction: tx}, function(err, client) {
+                    if (err) return Client.rollbackOnError(err, tx, cb);
+                    var settings = new Client.DefaultUserSettings(client.id);
+                    app.models.ExerciseSet.find({where: {public: 1}}, function(err, sets) {
+                        if (sets.length > 0) {
+                            settings.currentExerciseSet = sets[0].id;
+                        }
+                        Client.addExerciseSets(client, sets, err, tx, function(err) {
+                            if (err) return Client.rollbackOnError(err, tx, cb);                            
+                            app.models.UserSettings.create(settings, function(err, instance) {
+                                if (err) return Client.rollbackOnError(err, tx, cb);
+                                var userInfo = {
+                                    id: client.id
+                                }
+                                tx.commit();
+                                return cb(null, userInfo);
+                            });
+                        });
+                    });                     
+                });
+            });
+        }
+        catch (err) {
+            if (tx) return Client.rollbackOnError(err, tx, cb);
+        }
+    }
 
     Client.remoteMethod(
         'sharedExerciseSets',

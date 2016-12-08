@@ -11,6 +11,7 @@ export type HttpServiceErrors = Array<HttpServiceError>;
 @Injectable()
 export class HttpService extends Observable<HttpServiceErrors> {
   static get ClientsCollection(): string {return '/api/Clients/'}
+  static get newUser(): string {return '/api/Clients/createNewUser'}
   static get ExerciseSetCollection(): string {return '/api/ExerciseSets/';}
   static get ExerciseCollection(): string {return '/api/Exercises/';}
   static exerciseSetExercises(exerciseSetId: number): string {

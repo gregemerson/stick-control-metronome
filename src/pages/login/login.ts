@@ -55,8 +55,8 @@ export class LoginPage {
   }
 
   logIn() {
-  this.authenticator.login(this.email, this.password)
-  .subscribe(
+    this.authenticator.login(this.email, this.password)
+    .subscribe(
       () => {
         this.viewCtrl.dismiss();
       }, 
@@ -73,11 +73,9 @@ export class LoginPage {
   createAccount() {
     this.authenticator.createUser(this.newEmail, 
       this.newPassword1, this.newUsername)
-    .subscribe(
+      .subscribe(
       () => {
-        this.viewCtrl.dismiss();
-        // Now load the services for user
-        // May "Welcome" + username while services are loading
+        this.makeVisible('LogIn');
       }, 
       (err: any) => {
         console.log(err);
