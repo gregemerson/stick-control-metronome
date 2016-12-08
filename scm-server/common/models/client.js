@@ -8,9 +8,16 @@
 
 module.exports = function(Client) {
     var app = require('../../server/server');
+    var constraints = require('../constraints');
+
+    Client.validatesUniquenessOf('username');
+    Client.validatesUniquenessOf('email');
+    Client.validatesLengthOf('email', {max: constraints.email.maxEmailLength});
+
     Client.beforeRemote('create', function(ctx, instance, next) {
         ctx.req.body.created = new Date();
         ctx.req.body.lastUpdated = new Date();
+        // @todo put into config file
         ctx.req.body._userSettings = {
             "currentExerciseSet": -1,
             "numberOfRepititions": 20,
@@ -22,6 +29,27 @@ module.exports = function(Client) {
         next();
     });
 
+    Client.addExerciseSets = function(client, exerciseSets, next, error) {
+        if (exerciseSets.length > 0 && !error) {
+            client.exerciseSets.add(exerciseSets.pop, function(err, instance) {
+                Client.addExerciseSets(client, exerciseSets, next, err);
+            });
+        }
+        else {
+            if (error) {
+                next(error);
+                return;
+            }
+            next();
+        }
+    }
+
+    Client.afterRemote('create', function(err, newClient, next) {
+        app.models.Exerciseset.find({where: {public: 1}}, function(err, sets) {
+            Client.addExerciseSets(newClient, sets, next, err);
+        });
+    });
+
     Client.beforeRemote('*.__create__exerciseSets', function(ctx, instance, next) {
         ctx.req.body['created'] = new Date();
         ctx.req.body['ownerId'] = ctx.req.accessToken.userId;
@@ -30,7 +58,7 @@ module.exports = function(Client) {
 
     Client.beforeRemote('*.__unlink__exerciseSets', function(ctx, emptyObj, next) {
         let exerciseSetId = parseInt(ctx.req.params.fk);
-        app.model.Client.findOne(exerciseSetId, function(err, exerciseSet) {
+        app.models.Client.findOne(exerciseSetId, function(err, exerciseSet) {
             if (err) {
                 next(err);
             }
@@ -52,15 +80,6 @@ module.exports = function(Client) {
                 });
             }
         });
-/*
-        if (exerciseSet.isPublic) {
-            // Public exercise sets are never deleted only references by clients to them.
-            next();
-            return;
-        }
-        // If no client references the exercise set, delete it and all associated exercises
-*/
-        // If the set is the current one for user, remove it from user settings 
     });
 
     // For diagnostics
@@ -82,7 +101,7 @@ module.exports = function(Client) {
         next();
     });
 
-    Client.beforeRemote('logout', function(ctx, instance, next) { 
+    Client.beforeRemote('logout', function(ctx, instance, next) {
         // Extra protection
         Client.find({where: {username: 'guest'}}, function(err, user){
             if (err || !ctx.req.accessToken || user.id == ctx.req.accessToken.id) {
@@ -95,12 +114,11 @@ module.exports = function(Client) {
     });
 
     Client.afterRemote('login', function(ctx, auth, next) {
-        var accessToken = app.models.AccessToken;
         var deleteCallback = function(err, info) {
             // @todo Need to log these
             console.log(err, info);
         };
-        accessToken.destroyAll({and: [{userId: auth.userId}, {id: {neq: auth.id}}]}, deleteCallback);
+        app.models.AccessToken.destroyAll({and: [{userId: auth.userId}, {id: {neq: auth.id}}]}, deleteCallback);
         next();
     });
 
@@ -109,66 +127,95 @@ module.exports = function(Client) {
         error.status = 400;
         error.message = message;
         return error;
-    }
+    }  
 
-    Client.validatesUniquenessOf('username');
-    Client.validatesUniquenessOf('email');
-    Client.validatesLengthOf('email', {max: 40, min: 1});
+    Client.remoteMethod(
+        'sharedExerciseSets',
+        {
+          accepts: [
+              {arg: 'sharerId', type: 'number', required: true},
+              {arg: 'data', type: 'Object', http: {source: 'body'}, required: true}
+            ],
+            http: {path: '/:sharerId/sharedExerciseSets', verb: 'post'},
+            returns: {arg: 'share', type: 'Object'}
+        }
+    );
 
-    Client.beforeRemote('sharedExerciseSets', function(ctx, instance, next) {
-        ctx.req.body['sharerId'] = ctx.req.accessToken.userId;
-    });
-
-    Client.sharedExerciseSets = function(id, shareIn, cb) {
+    Client.sharedExerciseSets = function(sharerId, shareIn, cb) {
         try {
+            if (shareIn.receiverEmail == constraints.email.guest) {
+                return cb(Client.createClientError("Cannot share with guest"));
+            }
             shareIn.created = Date.now();
-            shareIn.sharerId = id;
             Client.findOne({where: {email: shareIn.receiverEmail}}, function(err, receiver){
-                if (err) throw err;
+                if (err) return cb(err);
                 if (!receiver) {
                     return cb(Client.createClientError("User does not exist"));
                 }
                 shareIn.receiverId = receiver.id;
-                Client.findOne({where: {id: id}}, function(err, sharer){
-                    if (err) throw err;
+                Client.findOne({where: {id: sharerId}}, function(err, sharer) {
+                    if (err) return cb(err);
+                    if (sharer.email == constraints.email.guest) {
+                        return cb(Client.createClientError("Guest cannot share"));
+                    }
                     sharer.exerciseSets.findOne({where: {id: shareIn.exerciseSetId}}, function(err, exerciseSet) {
-                        if (err) throw err;
+                        if (err) return cb(err);
                         if (!exerciseSet) {
                             return cb(Client.createClientError(
                                 'Sharer does not have the exercise set'));
                         }
                         app.models.SharedExerciseSet.findOne({where: {
                             exerciseSetId: shareIn.exerciseSetId,
-                            sharerId: shareIn.sharerId,
+                            sharerId: sharerId,
                             receiverId: shareIn.receiverId
                         }}, function(err, existingShare) {
-                            if (err) throw err;
+                            if (err) return cb(err);
                             if (existingShare) {
                                 return cb(existingShare);
                             }
                             app.models.SharedExerciseSet.create(shareIn, function(err, instance) {
-                                if (err) throw err;
+                                if (err) return cb(err);
                                 return cb(instance);
-                            })
-                        })
-                    })
-                })
-            })
+                            });
+                        });
+                    });
+                });
+            });
         }
         catch (err) {
             return cb(err);
         }
-    }    
+    }
 
     Client.remoteMethod(
-        'sharedExerciseSets',
+        'receiveExerciseSets',
         {
           accepts: [
-              {arg: 'id', type: 'number', required: true},
-              {arg: 'data', type: 'Object', http: {source: 'body'}, required: true}
+              {arg: 'clientId', type: 'number', required: true},
+              {arg: 'exerciseSetId', type: 'number', required: true}
             ],
-          http: {path: '/:id/sharedExerciseSets', verb: 'post'},
-          returns: {arg: 'share', type: 'Object'}
+          http: {path: '/:clientId/receivedExerciseSets/:exerciseSetId', verb: 'get'},
+          returns: {arg: 'receiveExerciseSet', type: 'Object'}
         }
     );
-};
+
+    Client.receiveExerciseSets = function(clientId, exerciseSetId, cb) {
+        try {
+            Client.findOne({where: {id: clientId}}, function(err, client) {
+                if (err) return cb(err);
+                if (!client) return cb(Client.createClientError('Could not fiind user'));
+                client.receivedExerciseSets.findOne({where: {id: exerciseSetId}}, function(err, exerciseSet) {
+                    if (err) return cb(err);
+                    if (!exerciseSet) return cb(Client.createClientError('Exercise set has not be shared with user'));
+                    client.exerciseSets.add(exerciseSet, options, function(err) {
+                        if (err) return cb(err);
+                        cb(exerciseSet);
+                    }); 
+                });
+            });
+        }
+        catch (err) {
+            cb(err);
+        }
+    }
+}
