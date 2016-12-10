@@ -41,6 +41,13 @@
   },
   "acls": [
     {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "administrator",
+      "permission": "ALLOW",
+      "model": "ExerciseSet"
+    },
+    {
       "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "$authenticated",

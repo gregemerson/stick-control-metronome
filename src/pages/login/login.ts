@@ -1,6 +1,8 @@
-import {Component, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, OnChanges, SimpleChanges, isDevMode} from '@angular/core';
 import {NavController, NavParams, ViewController} from 'ionic-angular';
 import {Authenticator, IAuthUser} from '../../providers/authenticator/authenticator';
+import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
+import {CustomValidators} from '../../utilities/custom-validators';
 import {Observer} from "rxjs";
 
 @Component({
@@ -8,20 +10,24 @@ import {Observer} from "rxjs";
   templateUrl: 'login.html'
 })
 export class LoginPage {
-  private maxPasswordLength = 12;
-  private maxUsernameLength = 20;
-  
+  errorMessage: string = null;
+  constraints = new CustomValidators();
+
+  accountGroup: FormGroup;
+
   // Current accounts
   password = '';
   email = '';
 
   // For new accounts
-  newUsername = '';
-  newEmail = '';
-  newPassword1 = '';
-  newPassword2 = '';
-
-  showError = false;
+  newUserNameCtrl: FormControl;
+  newEmailCtrl: FormControl;
+  newPassword1Ctrl: FormControl;
+  newPassword2Ctrl: FormControl;
+  newUserNameError = '';
+  newEmailError = '';
+  newPassword1Error = '';
+  newPassword2Error = '';
 
   private authenticator: Authenticator;
   
@@ -34,12 +40,32 @@ export class LoginPage {
 
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
-              private viewCtrl: ViewController) {
+              private viewCtrl: ViewController,
+              private formBuilder: FormBuilder) {
     this.authenticator = <Authenticator>navParams.get('authenticator');
+    this.newUserNameCtrl = new FormControl('', [Validators.required, CustomValidators.userName]);
+    this.newEmailCtrl = new FormControl('', [Validators.required, CustomValidators.email]);
+    this.newPassword1Ctrl = new FormControl('', [Validators.required, CustomValidators.password]);
+    this.newPassword2Ctrl = new FormControl('', [Validators.required, CustomValidators.password]);
+
+    this.accountGroup = this.formBuilder.group({
+      newUsername: this.newUserNameCtrl,
+      newEmail: this.newEmailCtrl,
+      newPassword1: this.newPassword1Ctrl,
+      newPassword2: this.newPassword2Ctrl
+    });
+  }
+
+  errorOn(message: string) {
+    this.errorMessage = message;
+  }
+
+  errorOff() {
+    this.errorMessage = null;
   }
 
   onChange(form: string) {
-    this.showError = false;
+    this.errorOff();
   }
 
   makeVisible(controlGroup: string) {
@@ -51,7 +77,7 @@ export class LoginPage {
     this.newEmail = '';
     this.newPassword1 = '';
     this.newPassword2 = '';
-    this.showError = false;
+    this.errorOff();
   }
 
   logIn() {
@@ -61,11 +87,10 @@ export class LoginPage {
         this.viewCtrl.dismiss();
       }, 
       (err: any) => {
-        this.showError = true;
-        console.log(err);
-        // Display errors
-      }, 
-        () => {
+        if (isDevMode()) {
+          console.dir(err);
+        }
+        this.errorOn('Invalid credentials');
       }
     );
   }
@@ -78,10 +103,10 @@ export class LoginPage {
         this.makeVisible('LogIn');
       }, 
       (err: any) => {
-        console.log(err);
-        // Display errors
-      }, 
-        () => {
+        if (isDevMode()) {
+          console.dir(err);
+        }
+        this.errorOn('Could not create account');
       }
     );
   }
@@ -92,9 +117,11 @@ export class LoginPage {
         this.viewCtrl.dismiss();
       }, 
       err => {
-        console.log(err);
-      }, 
-      () => {
-      });
+        if (isDevMode()) {
+          console.log(err);
+        }
+        this.errorOn('Could not log in as guest')
+      }
+    );
   }
 }

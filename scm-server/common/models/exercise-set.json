@@ -69,24 +69,31 @@
       "model": "ExerciseSet"
     },
     {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY",
+      "model": "ExerciseSet"
+    },
+    {
       "accessType": "READ",
       "principalType": "ROLE",
-      "principalId": "guest",
+      "principalId": "$authenticated",
       "permission": "ALLOW",
       "model": "ExerciseSet"
     },
     {
       "accessType": "WRITE",
       "principalType": "ROLE",
-      "principalId": "guest",
+      "principalId": "$authenticated",
       "permission": "DENY",
       "model": "ExerciseSet"
     },
     {
       "accessType": "EXECUTE",
       "principalType": "ROLE",
-      "principalId": "guest",
-      "permission": "DENY",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
       "model": "ExerciseSet"
     },
     {
@@ -97,18 +104,11 @@
       "model": "ExerciseSet"
     },
     {
-      "accessType": "*",
+      "accessType": "EXECUTE",
       "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "DENY",
-      "model": "ExerciseSet"
-    },
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$unauthenticated",
-      "permission": "DENY",
-      "model": "ExerciseSet"
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "createdExercises"
     }
   ],
   "methods": {}

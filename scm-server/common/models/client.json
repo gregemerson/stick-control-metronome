@@ -15,8 +15,7 @@
     },
     "username": {
       "type": "string",
-      "required": true,
-      "length": 40
+      "required": false
     },
     "membershipExpiry": {
       "type": "Date",
@@ -65,6 +64,12 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "administrator",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$owner",
       "permission": "ALLOW"
     },
     {

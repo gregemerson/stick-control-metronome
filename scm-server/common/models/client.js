@@ -11,6 +11,7 @@ module.exports = function(Client) {
     var constraints = require('../constraints');
 
     Client.validatesUniquenessOf('username');
+    Client.validatesLengthOf('username', {min: constraints.user.minUserNameLength, max: constraints.user.maxUserNameLength});
     Client.validatesUniquenessOf('email');
     Client.validatesLengthOf('email', {max: constraints.email.maxEmailLength});
 

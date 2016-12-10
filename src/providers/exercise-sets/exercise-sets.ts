@@ -562,6 +562,8 @@ export class Encoding {
         ];
     }
 
+    // Infinite loop for #rlrl r-lr lrl- rlr-|lrlr|<1:3>|lrlr l-rl rlr- lrl-|rlrl|<1:3>
+
     while (encodedIndex < encoded.length) {
       // Move to the playable portion of the display
       if (!beginExercise) {
@@ -663,7 +665,7 @@ export class Repeat extends ExerciseElement {
   tryParse(encoding: string, index: number): Repeat {
     if (encoding[index] == Encoding.repeatStart) {
       let start = index;
-      let end = encoding.indexOf(Encoding.repeatEnd);
+      let end = encoding.indexOf(Encoding.repeatEnd, index);
       let components = encoding.substring(start + 1, end - 1).
           split(Encoding.repeatDivider);
       let repeat = new Repeat();

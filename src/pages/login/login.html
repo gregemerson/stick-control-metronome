@@ -27,26 +27,30 @@
         <button ion-button (click)="logIn()">Ok</button>
         <button ion-button (click)="makeVisible('Menu')">Cancel</button>
       </ion-item>
-      <ion-item color="danger" [hidden]="!showError">Invalid Credentials</ion-item>
     </ion-list>
-    <ion-list ion-list [hidden]="invisibilityMap['CreateAccount']">
+    <form [formGroup]="accountGroup" [hidden]="invisibilityMap['CreateAccount']">
       <ion-item>
-        <ion-input  (change)="onChange('new')" [(ngModel)]="newUsername"  type="text" value="" placeholder="User name"></ion-input>
+        <ion-input  (change)="onChange('new')" formControlName="newUsername"  type="text" placeholder="User name"></ion-input>
       </ion-item>
+      <ion-item color="danger" [hidden]="!newUserNameCtrl.hasError('error')">{{ newUserNameCtrl.get('error') }}</ion-item>
       <ion-item>
-        <ion-input (change)="onChange('new')" [(ngModel)]="newEmail" type="email" value="" placeholder="Email"></ion-input>
+        <ion-input (change)="onChange('new')" formControlName"newEmail" type="email" placeholder="Email"></ion-input>
       </ion-item>
+      <ion-item color="danger" [hidden]="!newUserNameCtrl.hasError('error')">{{ newEmailCtrl.get('error') }}</ion-item>
       <ion-item>
-        <ion-input (change)="onChange('new')" [(ngModel)]="newPassword1"  type="password" value="" placeholder="Password"></ion-input>
+        <ion-input (change)="onChange('new')" formControlName="newPassword1"  type="password" placeholder="Password"></ion-input>
       </ion-item>
+      <ion-item color="danger" [hidden]="!newUserNameCtrl.hasError('error')">{{ newPassword1Ctrl.get('error') }}</ion-item>
       <ion-item>
-        <ion-input (change)="onChange('new')" [(ngModel)]="newPassword2"  type="password" value="" placeholder="Re-enter password"></ion-input>
+        <ion-input (change)="onChange('new')" formControlName="newPassword2"  type="password" placeholder="Re-enter password"></ion-input>
       </ion-item>
+      <ion-item color="danger" [hidden]="!newUserNameCtrl.hasError('error')">{{ newPassword2Ctrl.get('error') }}</ion-item>
       <ion-item>
         <button ion-button (click)="createAccount()">Ok</button>
         <button ion-button (click)="makeVisible('Menu')">Cancel</button>
       </ion-item>
-    </ion-list>
+    </form>
+    <ion-item color="danger" [hidden]="!errorMessage">{{ errorMessage }}</ion-item>
     </ion-card-content>
   </ion-card>
 </ion-content>
