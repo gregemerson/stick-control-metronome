@@ -1,4 +1,4 @@
-import {Component, OnChanges, SimpleChanges, isDevMode} from '@angular/core';
+import {Component, OnChanges, isDevMode} from '@angular/core';
 import {NavController, NavParams, ViewController} from 'ionic-angular';
 import {Authenticator, IAuthUser} from '../../providers/authenticator/authenticator';
 import {Validators, FormBuilder, FormGroup, FormControl} from '@angular/forms';
@@ -15,12 +15,14 @@ export class LoginPage {
 
   accountGroup: FormGroup;
 
+  errorFontEm = .8;
+
   // Current accounts
   password = '';
   email = '';
 
   // For new accounts
-  newUserNameCtrl: FormControl;
+  newUsernameCtrl: FormControl;
   newEmailCtrl: FormControl;
   newPassword1Ctrl: FormControl;
   newPassword2Ctrl: FormControl;
@@ -28,6 +30,7 @@ export class LoginPage {
   newEmailError = '';
   newPassword1Error = '';
   newPassword2Error = '';
+  passwordMismatch = false;
 
   private authenticator: Authenticator;
   
@@ -43,17 +46,23 @@ export class LoginPage {
               private viewCtrl: ViewController,
               private formBuilder: FormBuilder) {
     this.authenticator = <Authenticator>navParams.get('authenticator');
-    this.newUserNameCtrl = new FormControl('', [Validators.required, CustomValidators.userName]);
+    this.newUsernameCtrl = new FormControl('', [Validators.required, CustomValidators.userName]);
     this.newEmailCtrl = new FormControl('', [Validators.required, CustomValidators.email]);
     this.newPassword1Ctrl = new FormControl('', [Validators.required, CustomValidators.password]);
     this.newPassword2Ctrl = new FormControl('', [Validators.required, CustomValidators.password]);
 
     this.accountGroup = this.formBuilder.group({
-      newUsername: this.newUserNameCtrl,
+      newUsername: this.newUsernameCtrl,
       newEmail: this.newEmailCtrl,
       newPassword1: this.newPassword1Ctrl,
       newPassword2: this.newPassword2Ctrl
     });
+  }
+
+  
+
+  onEmailChange() {
+    console.dir(this.newEmailCtrl.errors);
   }
 
   errorOn(message: string) {
@@ -64,19 +73,24 @@ export class LoginPage {
     this.errorMessage = null;
   }
 
-  onChange(form: string) {
-    this.errorOff();
+  onPasswordChange() {
+    let p1 = this.newPassword1Ctrl.value;
+    let p2 = this.newPassword2Ctrl.value;
+    this.passwordMismatch = (p1 && p2 && p1 != p2);
   }
 
   makeVisible(controlGroup: string) {
     for (let ctrl in this.invisibilityMap) {
       this.invisibilityMap[ctrl] = ctrl != controlGroup;
     }
+    // Login
     this.email = '';
     this.password = '';
-    this.newEmail = '';
-    this.newPassword1 = '';
-    this.newPassword2 = '';
+    // New account
+    this.newUsernameCtrl.setValue('');
+    this.newEmailCtrl.setValue('');
+    this.newPassword1Ctrl.setValue('');
+    this.newPassword2Ctrl.setValue('');
     this.errorOff();
   }
 
@@ -96,8 +110,11 @@ export class LoginPage {
   }
 
   createAccount() {
-    this.authenticator.createUser(this.newEmail, 
-      this.newPassword1, this.newUsername)
+    if (!this.accountGroup.valid) {
+      return;
+    }
+    this.authenticator.createUser(this.newEmailCtrl.value, 
+      this.newPassword1Ctrl.value, this.newUsernameCtrl.value)
       .subscribe(
       () => {
         this.makeVisible('LogIn');

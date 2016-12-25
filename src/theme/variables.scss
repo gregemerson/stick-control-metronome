@@ -40,6 +40,12 @@ $fancy-color: black;
 $editing-color: #faa8a8;
 $static-color: #f8d682;
 
+.error-box {
+  font-size: .8em !important;
+  color: $background-color;
+  background-color: map-get($colors, danger) !important;
+}
+
 ion-title {
   font-family: $fancy-font;
 }
